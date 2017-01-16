@@ -16,7 +16,7 @@ type deviceResponse struct {
 }
 
 // ListDevices -- list your devices and their state
-func ListDevices(props bool, auths ...Authentication) ([]Device, error) {
+func ListDevices(state string, props bool, auths ...Authentication) ([]Device, error) {
 	var resp deviceResponse
 	params := map[string]string{}
 
@@ -28,5 +28,16 @@ func ListDevices(props bool, auths ...Authentication) ([]Device, error) {
 		return nil, err
 	}
 
-	return resp.Devices, nil
+	// apply state filter
+	rc := resp.Devices
+	if state != "" {
+		rc = []Device{}
+		for i := range resp.Devices {
+			dev := resp.Devices[i]
+			if dev.State == state {
+				rc = append(rc, dev)
+			}
+		}
+	}
+	return rc, nil
 }

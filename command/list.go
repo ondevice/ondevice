@@ -12,10 +12,11 @@ import (
 // ListCmd -- `ondevice list` implementation
 type ListCmd struct{}
 
+// ListOpts -- commandline arguments for `ondevice list`
 var ListOpts struct {
 	Properties bool   `short:"p" long:"props" description:"Include properties in the JSON output"`
 	JSON       bool   `short:"j" long:"json" description:"JSON output, on object/device per line"`
-	State      string `long:"string" description:"Filter output by device state, one of online/offline"`
+	State      string `long:"state" description:"Filter output by device state, one of online/offline"`
 }
 
 const _longListHelp = `ondevice list
@@ -51,7 +52,7 @@ func (l ListCmd) Run(args []string) {
 		log.Fatal(err)
 	}
 
-	devices, err := rest.ListDevices(opts.Properties)
+	devices, err := rest.ListDevices(opts.State, opts.Properties)
 	if err != nil {
 		log.Fatal(err)
 	}

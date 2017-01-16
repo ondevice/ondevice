@@ -1,11 +1,9 @@
 package command
 
-import (
-	"fmt"
-	"log"
-)
+import "fmt"
+import "log"
 
-var _longHelp = `ondevice help [cmd]
+const _longHelpHelp = `ondevice help [cmd]
 
 Lists commands (if [cmd] was omitted) or shows details for a specific command)
 
@@ -27,7 +25,7 @@ func (h HelpCommand) args() []string {
 }
 
 func (h HelpCommand) longHelp() string {
-	return _longHelp
+	return _longHelpHelp
 }
 
 func (h HelpCommand) shortHelp() string {
@@ -60,6 +58,6 @@ func (h HelpCommand) help(cmdName string) {
 	if cmd == nil {
 		log.Fatal("Command not found:" + cmdName)
 	} else {
-		fmt.Println("help " + cmdName + ": " + cmd.longHelp())
+		fmt.Println(cmd.longHelp())
 	}
 }

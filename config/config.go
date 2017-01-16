@@ -47,3 +47,28 @@ func GetValue(section string, key string) (string, error) {
 
 	return val.String(), nil
 }
+
+// SetValue -- create/update a config value
+func SetValue(section string, key string, value string) error {
+	path := GetConfigPath("ondevice.conf")
+
+	cfg, err := ini.InsensitiveLoad(path)
+	if err != nil {
+		return err
+	}
+
+	s, err := cfg.GetSection(section)
+	if err != nil {
+		return err
+	}
+
+	k, err := s.GetKey(key)
+	if err != nil {
+		return err
+	}
+
+	k.SetValue(value)
+	cfg.SaveTo(path)
+
+	return nil
+}

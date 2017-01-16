@@ -19,7 +19,7 @@ func get(endpoint string, params map[string]string, auths ...Authentication) (*h
 		auth = &auths[0]
 	}
 
-	url := auth.getURL(endpoint)
+	url := auth.getURL(endpoint, params)
 	log.Print("GET request to URL ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

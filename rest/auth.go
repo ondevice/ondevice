@@ -2,6 +2,10 @@ package rest
 
 import (
 	"encoding/base64"
+	"log"
+	"net/url"
+	"path"
+	"strings"
 
 	"github.com/ondevice/ondevice-cli/config"
 )
@@ -18,12 +22,31 @@ func (a Authentication) getAuthHeader() string {
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(token))
 }
 
-func (a Authentication) getURL(endpoint string) string {
+func (a Authentication) getURL(endpoint string, params map[string]string) string {
 	server := a.apiServer
+
 	if server == "" {
 		server = "https://api.ondevice.io/"
 	}
-	return server + "v1.1" + endpoint
+
+	u, err := url.Parse(server)
+	if err != nil {
+		log.Fatal("URL parsing error: ", err)
+	}
+
+	if strings.HasPrefix(endpoint, "/") {
+		endpoint = endpoint[1:]
+	}
+	u.Path = path.Join("/v1.1", endpoint)
+
+	// parse query params
+	query := url.Values{}
+	for k, v := range params {
+		query.Add(k, v)
+	}
+	u.RawQuery = query.Encode()
+
+	return u.String()
 }
 
 // CreateAuth -- Create Authentication object

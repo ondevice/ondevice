@@ -5,7 +5,7 @@ type Device struct {
 	ID      string                 `json:"id"`
 	IP      string                 `json:"ip,omitempty"`
 	State   string                 `json:"state"`
-	StateTs int                    `json:"ts,omitempty"`
+	StateTs int                    `json:"stateTs,omitempty"`
 	Name    string                 `json:"name,omitempty"`
 	Version string                 `json:"version,omitempty"`
 	Props   map[string]interface{} `json:"props,omitempty"`
@@ -16,10 +16,15 @@ type deviceResponse struct {
 }
 
 // ListDevices -- list your devices and their state
-func ListDevices(auths ...Authentication) ([]Device, error) {
+func ListDevices(props bool, auths ...Authentication) ([]Device, error) {
 	var resp deviceResponse
+	params := map[string]string{}
 
-	if err := getObject(&resp, "/devices", nil, auths...); err != nil {
+	if props {
+		params["props"] = "true"
+	}
+
+	if err := getObject(&resp, "/devices", params, auths...); err != nil {
 		return nil, err
 	}
 

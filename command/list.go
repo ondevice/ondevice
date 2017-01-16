@@ -47,12 +47,11 @@ func (l ListCmd) shortHelp() string {
 func (l ListCmd) Run(args []string) {
 	// parse args
 	opts := ListOpts
-	args, err := flags.ParseArgs(&opts, args)
-	if err != nil {
+	if _, err := flags.ParseArgs(&opts, args); err != nil {
 		log.Fatal(err)
 	}
 
-	devices, err := rest.ListDevices()
+	devices, err := rest.ListDevices(opts.Properties)
 	if err != nil {
 		log.Fatal(err)
 	}

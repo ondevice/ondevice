@@ -1,5 +1,7 @@
 package rest
 
+import "log"
+
 // Device -- state info for a specific device
 type Device struct {
 	ID      string                 `json:"id"`
@@ -13,6 +15,10 @@ type Device struct {
 
 type deviceResponse struct {
 	Devices []Device
+}
+
+type propertyListResponse struct {
+	Props map[string]map[string]string
 }
 
 // ListDevices -- list your devices and their state
@@ -40,4 +46,19 @@ func ListDevices(state string, props bool, auths ...Authentication) ([]Device, e
 		}
 	}
 	return rc, nil
+}
+
+// ListProperties -- Query device properties
+func ListProperties(devID string, auths ...Authentication) map[string]string {
+	var rc propertyListResponse
+	if err := getObject(&rc, "/device/"+devID+"/props", nil, auths...); err != nil {
+		log.Fatal("Couldn't get device properties", err)
+	}
+
+	// simply return the first element
+	for k := range rc.Props {
+		return rc.Props[k]
+	}
+
+	return nil
 }

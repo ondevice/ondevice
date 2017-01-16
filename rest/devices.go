@@ -1,6 +1,11 @@
 package rest
 
-import "log"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/url"
+)
 
 // Device -- state info for a specific device
 type Device struct {
@@ -49,16 +54,59 @@ func ListDevices(state string, props bool, auths ...Authentication) ([]Device, e
 }
 
 // ListProperties -- Query device properties
-func ListProperties(devID string, auths ...Authentication) map[string]string {
+func ListProperties(devID string, auths ...Authentication) (map[string]string, error) {
 	var rc propertyListResponse
-	if err := getObject(&rc, "/device/"+devID+"/props", nil, auths...); err != nil {
+	err := getObject(&rc, "/device/"+devID+"/props", nil, auths...)
+	return _propertyList(rc, err)
+}
+
+// RemoveProperties -- remove one or more device properties
+func RemoveProperties(devID string, props []string, auths ...Authentication) (map[string]string, error) {
+	var rc propertyListResponse
+	values := url.Values{}
+
+	if len(props) == 0 {
+		return nil, fmt.Errorf("Can't delete empty list of properties")
+	}
+
+	for i := range props {
+		values.Add(props[i], "")
+	}
+
+	obj := map[string][]string{"props": props}
+	data, _ := json.Marshal(obj)
+
+	err := deleteObject(&rc, "/device/"+devID+"/props", nil, "application/json", data, auths...)
+	return _propertyList(rc, err)
+}
+
+// SetProperties -- Set device property values
+func SetProperties(devID string, props map[string]string, auths ...Authentication) (map[string]string, error) {
+	var rc propertyListResponse
+	values := url.Values{}
+
+	if len(props) == 0 {
+		return nil, fmt.Errorf("Can't set empty list of properties")
+	}
+
+	for k, v := range props {
+		values.Add(k, v)
+	}
+
+	// TODO use the JSON request here
+	err := postObject(&rc, "/device/"+devID+"/props", nil, "application/x-www-form-urlencoded", []byte(values.Encode()), auths...)
+	return _propertyList(rc, err)
+}
+
+func _propertyList(data propertyListResponse, err error) (map[string]string, error) {
+	if err != nil {
 		log.Fatal("Couldn't get device properties", err)
 	}
 
 	// simply return the first element
-	for k := range rc.Props {
-		return rc.Props[k]
+	for k := range data.Props {
+		return data.Props[k], nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("Got empty property response")
 }

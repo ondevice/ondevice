@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,8 +9,19 @@ import (
 	"net/http"
 )
 
-// Get -- issue a GET request to the API server
+func delete(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
+	return _request("DELETE", endpoint, params, bodyType, body, auths...)
+}
+
 func get(endpoint string, params map[string]string, auths ...Authentication) (*http.Response, error) {
+	return _request("GET", endpoint, params, "", nil, auths...)
+}
+
+func post(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
+	return _request("POST", endpoint, params, bodyType, body, auths...)
+}
+
+func _request(method string, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
 	var auth *Authentication
 
 	if auths == nil {
@@ -20,12 +32,18 @@ func get(endpoint string, params map[string]string, auths ...Authentication) (*h
 	}
 
 	url := auth.getURL(endpoint, params)
-	log.Print("GET request to URL ", url)
-	req, err := http.NewRequest("GET", url, nil)
+	log.Printf("%s request to URL %s\n", method, url)
+	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		log.Fatal("Failed request", err)
 	}
 	req.Header.Add("Authorization", auth.getAuthHeader())
+
+	if body != nil {
+		req.Body = ioutil.NopCloser(bytes.NewReader(body))
+		// TODO make the content type configurable
+		req.Header.Add("Content-type", bodyType)
+	}
 
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -33,8 +51,19 @@ func get(endpoint string, params map[string]string, auths ...Authentication) (*h
 	return resp, err
 }
 
+func deleteBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
+	return _getBody(delete(endpoint, params, bodyType, body, auths...))
+}
+
 func getBody(endpoint string, params map[string]string, auths ...Authentication) ([]byte, error) {
-	resp, err := get(endpoint, params, auths...)
+	return _getBody(get(endpoint, params, auths...))
+}
+
+func postBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
+	return _getBody(post(endpoint, params, bodyType, body, auths...))
+}
+
+func _getBody(resp *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +83,22 @@ func getBody(endpoint string, params map[string]string, auths ...Authentication)
 	return body, nil
 }
 
+func deleteObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) error {
+	body, err := deleteBody(endpoint, params, bodyType, body, auths...)
+	return _getObject(tgtValue, body, err)
+}
+
 func getObject(tgtValue interface{}, endpoint string, params map[string]string, auths ...Authentication) error {
 	body, err := getBody(endpoint, params, auths...)
+	return _getObject(tgtValue, body, err)
+}
+
+func postObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) error {
+	body, err := postBody(endpoint, params, bodyType, body, auths...)
+	return _getObject(tgtValue, body, err)
+}
+
+func _getObject(tgtValue interface{}, body []byte, err error) error {
 	if err != nil {
 		return err
 	}

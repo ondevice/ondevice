@@ -12,7 +12,7 @@ type Command interface {
 
 // TODO find a way to make me const
 var _commands = map[string]Command{
-	"help":   new(HelpCommand),
+	"help":   new(HelpCmd),
 	"device": new(DeviceCmd),
 	"list":   new(ListCmd),
 	"login":  new(LoginCmd),

@@ -19,24 +19,24 @@ Examples:
       shows help for the 'ondevice login' command
 `
 
-// HelpCommand - the 'help' command
-type HelpCommand struct {
+// HelpCmd - the 'help' command
+type HelpCmd struct {
 }
 
-func (h HelpCommand) args() string {
+func (h HelpCmd) args() string {
 	return "[cmd]"
 }
 
-func (h HelpCommand) longHelp() string {
+func (h HelpCmd) longHelp() string {
 	return _longHelpHelp
 }
 
-func (h HelpCommand) shortHelp() string {
+func (h HelpCmd) shortHelp() string {
 	return "Shows this help screen"
 }
 
 // Run -- run `ondevice help <args>`
-func (h HelpCommand) Run(args []string) {
+func (h HelpCmd) Run(args []string) {
 	if len(args) == 0 {
 		h.listCommands()
 	} else if len(args) == 1 {
@@ -48,7 +48,7 @@ func (h HelpCommand) Run(args []string) {
 }
 
 // ListCommands -- implements `ondevice help`
-func (h HelpCommand) listCommands() {
+func (h HelpCmd) listCommands() {
 	l := log.New(os.Stderr, "", 0)
 	l.Println("USAGE: ondevice <command> [...]")
 
@@ -64,7 +64,7 @@ func (h HelpCommand) listCommands() {
 	h._listCommands(nil, cmds)
 }
 
-func (h HelpCommand) _listCommands(names []string, cmds map[string]Command) {
+func (h HelpCmd) _listCommands(names []string, cmds map[string]Command) {
 	if names == nil {
 		names = []string{}
 		for k := range cmds {
@@ -85,7 +85,7 @@ func (h HelpCommand) _listCommands(names []string, cmds map[string]Command) {
 	}
 }
 
-func (h HelpCommand) help(cmdName string) {
+func (h HelpCmd) help(cmdName string) {
 	cmd := Get(cmdName)
 	if cmd == nil {
 		log.Fatal("Command not found:" + cmdName)

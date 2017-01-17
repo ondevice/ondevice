@@ -17,12 +17,14 @@ type Authentication struct {
 	apiServer string
 }
 
-func (a Authentication) getAuthHeader() string {
+// GetAuthHeader -- Return the value of the HTTP Basic Authentication header
+func (a Authentication) GetAuthHeader() string {
 	token := a.user + ":" + a.auth
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(token))
 }
 
-func (a Authentication) getURL(endpoint string, params map[string]string) string {
+// GetURL -- Get the full API server URL for the apiServer we store internally and the params we get
+func (a Authentication) GetURL(endpoint string, params map[string]string, scheme string) string {
 	server := a.apiServer
 
 	if server == "" {
@@ -46,6 +48,7 @@ func (a Authentication) getURL(endpoint string, params map[string]string) string
 	}
 	u.RawQuery = query.Encode()
 
+	u.Scheme = scheme
 	return u.String()
 }
 

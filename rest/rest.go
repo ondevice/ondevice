@@ -31,13 +31,13 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 		auth = &auths[0]
 	}
 
-	url := auth.getURL(endpoint, params)
+	url := auth.GetURL(endpoint, params, "https")
 	log.Printf("%s request to URL %s\n", method, url)
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		log.Fatal("Failed request", err)
 	}
-	req.Header.Add("Authorization", auth.getAuthHeader())
+	req.Header.Add("Authorization", auth.GetAuthHeader())
 
 	if body != nil {
 		req.Body = ioutil.NopCloser(bytes.NewReader(body))

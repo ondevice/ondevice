@@ -36,7 +36,7 @@ func (h HelpCmd) shortHelp() string {
 }
 
 // Run -- run `ondevice help <args>`
-func (h HelpCmd) Run(args []string) {
+func (h HelpCmd) Run(args []string) int {
 	if len(args) == 0 {
 		h.listCommands()
 	} else if len(args) == 1 {
@@ -45,6 +45,8 @@ func (h HelpCmd) Run(args []string) {
 	} else {
 		log.Fatal("USAGE: ondevice help [cmd]")
 	}
+
+	return 0
 }
 
 // ListCommands -- implements `ondevice help`

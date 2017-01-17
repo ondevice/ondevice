@@ -7,7 +7,7 @@ type Command interface {
 	args() string
 	shortHelp() string
 	longHelp() string
-	Run(args []string)
+	Run(args []string) int
 }
 
 // TODO find a way to make me const
@@ -39,10 +39,10 @@ func List() map[string]Command {
 }
 
 // Run -- Run a command with the specified arguments
-func Run(cmdName string, args []string) {
+func Run(cmdName string, args []string) int {
 	cmd := Get(cmdName)
 	if cmd == nil {
 		log.Fatal("Command not found:", cmdName)
 	}
-	cmd.Run(args)
+	return cmd.Run(args)
 }

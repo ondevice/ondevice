@@ -39,7 +39,7 @@ func (l SetupCmd) shortHelp() string {
 }
 
 // Run -- implements 'ondevice login'
-func (l SetupCmd) Run(args []string) {
+func (l SetupCmd) Run(args []string) int {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("User: ")
 	user, _ := reader.ReadString('\n')
@@ -68,4 +68,6 @@ func (l SetupCmd) Run(args []string) {
 			config.SetValue("device", "auth", string(auth))
 		}
 	}
+
+	return 0
 }

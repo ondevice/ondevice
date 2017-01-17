@@ -32,7 +32,7 @@ func (p PipeCmd) shortHelp() string {
 }
 
 // Run -- implements `ondevice pipe`
-func (p PipeCmd) Run(args []string) {
+func (p PipeCmd) Run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
 		log.Fatal("Missing devId")
@@ -59,6 +59,9 @@ func (p PipeCmd) Run(args []string) {
 	for {
 		if count, err = p.reader.Read(buff); err != nil {
 			if count == 0 && err == io.EOF {
+				// we can't simply call c.Close() here because the other side might still
+				// send data. A simple test would be (assuming the device has the 'echo' service enabled):
+				//   echo hello | ondevice pipe <dev> echo
 				c.CloseWrite()
 				break
 			} else {
@@ -70,6 +73,7 @@ func (p PipeCmd) Run(args []string) {
 	}
 
 	c.Wait()
+	return 0
 }
 
 // OnMessage -- Handles incoming WebSocket messages

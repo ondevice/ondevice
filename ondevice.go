@@ -14,5 +14,6 @@ func main() {
 
 	//log.Print("-- args: ", os.Args[1:])
 	cmd := os.Args[1]
-	command.Run(cmd, os.Args[2:])
+	rc := command.Run(cmd, os.Args[2:])
+	os.Exit(rc)
 }

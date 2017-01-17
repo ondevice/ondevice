@@ -32,8 +32,8 @@ Options:
   limit to devices that are on/offline
 `
 
-func (l ListCmd) args() []string {
-	return nil
+func (l ListCmd) args() string {
+	return "[--json] [--props] [--status=<online/offline>]"
 }
 
 func (l ListCmd) longHelp() string {

@@ -26,8 +26,8 @@ Auth: <enter your credentials>
 // LoginCmd -- `ondevice login` implementation
 type LoginCmd struct{}
 
-func (l LoginCmd) args() []string {
-	return nil
+func (l LoginCmd) args() string {
+	return ""
 }
 
 func (l LoginCmd) longHelp() string {

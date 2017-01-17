@@ -4,7 +4,7 @@ import "log"
 
 // Command - Defines a command
 type Command interface {
-	args() []string
+	args() string
 	shortHelp() string
 	longHelp() string
 	Run(args []string)
@@ -18,6 +18,9 @@ var _commands = map[string]Command{
 	"login":  new(LoginCmd),
 }
 
+var deviceCmds = []string{}
+var clientCmds = []string{"device", "list"}
+
 // Get -- Return specified command (or nil if not found)
 func Get(cmd string) Command {
 	return _commands[cmd]
@@ -29,12 +32,8 @@ func Help(cmd string) (args string, short string, long string) {
 }
 
 // List -- list command names
-func List() []string {
-	rc := make([]string, 0, len(_commands))
-	for k := range _commands {
-		rc = append(rc, k)
-	}
-	return rc
+func List() map[string]Command {
+	return _commands
 }
 
 // Run -- Run a command with the specified arguments

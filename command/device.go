@@ -11,8 +11,8 @@ import (
 // DeviceCmd -- `ondevice device` implementation
 type DeviceCmd struct{}
 
-func (d DeviceCmd) args() []string {
-	return nil
+func (d DeviceCmd) args() string {
+	return "<devId> <props/set/rm> [...]"
 }
 
 func (d DeviceCmd) longHelp() string {

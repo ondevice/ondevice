@@ -1,7 +1,10 @@
 package command
 
-import "fmt"
-import "log"
+import (
+	"fmt"
+	"log"
+	"os"
+)
 
 const _longHelpHelp = `ondevice help [cmd]
 
@@ -20,8 +23,8 @@ Examples:
 type HelpCommand struct {
 }
 
-func (h HelpCommand) args() []string {
-	return nil
+func (h HelpCommand) args() string {
+	return "[cmd]"
 }
 
 func (h HelpCommand) longHelp() string {
@@ -46,10 +49,39 @@ func (h HelpCommand) Run(args []string) {
 
 // ListCommands -- implements `ondevice help`
 func (h HelpCommand) listCommands() {
+	l := log.New(os.Stderr, "", 0)
+	l.Println("USAGE: ondevice <command> [...]")
+
 	cmds := List()
-	for i := range cmds {
-		cmd := Get(cmds[i])
-		fmt.Println(cmds[i], cmd.shortHelp())
+
+	l.Println("\n- Device commands:")
+	h._listCommands(deviceCmds, cmds)
+
+	l.Println("\n- Client commands:")
+	h._listCommands(clientCmds, cmds)
+
+	l.Println("\n- Other commands:")
+	h._listCommands(nil, cmds)
+}
+
+func (h HelpCommand) _listCommands(names []string, cmds map[string]Command) {
+	if names == nil {
+		names = []string{}
+		for k := range cmds {
+			names = append(names, k)
+		}
+	}
+
+	for i := range names {
+		name := names[i]
+		if _, ok := cmds[name]; !ok {
+			log.Fatal("Command not found: ", name)
+		}
+		cmd := cmds[name]
+		fmt.Printf("    %s %s\n", name, cmd.args())
+		fmt.Println("        ", cmd.shortHelp())
+
+		delete(cmds, name)
 	}
 }
 

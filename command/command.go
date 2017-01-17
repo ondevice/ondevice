@@ -15,7 +15,7 @@ var _commands = map[string]Command{
 	"help":   new(HelpCmd),
 	"device": new(DeviceCmd),
 	"list":   new(ListCmd),
-	"login":  new(LoginCmd),
+	"setup":  new(SetupCmd),
 }
 
 var deviceCmds = []string{}

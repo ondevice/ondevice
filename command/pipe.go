@@ -2,6 +2,7 @@ package command
 
 import (
 	"bufio"
+	"io"
 	"log"
 	"os"
 
@@ -57,11 +58,18 @@ func (p PipeCmd) Run(args []string) {
 
 	for {
 		if count, err = p.reader.Read(buff); err != nil {
-			log.Fatal("error reading from stdin: ", err)
+			if count == 0 && err == io.EOF {
+				c.CloseWrite()
+				break
+			} else {
+				log.Fatal("error reading from stdin: ", err)
+			}
 		}
 
 		c.Write(buff[:count])
 	}
+
+	c.Wait()
 }
 
 // OnMessage -- Handles incoming WebSocket messages

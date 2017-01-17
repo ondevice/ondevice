@@ -22,6 +22,12 @@ type Tunnel struct {
 	OnEOF   func()
 }
 
+// CloseWrite -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
+func (t *Tunnel) CloseWrite() {
+	log.Print("Sending EOF...")
+	t.SendBinary([]byte("meta:EOF"))
+}
+
 func (t *Tunnel) Write(data []byte) {
 	var msg = make([]byte, 0, len(data)+5)
 	msg = append(msg, []byte("data:")...)

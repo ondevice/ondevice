@@ -53,18 +53,19 @@ func (h HelpCmd) listCommands() {
 	l.Println("USAGE: ondevice <command> [...]")
 
 	cmds := List()
+	showInternal := false // TODO use a commandline flag or something
 
 	l.Println("\n- Device commands:")
-	h._listCommands(deviceCmds, cmds)
+	h._listCommands(deviceCmds, cmds, showInternal)
 
 	l.Println("\n- Client commands:")
-	h._listCommands(clientCmds, cmds)
+	h._listCommands(clientCmds, cmds, showInternal)
 
 	l.Println("\n- Other commands:")
-	h._listCommands(nil, cmds)
+	h._listCommands(nil, cmds, showInternal)
 }
 
-func (h HelpCmd) _listCommands(names []string, cmds map[string]Command) {
+func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInternal bool) {
 	if names == nil {
 		names = []string{}
 		for k := range cmds {
@@ -74,6 +75,11 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command) {
 
 	for i := range names {
 		name := names[i]
+
+		if _, ok := internalCmds[name]; !showInternal && ok {
+			continue // skip internal commands (unless showInternal is true)
+		}
+
 		if _, ok := cmds[name]; !ok {
 			log.Fatal("Command not found: ", name)
 		}

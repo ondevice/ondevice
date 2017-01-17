@@ -20,7 +20,8 @@ var _commands = map[string]Command{
 }
 
 var deviceCmds = []string{}
-var clientCmds = []string{"device", "list"}
+var clientCmds = []string{"device", "list", "pipe"}
+var internalCmds = map[string]int{"pipe": 0}
 
 // Get -- Return specified command (or nil if not found)
 func Get(cmd string) Command {

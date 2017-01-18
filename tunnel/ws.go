@@ -31,11 +31,16 @@ func open(c *Connection, endpoint string, params map[string]string, onMessage fu
 		if auth, err = rest.CreateClientAuth(); err != nil {
 			return err
 		}
+	} else {
+		auth = auths[0]
 	}
 
 	hdr.Add("Authorization", auth.GetAuthHeader())
 
-	ws, resp, err := websocket.DefaultDialer.Dial(auth.GetURL(endpoint+"/websocket", params, "wss"), hdr)
+	url := auth.GetURL(endpoint+"/websocket", params, "wss")
+	//log.Printf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
+
+	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
 	if resp.StatusCode == 401 {
 		return fmt.Errorf("API server authentication failed")
 	} else if err != nil {

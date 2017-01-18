@@ -16,12 +16,13 @@ var _commands = map[string]Command{
 	"help":   new(HelpCmd),
 	"list":   new(ListCmd),
 	"pipe":   new(PipeCmd),
+	"rsync":  new(RsyncCommand),
 	"setup":  new(SetupCmd),
 	"ssh":    new(SSHCommand),
 }
 
 var deviceCmds = []string{}
-var clientCmds = []string{"device", "list", "pipe", "ssh"}
+var clientCmds = []string{"device", "list", "pipe", "rsync", "ssh"}
 var internalCmds = map[string]int{"pipe": 0}
 
 // Get -- Return specified command (or nil if not found)

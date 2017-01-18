@@ -5,7 +5,7 @@ This is (about to become) the official ondevice.io commandline client.
 
 It's written in [Go][go].
 
-It replaces the original [python client][goClient]. The main reason for the rewrite was
+It replaces the original [python client][pyClient]. The main reason for the rewrite was
 that go applications can be shipped as single binary, dramatically simplifying my
 packaging job :)  
 Being a modern, statically typed and compiled language helps Go's case too

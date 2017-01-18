@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/ondevice/ondevice-cli/api"
 	"github.com/ondevice/ondevice-cli/config"
-	"github.com/ondevice/ondevice-cli/rest"
 	"github.com/ondevice/ondevice-cli/tunnel"
 )
 
@@ -48,7 +48,7 @@ func (p PipeCmd) Run(args []string) int {
 	devID := args[0]
 	service := args[1]
 
-	auth, err := rest.CreateClientAuth()
+	auth, err := api.CreateClientAuth()
 	if err != nil {
 		log.Fatal("Missing client credentials")
 	}
@@ -58,7 +58,7 @@ func (p PipeCmd) Run(args []string) int {
 		var user, pwd string
 		if user, pwd, err = config.GetClientUserAuth(parts[0]); err == nil {
 			devID = parts[1]
-			auth = rest.CreateAuth(user, pwd)
+			auth = api.CreateAuth(user, pwd)
 		}
 	}
 

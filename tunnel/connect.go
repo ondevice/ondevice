@@ -1,9 +1,9 @@
 package tunnel
 
-import "github.com/ondevice/ondevice-cli/rest"
+import "github.com/ondevice/ondevice-cli/api"
 
 // Connect to a service on one of your devices
-func Connect(devID string, service string, protocol string, auths ...rest.Authentication) (*Tunnel, error) {
+func Connect(devID string, service string, protocol string, auths ...api.Authentication) (*Tunnel, error) {
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 	rc := Tunnel{}
 	rc.sendLock.Lock()

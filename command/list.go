@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/ondevice/ondevice-cli/rest"
+	"github.com/ondevice/ondevice-cli/api"
 )
 
 // ListCmd -- `ondevice list` implementation
@@ -52,7 +52,7 @@ func (l ListCmd) Run(args []string) int {
 		log.Fatal(err)
 	}
 
-	devices, err := rest.ListDevices(opts.State, opts.Properties)
+	devices, err := api.ListDevices(opts.State, opts.Properties)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func (l ListCmd) Run(args []string) int {
 	return 0
 }
 
-func (l ListCmd) print(devices []rest.Device) {
+func (l ListCmd) print(devices []api.Device) {
 	// find the maximum lengths for each column
 	titles := []string{"ID", "State", "IP", "Version", "Name"}
 	widths := []int{2, 5, 2, 7, 4}
@@ -89,7 +89,7 @@ func (l ListCmd) print(devices []rest.Device) {
 	}
 }
 
-func (l ListCmd) printJSON(devs []rest.Device) {
+func (l ListCmd) printJSON(devs []api.Device) {
 	for i := range devs {
 		dev := devs[i]
 		out, err := json.Marshal(dev)
@@ -100,7 +100,7 @@ func (l ListCmd) printJSON(devs []rest.Device) {
 	}
 }
 
-func _getColumns(dev rest.Device) []string {
+func _getColumns(dev api.Device) []string {
 	return []string{dev.ID, dev.State, dev.IP, dev.Version, dev.Name}
 }
 

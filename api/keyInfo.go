@@ -1,4 +1,4 @@
-package rest
+package api
 
 // KeyInfo -- API key info
 type KeyInfo struct {

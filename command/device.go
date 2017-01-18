@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ondevice/ondevice-cli/rest"
+	"github.com/ondevice/ondevice-cli/api"
 )
 
 // DeviceCmd -- `ondevice device` implementation
@@ -44,11 +44,11 @@ func (d DeviceCmd) Run(args []string) int {
 }
 
 func (d DeviceCmd) listProperties(devID string) {
-	_printProperties(rest.ListProperties(devID))
+	_printProperties(api.ListProperties(devID))
 }
 
 func (d DeviceCmd) removeProperties(devID string, args []string) {
-	_printProperties(rest.RemoveProperties(devID, args))
+	_printProperties(api.RemoveProperties(devID, args))
 }
 
 func (d DeviceCmd) setProperties(devID string, args []string) {
@@ -62,7 +62,7 @@ func (d DeviceCmd) setProperties(devID string, args []string) {
 		props[s[0]] = s[1]
 	}
 
-	_printProperties(rest.SetProperties(devID, props))
+	_printProperties(api.SetProperties(devID, props))
 }
 
 func _printProperties(props map[string]string, err error) {

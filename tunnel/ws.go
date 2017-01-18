@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/ondevice/ondevice-cli/rest"
+	"github.com/ondevice/ondevice-cli/api"
 )
 
 // WSListener -- WebSocket listener
@@ -22,13 +22,13 @@ type Connection struct {
 }
 
 // open -- Open a websocket connection
-func open(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...rest.Authentication) error {
+func open(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) error {
 	hdr := http.Header{}
 
-	var auth rest.Authentication
+	var auth api.Authentication
 	if len(auths) == 0 {
 		var err error
-		if auth, err = rest.CreateClientAuth(); err != nil {
+		if auth, err = api.CreateClientAuth(); err != nil {
 			return err
 		}
 	} else {

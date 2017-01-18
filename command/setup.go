@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/howeyc/gopass"
+	"github.com/ondevice/ondevice-cli/api"
 	"github.com/ondevice/ondevice-cli/config"
-	"github.com/ondevice/ondevice-cli/rest"
 )
 
 const _longLoginHelp = `ondevice login
@@ -51,7 +51,7 @@ func (l SetupCmd) Run(args []string) int {
 		log.Fatal(err)
 	}
 
-	roles, err := rest.GetKeyInfo(rest.CreateAuth(user, string(auth)))
+	roles, err := api.GetKeyInfo(api.CreateAuth(user, string(auth)))
 	if err != nil {
 		log.Fatal(err)
 	}

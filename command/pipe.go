@@ -5,8 +5,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/ondevice/ondevice-cli/config"
+	"github.com/ondevice/ondevice-cli/rest"
 	"github.com/ondevice/ondevice-cli/tunnel"
 )
 
@@ -45,12 +48,26 @@ func (p PipeCmd) Run(args []string) int {
 	devID := args[0]
 	service := args[1]
 
+	auth, err := rest.CreateClientAuth()
+	if err != nil {
+		log.Fatal("Missing client credentials")
+	}
+
+	if strings.Contains(devID, ".") {
+		parts := strings.SplitN(devID, ".", 2)
+		var user, pwd string
+		if user, pwd, err = config.GetClientUserAuth(parts[0]); err == nil {
+			devID = parts[1]
+			auth = rest.CreateAuth(user, pwd)
+		}
+	}
+
 	// initiate connection
-	c, err := tunnel.Connect(devID, service, service)
-	c.OnData = p.onData
+	c, err := tunnel.Connect(devID, service, service, auth)
 	if err != nil {
 		log.Fatal(err)
 	}
+	c.OnData = p.onData
 
 	p.writer = bufio.NewWriter(os.Stdout)
 	p.reader = bufio.NewReader(os.Stdin)

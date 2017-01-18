@@ -8,7 +8,7 @@ func Connect(devID string, service string, protocol string, auths ...api.Authent
 	rc := Tunnel{}
 	rc.sendLock.Lock()
 
-	err := open(&rc.Connection, "/connect", params, rc.onMessage, auths...)
+	err := OpenWebsocket(&rc.Connection, "/connect", params, rc.onMessage, auths...)
 
 	if err != nil {
 		return nil, err

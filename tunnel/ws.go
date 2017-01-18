@@ -21,8 +21,8 @@ type Connection struct {
 	done      chan struct{}
 }
 
-// open -- Open a websocket connection
-func open(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) error {
+// OpenWebsocket -- Open a websocket connection
+func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) error {
 	hdr := http.Header{}
 
 	var auth api.Authentication

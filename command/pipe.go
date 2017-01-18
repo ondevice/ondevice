@@ -41,6 +41,7 @@ func (p PipeCmd) Run(args []string) int {
 		log.Fatal("Missing service name")
 	}
 
+	// TODO if devID is qualified and it's another user, use other client credentials if possible
 	devID := args[0]
 	service := args[1]
 

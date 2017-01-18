@@ -29,11 +29,6 @@ func Get(cmd string) Command {
 	return _commands[cmd]
 }
 
-// Help -- Get help for a specific command, returning
-func Help(cmd string) (args string, short string, long string) {
-	return "arg1, arg2", "help", "help meeeeeeeeeeee!"
-}
-
 // List -- list command names
 func List() map[string]Command {
 	return _commands

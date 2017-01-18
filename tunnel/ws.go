@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/ondevice/ondevice-cli/api"
+	"github.com/ondevice/ondevice/api"
 )
 
 // WSListener -- WebSocket listener

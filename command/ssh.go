@@ -7,7 +7,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/ondevice/ondevice-cli/config"
+	"github.com/ondevice/ondevice/config"
 )
 
 const sshFlags = "1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:"

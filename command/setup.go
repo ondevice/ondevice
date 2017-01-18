@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/howeyc/gopass"
-	"github.com/ondevice/ondevice-cli/api"
-	"github.com/ondevice/ondevice-cli/config"
+	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
 )
 
 const _longLoginHelp = `ondevice login

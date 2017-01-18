@@ -1,6 +1,6 @@
 package tunnel
 
-import "github.com/ondevice/ondevice-cli/api"
+import "github.com/ondevice/ondevice/api"
 
 // Echo -- open a simple echoing WebSocket connection to the API server
 func Echo(onMessage func(int, []byte), auths ...api.Authentication) (*Connection, error) {

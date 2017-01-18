@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/ondevice/ondevice-cli/api"
-	"github.com/ondevice/ondevice-cli/config"
-	"github.com/ondevice/ondevice-cli/tunnel"
+	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/tunnel"
 )
 
 // PipeCmd -- `ondevice pipe` implementation

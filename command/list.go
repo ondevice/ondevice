@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/ondevice/ondevice-cli/api"
+	"github.com/ondevice/ondevice/api"
 )
 
 // ListCmd -- `ondevice list` implementation

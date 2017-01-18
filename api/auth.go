@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ondevice/ondevice-cli/config"
+	"github.com/ondevice/ondevice/config"
 )
 
 // Authentication -- authentication and other API options)

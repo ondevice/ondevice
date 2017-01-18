@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ondevice/ondevice-cli/command"
+	"github.com/ondevice/ondevice/command"
 )
 
 func main() {

@@ -1,6 +1,6 @@
 package tunnel
 
-import "github.com/ondevice/ondevice-cli/api"
+import "github.com/ondevice/ondevice/api"
 
 // Connect to a service on one of your devices
 func Connect(devID string, service string, protocol string, auths ...api.Authentication) (*Tunnel, error) {

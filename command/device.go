@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ondevice/ondevice-cli/api"
+	"github.com/ondevice/ondevice/api"
 )
 
 // DeviceCmd -- `ondevice device` implementation

@@ -71,11 +71,15 @@ func (s SSHCommand) Run(args []string) int {
 	// create something like `ssh -oProxyCommand=... user@ondevice:devId <opts`
 	a := make([]string, 0, 10)
 	a = append(a, sshPath, proxyCmd)
-	a = append(a, fmt.Sprintf("%s@ondevice:%s", tgtUser, tgtHost))
+	if tgtUser != "" {
+		a = append(a, fmt.Sprintf("%s@ondevice:%s", tgtUser, tgtHost))
+	} else {
+		a = append(a, fmt.Sprintf("ondevice:%s", tgtHost))
+	}
 	a = append(a, args...)
 
 	// TODO detect OSs that don't support the exec syscall and use something else instead
-	//log.Fatal("resulting command: ", a)
+	//log.Fatal("resulting command: ", a) // uncomment this to print the command (instead of running it)
 	err := syscall.Exec(sshPath, a, nil)
 	if err != nil {
 		log.Fatal("Failed to run ", sshPath, ": ", err)

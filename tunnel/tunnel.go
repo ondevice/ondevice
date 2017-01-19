@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,8 +12,8 @@ import (
 // Tunnel -- an ondevice.io tunnel ()
 type Tunnel struct {
 	Connection
-	Side     string // "client" or "device"
-	sendLock sync.Mutex
+	Side      string // "client" or "device"
+	connected chan error
 
 	OnClose func()
 	OnData  func(data []byte)
@@ -33,9 +32,7 @@ func (t *Tunnel) Write(data []byte) {
 	msg = append(msg, []byte("data:")...)
 	msg = append(msg, data...)
 
-	t.sendLock.Lock() // make sure the tunnel is up and running
 	t.SendBinary(msg)
-	t.sendLock.Unlock()
 }
 
 func (t *Tunnel) onMessage(_type int, msg []byte) {
@@ -65,9 +62,8 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		} else if metaType == "pong" {
 			// TODO update 't.lastPing'
 		} else if metaType == "connected" {
-			// unlock the Send*() methods
-			t.sendLock.Unlock()
 			log.Print("connected")
+			t.connected <- nil
 		} else if metaType == "EOF" {
 			if t.OnEOF != nil {
 				t.OnEOF()

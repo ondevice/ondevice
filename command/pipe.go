@@ -21,21 +21,21 @@ type PipeCmd struct {
 	writer *bufio.Writer
 }
 
-func (p PipeCmd) args() string {
+func (p *PipeCmd) args() string {
 	return "<devId> <service>"
 }
 
-func (p PipeCmd) longHelp() string {
+func (p *PipeCmd) longHelp() string {
 	log.Fatal("implement me")
 	return ""
 }
 
-func (p PipeCmd) shortHelp() string {
+func (p *PipeCmd) shortHelp() string {
 	return "Pipes a device's service to stdout/stdin"
 }
 
 // Run -- implements `ondevice pipe`
-func (p PipeCmd) Run(args []string) int {
+func (p *PipeCmd) Run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
 		log.Fatal("Missing devId")

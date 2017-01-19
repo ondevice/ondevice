@@ -2,9 +2,10 @@ package tunnel
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,6 +20,22 @@ type Tunnel struct {
 	OnData  func(data []byte)
 	OnError func(err error)
 	OnEOF   func()
+}
+
+// GetErrorCodeName -- returns a string representing the given 'HTTP-ish' tunnel error code
+func GetErrorCodeName(code int) string {
+	switch code {
+	case 400:
+		return "Bad Request"
+	case 403:
+		return "Access Denied"
+	case 404:
+		return "Not Found"
+	case 503:
+		return "Service Unavailable"
+	}
+
+	return ""
 }
 
 // CloseWrite -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
@@ -77,7 +94,17 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		//}
 		t.OnData(msg)
 	} else if msgType == "error" {
-		err := errors.New(string(msg))
+		parts := strings.SplitN(string(msg), ":", 2)
+		var code int
+		var errMsg string
+		if len(parts) == 1 {
+			errMsg = parts[0]
+		} else {
+			code, _ = strconv.Atoi(parts[0])
+			errMsg = parts[1]
+		}
+
+		err := fmt.Errorf("%s (%d): %s", GetErrorCodeName(code), code, errMsg)
 		if t.connected != nil {
 			t.connected <- err
 		}

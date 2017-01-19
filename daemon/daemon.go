@@ -22,6 +22,11 @@ type DeviceSocket struct {
 	OnError      func(error)
 }
 
+type pingMsg struct {
+	Type string `json:"_type"`
+	Ts   int    `json:"ts"`
+}
+
 // Connect -- Go online
 func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
 	// TODO use the new 'key' param instead of 'id'
@@ -136,7 +141,9 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 		d.onHello(msg)
 		break
 	case "ping":
-		d.onPing(msg)
+		var ping pingMsg
+		json.Unmarshal(data, &ping)
+		d.onPing(ping)
 		break
 	case "connect":
 		d.onConnect(msg)
@@ -148,12 +155,12 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 	}
 }
 
-func (d *DeviceSocket) onPing(msg *map[string]interface{}) {
+func (d *DeviceSocket) onPing(msg pingMsg) {
 	log.Print("Got ping message: ", msg)
 	d.lastPing = time.Now()
 	resp := make(map[string]interface{}, 1)
 	resp["_type"] = "pong"
-	resp["ts"] = _getInt(msg, "ts")
+	resp["ts"] = msg.Ts
 	d.SendJSON(resp)
 }
 

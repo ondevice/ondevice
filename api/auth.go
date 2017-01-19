@@ -59,6 +59,11 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 	return u.String()
 }
 
+// SetServerURL -- Set the API server's URL (used by GetURL(), necessary to use the correct API server in tunnel.Accept())
+func (a *Authentication) SetServerURL(apiServer string) {
+	a.apiServer = apiServer
+}
+
 // CreateAuth -- Create Authentication object
 func CreateAuth(user string, auth string) Authentication {
 	return Authentication{
@@ -70,6 +75,15 @@ func CreateAuth(user string, auth string) Authentication {
 // CreateClientAuth -- Create default authentication
 func CreateClientAuth() (Authentication, error) {
 	user, auth, err := config.GetClientAuth()
+	if err != nil {
+		return Authentication{}, err
+	}
+	return CreateAuth(user, auth), nil
+}
+
+// CreateDeviceAuth -- Create default device authentication
+func CreateDeviceAuth() (Authentication, error) {
+	user, auth, err := config.GetDeviceAuth()
 	if err != nil {
 		return Authentication{}, err
 	}

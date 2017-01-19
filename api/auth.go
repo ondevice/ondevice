@@ -29,6 +29,7 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 
 	if server == "" {
 		server = "https://api.ondevice.io/"
+		//server = "http://localhost:8080/"
 	}
 
 	u, err := url.Parse(server)
@@ -48,7 +49,13 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 	}
 	u.RawQuery = query.Encode()
 
-	u.Scheme = scheme
+	// use ws:// if the API server URL was http:// (for local testing)
+	if u.Scheme == "http" && scheme == "wss" {
+		u.Scheme = "ws"
+	} else {
+		u.Scheme = scheme
+	}
+
 	return u.String()
 }
 

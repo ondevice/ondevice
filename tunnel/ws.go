@@ -41,10 +41,14 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	//log.Printf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
 	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("API server authentication failed")
-	} else if err != nil {
-		log.Fatalf("error opening websocket (response code: %s): %s", resp.Status, err)
+	if err != nil {
+		if resp != nil {
+			if resp.StatusCode == 401 {
+				return fmt.Errorf("API server authentication failed")
+			}
+			return fmt.Errorf("Error opening websocket (response code: %s): %s", resp.Status, err)
+		}
+		return fmt.Errorf("Error opening websocket: %s", err)
 	}
 
 	c.ws = ws

@@ -77,7 +77,11 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		//}
 		t.OnData(msg)
 	} else if msgType == "error" {
-		t._error(errors.New(string(msg)))
+		err := errors.New(string(msg))
+		if t.connected != nil {
+			t.connected <- err
+		}
+		t._error(err)
 	} else {
 		log.Println("Unsupported tunnel message type: ", msgType)
 	}

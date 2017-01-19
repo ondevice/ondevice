@@ -31,6 +31,7 @@ func Connect(devID string, service string, protocol string, auths ...api.Authent
 	}
 
 	close(rc.connected)
+	rc.connected = nil
 
 	return &rc, nil
 }

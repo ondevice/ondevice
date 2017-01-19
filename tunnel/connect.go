@@ -8,30 +8,29 @@ import (
 )
 
 // Connect to a service on one of your devices
-func Connect(devID string, service string, protocol string, auths ...api.Authentication) (*Tunnel, error) {
+func Connect(t *Tunnel, devID string, service string, protocol string, auths ...api.Authentication) error {
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
-	rc := Tunnel{}
 
-	rc.connected = make(chan error)
-	err := OpenWebsocket(&rc.Connection, "/connect", params, rc.onMessage, auths...)
+	t.connected = make(chan error)
+	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// time out after 30 secs
 	go func() {
 		time.Sleep(30 * time.Second)
-		rc.connected <- fmt.Errorf("Timeout while connecting to %s", devID)
+		t.connected <- fmt.Errorf("Timeout while connecting to %s", devID)
 	}()
 
-	err = <-rc.connected
+	err = <-t.connected
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	close(rc.connected)
-	rc.connected = nil
+	close(t.connected)
+	t.connected = nil
 
-	return &rc, nil
+	return nil
 }

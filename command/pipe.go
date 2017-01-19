@@ -44,7 +44,6 @@ func (p PipeCmd) Run(args []string) int {
 		log.Fatal("Missing service name")
 	}
 
-	// TODO if devID is qualified and it's another user, use other client credentials if possible
 	devID := args[0]
 	service := args[1]
 
@@ -62,15 +61,16 @@ func (p PipeCmd) Run(args []string) int {
 		}
 	}
 
-	// initiate connection
-	c, err := tunnel.Connect(devID, service, service, auth)
-	if err != nil {
-		log.Fatal(err)
-	}
-	c.OnData = p.onData
-
 	p.writer = bufio.NewWriter(os.Stdout)
 	p.reader = bufio.NewReader(os.Stdin)
+
+	// initiate connection
+	c := tunnel.Tunnel{}
+	c.OnData = p.onData
+	if err = tunnel.Connect(&c, devID, service, service, auth); err != nil {
+		log.Fatal(err)
+	}
+
 	buff := make([]byte, 8192)
 	var count int
 

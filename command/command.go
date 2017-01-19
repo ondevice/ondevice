@@ -12,6 +12,7 @@ type Command interface {
 
 // TODO find a way to make me const
 var _commands = map[string]Command{
+	"daemon": new(DaemonCommand),
 	"device": new(DeviceCmd),
 	"help":   new(HelpCmd),
 	"list":   new(ListCmd),
@@ -21,8 +22,10 @@ var _commands = map[string]Command{
 	"ssh":    new(SSHCommand),
 }
 
-var deviceCmds = []string{}
+var deviceCmds = []string{"daemon"}
 var clientCmds = []string{"device", "list", "pipe", "rsync", "ssh"}
+
+// hide these commands from `ondevice help`
 var internalCmds = map[string]int{"pipe": 0}
 
 // Get -- Return specified command (or nil if not found)

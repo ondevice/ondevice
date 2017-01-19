@@ -61,16 +61,16 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 }
 
 // Close -- Close the underlying WebSocket connection
-func (c Connection) Close() {
+func (c *Connection) Close() {
 	c.ws.Close()
 }
 
 // OnMessage -- pass incoming WebSocket messages on to the listener function
-func (c Connection) OnMessage(msgType int, msg []byte) {
+func (c *Connection) OnMessage(msgType int, msg []byte) {
 	c.onMessage(msgType, msg)
 }
 
-func (c Connection) receive() {
+func (c *Connection) receive() {
 	defer c.ws.Close()
 	defer close(c.done)
 
@@ -85,21 +85,21 @@ func (c Connection) receive() {
 }
 
 // SendBinary -- Send binary WebSocket message
-func (c Connection) SendBinary(data []byte) {
+func (c *Connection) SendBinary(data []byte) {
 	c.ws.WriteMessage(websocket.BinaryMessage, data)
 }
 
 // SendJSON -- Send a JSON text message to the WebSocket
-func (c Connection) SendJSON(value interface{}) {
+func (c *Connection) SendJSON(value interface{}) {
 	c.ws.WriteJSON(value)
 }
 
 // SendText -- send a raw text websocket messge (use SendJson instead where possible)
-func (c Connection) SendText(msg string) {
+func (c *Connection) SendText(msg string) {
 	c.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 }
 
 // Wait -- Wait for the connection to close
-func (c Connection) Wait() {
+func (c *Connection) Wait() {
 	<-c.done
 }

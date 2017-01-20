@@ -25,6 +25,10 @@ func (d DaemonCommand) shortHelp() string {
 
 // Run -- implements `ondevice daemon`
 func (d DaemonCommand) Run(args []string) int {
+	if !daemon.TryLock() {
+		log.Fatal("Couldn't acquire lock file")
+	}
+
 	// TODO start the unix socket, etc.
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT and maybe a unix socket call)
 	for true {

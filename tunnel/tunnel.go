@@ -89,9 +89,9 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			t._error(fmt.Errorf("Unsupported meta message: %s", metaType))
 		}
 	} else if msgType == "data" {
-		//if t.OnData == nil {
-		//	log.Fatal("Tunnel: Missing OnData handler")
-		//}
+		if t.OnData == nil {
+			panic("Tunnel: Missing OnData handler")
+		}
 		t.OnData(msg)
 	} else if msgType == "error" {
 		parts := strings.SplitN(string(msg), ":", 2)

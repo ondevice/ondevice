@@ -2,13 +2,13 @@ package daemon
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/service"
 	"github.com/ondevice/ondevice/tunnel"
 )
 
@@ -61,39 +61,26 @@ func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
 	clientIP := _getString(msg, "clientIp")
 	clientUser := _getString(msg, "clientUser")
 	protocol := _getString(msg, "protocol")
-	service := _getString(msg, "service")
-	//broker := _getString(msg, "broker")
+	svc := _getString(msg, "service")
+	brokerURL := _getString(msg, "broker")
 	tunnelID := _getString(msg, "tunnelId")
 
-	// TODO support actual services
-	if service != "ssh" {
-		d.SendConnectionError(404, fmt.Sprintf("Service '%s' not found", service), tunnelID)
-	}
-	if protocol != "ssh" {
-		d.SendConnectionError(400, fmt.Sprintf("Protocol mismatch (expected=%s, actual=%s)", "ssh", protocol), tunnelID)
+	log.Printf("Connection request for %s@%s from user %s@%s", protocol, svc, clientUser, clientIP)
+
+	handler := service.GetServiceHandler(svc, protocol)
+	if handler == nil {
+		// TODO send the error back to the API server
+		log.Print("Error: Coudln't find protocol handler: ", protocol)
+		return
 	}
 
-	log.Printf("Connection request for %s@%s from user %s@%s", protocol, service, clientUser, clientIP)
-
-	d.SendConnectionError(400, "Not yet implemented", tunnelID)
+	handler.Start(tunnelID, brokerURL)
 }
 
 func (d *DeviceSocket) onError(msg *map[string]interface{}) {
 	code := _getInt(msg, "code")
 	message := _getString(msg, "msg")
-	var codeName string
-
-	switch code {
-	case 400:
-		codeName = "Bad Request"
-		break
-	case 403:
-		codeName = "Access Denied"
-		break
-	case 404:
-		codeName = "Not Found"
-		break
-	}
+	var codeName = tunnel.GetErrorCodeName(int(code))
 
 	log.Printf("Device ERROR: %s - %s ", codeName, message)
 }

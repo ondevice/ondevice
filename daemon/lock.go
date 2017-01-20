@@ -10,8 +10,15 @@ import (
 )
 
 // TryLock -- Try to acquire the daemon's lock file (and write to PID file)
+//
+// We don't want `ondevice daemon` to be run more than once per user and pc
+// since both instances would request the same devID from the server.
+// The API server would then believe there was a conflict and after ~5min
+// assign a new devID to one of the daemons.
+//
+// This issue would be repeated (e.g. the next time the system is restarted)
+// and therefore cause a lot of garbage data (and possibly cost the user money)
 func TryLock() bool {
-
 	lockFile := config.GetConfigPath("ondevice.lock")
 
 	fd, err := syscall.Open(lockFile, os.O_CREATE|os.O_WRONLY, 0600)

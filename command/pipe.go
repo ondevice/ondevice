@@ -17,6 +17,8 @@ import (
 type PipeCmd struct {
 	ws *websocket.Conn
 
+	sentEOF bool
+
 	reader *bufio.Reader
 	writer *bufio.Writer
 }
@@ -66,6 +68,7 @@ func (p *PipeCmd) Run(args []string) int {
 
 	// initiate connection
 	c := tunnel.Tunnel{}
+	c.OnError = p.onError
 	c.OnData = p.onData
 	if err = tunnel.Connect(&c, devID, service, service, auth); err != nil {
 		log.Fatal(err)
@@ -80,6 +83,7 @@ func (p *PipeCmd) Run(args []string) int {
 				// we can't simply call c.Close() here because the other side might still
 				// send data. A simple test would be (assuming the device has the 'echo' service enabled):
 				//   echo hello | ondevice pipe <dev> echo
+				p.sentEOF = true
 				c.CloseWrite()
 				break
 			} else {
@@ -92,6 +96,13 @@ func (p *PipeCmd) Run(args []string) int {
 
 	c.Wait()
 	return 0
+}
+
+func (p *PipeCmd) onError(err error) {
+	if !p.sentEOF {
+		log.Fatal("Lost connection")
+	}
+	p.ws.Close()
 }
 
 // OnMessage -- Handles incoming WebSocket messages

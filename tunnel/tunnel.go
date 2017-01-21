@@ -18,7 +18,6 @@ type Tunnel struct {
 
 	OnClose func()
 	OnData  func(data []byte)
-	OnError func(err error)
 	OnEOF   func()
 }
 

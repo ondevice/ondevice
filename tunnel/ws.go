@@ -16,7 +16,9 @@ type WSListener interface {
 
 // Connection -- WebSocket connection
 type Connection struct {
-	ws        *websocket.Conn
+	ws *websocket.Conn
+
+	OnError   func(err error)
 	onMessage func(int, []byte)
 	done      chan struct{}
 }
@@ -77,7 +79,10 @@ func (c *Connection) receive() {
 	for {
 		msgType, msg, err := c.ws.ReadMessage()
 		if err != nil {
-			log.Println("read error:", err)
+			log.Println("read error: ", err)
+			if c.OnError != nil {
+				c.OnError(err)
+			}
 			return
 		}
 		c.onMessage(msgType, msg)

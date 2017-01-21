@@ -3,6 +3,7 @@ package daemon
 import (
 	"encoding/json"
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -143,7 +144,8 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 }
 
 func (d *DeviceSocket) onPing(msg pingMsg) {
-	log.Print("Got ping message: ", msg)
+	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
+	log.Printf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
 	resp := make(map[string]interface{}, 1)
 	resp["_type"] = "pong"

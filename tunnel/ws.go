@@ -23,6 +23,11 @@ type Connection struct {
 	done      chan struct{}
 }
 
+// AuthenticationError -- error indicating authentication issues
+type AuthenticationError struct {
+	msg string
+}
+
 // OpenWebsocket -- Open a websocket connection
 func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) error {
 	hdr := http.Header{}
@@ -46,7 +51,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	if err != nil {
 		if resp != nil {
 			if resp.StatusCode == 401 {
-				return fmt.Errorf("API server authentication failed")
+				return AuthenticationError{"API server authentication failed"}
 			}
 			return fmt.Errorf("Error opening websocket (response code: %s): %s", resp.Status, err)
 		}
@@ -107,4 +112,8 @@ func (c *Connection) SendText(msg string) {
 // Wait -- Wait for the connection to close
 func (c *Connection) Wait() {
 	<-c.done
+}
+
+func (e AuthenticationError) Error() string {
+	return e.msg
 }

@@ -2,8 +2,10 @@ package command
 
 import (
 	"log"
+	"time"
 
 	"github.com/ondevice/ondevice/daemon"
+	"github.com/ondevice/ondevice/tunnel"
 )
 
 // DaemonCommand -- `ondevice daemon` implementation
@@ -31,14 +33,34 @@ func (d DaemonCommand) Run(args []string) int {
 
 	// TODO start the unix socket, etc.
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT and maybe a unix socket call)
+	retryDelay := 10 * time.Second
 	for true {
 		d, err := daemon.Connect()
 		if err != nil {
-			// TODO only abort here if it's an authentication issue
-			log.Fatal(err)
-			// TODO sleep for a bit to avoid spamming the server
+			// only abort here if it's an authentication issue
+			if _, ok := err.(tunnel.AuthenticationError); ok {
+				log.Fatal(err)
+			}
+
+			// sleep for a bit to avoid spamming the servers
+			if retryDelay > 120*time.Second {
+				retryDelay = 120 * time.Second
+			}
+			if retryDelay < 10*time.Second {
+				retryDelay = 10 * time.Second
+			}
+
+			log.Printf("device error - retrying in %ds", retryDelay/time.Second)
+			time.Sleep(retryDelay)
+
+			retryDelay = time.Duration(float32(retryDelay) * 1.5)
+			continue
 		}
 		d.Wait()
+
+		// connection was successful -> restart after 10sec
+		retryDelay = 10
+		time.Sleep(retryDelay * time.Second)
 	}
 
 	return 0

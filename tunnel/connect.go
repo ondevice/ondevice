@@ -19,18 +19,15 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	}
 
 	// time out after 30 secs
-	go func() {
-		time.Sleep(30 * time.Second)
-		t.connected <- fmt.Errorf("Timeout while connecting to %s", devID)
-	}()
-
-	err = <-t.connected
-	if err != nil {
-		return err
+	select {
+	case err = <-t.connected:
+		break
+	case <-time.After(time.Second * 30):
+		err = fmt.Errorf("Timeout while connecting to %s", devID)
 	}
 
 	close(t.connected)
 	t.connected = nil
 
-	return nil
+	return err
 }

@@ -33,18 +33,15 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 	}
 
 	// time out after 30 secs
-	go func() {
-		time.Sleep(30 * time.Second)
-		t.connected <- fmt.Errorf("Timeout while accepting tunnel %s", tunnelID)
-	}()
-
-	err = <-t.connected
-	if err != nil {
-		return err
+	select {
+	case err = <-t.connected:
+		break
+	case <-time.After(time.Second * 30):
+		err = fmt.Errorf("Timeout while accepting tunnel %s", tunnelID)
 	}
 
 	close(t.connected)
 	t.connected = nil
 
-	return nil
+	return err
 }

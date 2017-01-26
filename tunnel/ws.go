@@ -16,7 +16,8 @@ type WSListener interface {
 
 // Connection -- WebSocket connection
 type Connection struct {
-	ws *websocket.Conn
+	ws       *websocket.Conn
+	isClosed bool
 
 	OnError   func(err error)
 	onMessage func(int, []byte)
@@ -69,6 +70,10 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 
 // Close -- Close the underlying WebSocket connection
 func (c *Connection) Close() {
+	if c.isClosed {
+		return
+	}
+	c.isClosed = true
 	c.ws.Close()
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/service"
 	"github.com/ondevice/ondevice/tunnel"
+	"github.com/ondevice/ondevice/util"
 )
 
 // DeviceSocket -- represents a device's connection to the ondevice.io API server
@@ -18,6 +19,7 @@ type DeviceSocket struct {
 	tunnel.Connection
 
 	lastPing time.Time
+	wdog     *util.Watchdog
 
 	OnConnection func(tunnelID string, service string, protocol string)
 	OnError      func(error)
@@ -33,6 +35,7 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
 	// TODO use the new 'key' param instead of 'id'
 	params := map[string]string{"id": config.GetDeviceKey()}
 	rc := DeviceSocket{}
+	rc.wdog = util.NewWatchdog(180*time.Second, rc.onPingTimeout)
 
 	err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...)
 
@@ -147,10 +150,17 @@ func (d *DeviceSocket) onPing(msg pingMsg) {
 	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
 	log.Printf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
+	d.wdog.Kick()
 	resp := make(map[string]interface{}, 1)
 	resp["_type"] = "pong"
 	resp["ts"] = msg.Ts
 	d.SendJSON(resp)
+}
+
+func (d *DeviceSocket) onPingTimeout() {
+	log.Print("ERROR: Haven't got a ping from the API server in a while, closing connection...")
+	d.Close()
+	d.wdog.Stop()
 }
 
 func _contains(m *map[string]interface{}, key string) bool {

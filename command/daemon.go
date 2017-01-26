@@ -59,6 +59,7 @@ func (d DaemonCommand) Run(args []string) int {
 		d.Wait()
 
 		// connection was successful -> restart after 10sec
+		log.Print("lost device connection, reconnecting in 10s")
 		retryDelay = 10
 		time.Sleep(retryDelay * time.Second)
 	}

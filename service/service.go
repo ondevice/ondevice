@@ -8,11 +8,12 @@ import (
 
 // ProtocolHandler -- Service protocol implementations
 type ProtocolHandler struct {
-	t *tunnel.Tunnel
+	tunnel *tunnel.Tunnel
 
-	OnData   func(data []byte)
-	OnEOF    func()
-	RunLocal func()
+	Connect func() error
+	OnData  func(data []byte)
+	OnEOF   func()
+	Receive func()
 }
 
 // GetProtocolHandler -- Get
@@ -20,10 +21,17 @@ func GetProtocolHandler(name string) *ProtocolHandler {
 	var rc *ProtocolHandler
 	switch name {
 	case "echo":
-		e := new(EchoHandler)
-		e.OnData = e.onData
-		e.OnEOF = e.onRemoteEOF
-		rc = &e.ProtocolHandler
+		rc = NewEchoHandler()
+	case "ssh":
+		rc = NewTCPHandler()
+	}
+
+	if rc.Connect != nil {
+		err := rc.Connect()
+		if err != nil {
+			log.Print("GetProtocolHandler error: ", err)
+			return nil
+		}
 	}
 
 	return rc
@@ -46,8 +54,14 @@ func (p *ProtocolHandler) Start(tunnelID string, brokerURL string) {
 }
 
 func (p *ProtocolHandler) run(tunnelID string, brokerURL string) {
-	p.t = new(tunnel.Tunnel)
-	p.t.OnEOF = p.OnEOF
-	p.t.OnData = p.OnData
-	tunnel.Accept(p.t, tunnelID, brokerURL)
+	p.tunnel = new(tunnel.Tunnel)
+	p.tunnel.OnEOF = p.OnEOF
+	p.tunnel.OnData = p.OnData
+
+	err := tunnel.Accept(p.tunnel, tunnelID, brokerURL)
+	if err == nil {
+		if p.Receive != nil {
+			go p.Receive()
+		}
+	}
 }

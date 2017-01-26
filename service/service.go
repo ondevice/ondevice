@@ -1,8 +1,7 @@
 package service
 
 import (
-	"log"
-
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 )
 
@@ -29,7 +28,7 @@ func GetProtocolHandler(name string) *ProtocolHandler {
 	if rc.Connect != nil {
 		err := rc.Connect()
 		if err != nil {
-			log.Print("GetProtocolHandler error: ", err)
+			logg.Error("GetProtocolHandler error: ", err)
 			return nil
 		}
 	}
@@ -41,7 +40,7 @@ func GetProtocolHandler(name string) *ProtocolHandler {
 func GetServiceHandler(svc string, protocol string) *ProtocolHandler {
 	// TODO implement actual services
 	if svc != protocol {
-		log.Printf("protocol/service mismatch: svc=%s, protocol=%s", svc, protocol)
+		logg.Errorf("protocol/service mismatch: svc=%s, protocol=%s", svc, protocol)
 		return nil
 	}
 

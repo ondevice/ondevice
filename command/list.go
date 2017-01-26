@@ -3,10 +3,10 @@ package command
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/logg"
 )
 
 // ListCmd -- `ondevice list` implementation
@@ -49,12 +49,12 @@ func (l ListCmd) Run(args []string) int {
 	// parse args
 	opts := ListOpts
 	if _, err := flags.ParseArgs(&opts, args); err != nil {
-		log.Fatal(err)
+		logg.Fatal(err)
 	}
 
 	devices, err := api.ListDevices(opts.State, opts.Properties)
 	if err != nil {
-		log.Fatal(err)
+		logg.Fatal(err)
 	}
 
 	if opts.JSON {
@@ -94,7 +94,7 @@ func (l ListCmd) printJSON(devs []api.Device) {
 		dev := devs[i]
 		out, err := json.Marshal(dev)
 		if err != nil {
-			log.Fatal("JSON serialization failed: ", err)
+			logg.Fatal("JSON serialization failed: ", err)
 		}
 		fmt.Println(string(out))
 	}
@@ -106,7 +106,7 @@ func _getColumns(dev api.Device) []string {
 
 func _printColumns(widths []int, cols []string) {
 	if len(widths) != len(cols) {
-		log.Fatal("mismatch between cols and widths count", cols, widths)
+		logg.Fatal("mismatch between cols and widths count", cols, widths)
 	}
 
 	for i := range widths {
@@ -118,7 +118,7 @@ func _printColumns(widths []int, cols []string) {
 
 func _printValue(width int, val string) {
 	if len(val) > width {
-		log.Fatal("width < len(val) !")
+		logg.Fatal("width < len(val) !")
 	}
 	fmt.Print(val)
 	for i := len(val); i < width; i++ {

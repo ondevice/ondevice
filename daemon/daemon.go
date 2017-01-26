@@ -2,13 +2,13 @@ package daemon
 
 import (
 	"encoding/json"
-	"log"
 	"runtime"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/service"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
@@ -49,7 +49,7 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
 
 // SendConnectionError -- Send an connection error message to the API server)
 func (d *DeviceSocket) SendConnectionError(code int, msg string, tunnelID string) {
-	log.Printf("Sending connection error: %s (code %d)", msg, code)
+	logg.Debugf("Sending connection error: %s (code %d)", msg, code)
 	data := make(map[string]interface{})
 	data["_type"] = "connectError"
 	data["tunnelId"] = tunnelID
@@ -71,12 +71,12 @@ func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
 	brokerURL := _getString(msg, "broker")
 	tunnelID := _getString(msg, "tunnelId")
 
-	log.Printf("Connection request for %s@%s from user %s@%s", protocol, svc, clientUser, clientIP)
+	logg.Infof("Connection request for %s@%s from user %s@%s", protocol, svc, clientUser, clientIP)
 
 	handler := service.GetServiceHandler(svc, protocol)
 	if handler == nil {
 		// TODO send the error back to the API server
-		log.Print("Error: Coudln't find protocol handler: ", protocol)
+		logg.Error("Coudln't find protocol handler: ", protocol)
 		return
 	}
 
@@ -88,11 +88,11 @@ func (d *DeviceSocket) onError(msg *map[string]interface{}) {
 	message := _getString(msg, "msg")
 	var codeName = tunnel.GetErrorCodeName(int(code))
 
-	log.Printf("Device ERROR: %s - %s ", codeName, message)
+	logg.Errorf("Device ERROR: %s - %s ", codeName, message)
 }
 
 func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
-	log.Print("Got hello message: ", msg)
+	logg.Debug("Got hello message: ", msg)
 	var devID, key string
 	if _contains(msg, "name") {
 		// deprecated hello message format (for backwards compatibility) -- 2017-01-19
@@ -103,11 +103,11 @@ func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
 		key = _getString(msg, "key")
 	}
 
-	log.Printf("Connection established, online as '%s'", devID)
+	logg.Infof("Connection established, online as '%s'", devID)
 
 	// update the key if changed
 	if config.GetDeviceKey() != key {
-		log.Print("Updating device key: ", key)
+		logg.Debug("Updating device key: ", key)
 		config.SetValue("device", "key", key)
 	}
 
@@ -120,7 +120,7 @@ func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
 
 func (d *DeviceSocket) onMessage(_type int, data []byte) {
 	if _type == websocket.BinaryMessage {
-		log.Print("Got a binary message over the device websocket: ", string(data))
+		logg.Error("Got a binary message over the device websocket: ", string(data))
 		return
 	}
 
@@ -143,14 +143,14 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 	case "error":
 		d.onError(msg)
 	default:
-		log.Print("Unsupported WS message: ", data)
+		logg.Error("Unsupported WS message: ", data)
 		break
 	}
 }
 
 func (d *DeviceSocket) onPing(msg pingMsg) {
 	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
-	log.Printf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
+	logg.Debugf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
 	d.wdog.Kick()
 	resp := make(map[string]interface{}, 1)
@@ -160,7 +160,7 @@ func (d *DeviceSocket) onPing(msg pingMsg) {
 }
 
 func (d *DeviceSocket) onPingTimeout() {
-	log.Print("ERROR: Haven't got a ping from the API server in a while, closing connection...")
+	logg.Warning("Haven't got a ping from the API server in a while, closing connection...")
 	d.Close()
 	d.wdog.Stop()
 }
@@ -175,6 +175,6 @@ func _getInt(m *map[string]interface{}, key string) int64 {
 }
 
 func _getString(m *map[string]interface{}, key string) string {
-	log.Printf("-- %s: %s", key, (*m)[key])
+	//logg.Debugf("-- %s: %s", key, (*m)[key])
 	return (*m)[key].(string)
 }

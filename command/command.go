@@ -1,6 +1,6 @@
 package command
 
-import "log"
+import "github.com/ondevice/ondevice/logg"
 
 // Command - Defines a command
 type Command interface {
@@ -42,7 +42,7 @@ func List() map[string]Command {
 func Run(cmdName string, args []string) int {
 	cmd := Get(cmdName)
 	if cmd == nil {
-		log.Fatal("Command not found:", cmdName)
+		logg.Fatal("Command not found:", cmdName)
 	}
 	return cmd.Run(args)
 }

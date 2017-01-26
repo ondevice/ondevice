@@ -2,12 +2,12 @@ package api
 
 import (
 	"encoding/base64"
-	"log"
 	"net/url"
 	"path"
 	"strings"
 
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 )
 
 // Authentication -- authentication and other API options)
@@ -34,7 +34,7 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 
 	u, err := url.Parse(server)
 	if err != nil {
-		log.Fatal("URL parsing error: ", err)
+		logg.Fatal("URL parsing error: ", err)
 	}
 
 	if strings.HasPrefix(endpoint, "/") {

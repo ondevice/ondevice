@@ -3,13 +3,13 @@ package command
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 )
 
@@ -28,7 +28,7 @@ func (p *PipeCmd) args() string {
 }
 
 func (p *PipeCmd) longHelp() string {
-	log.Fatal("implement me")
+	logg.Fatal("implement me")
 	return ""
 }
 
@@ -40,10 +40,10 @@ func (p *PipeCmd) shortHelp() string {
 func (p *PipeCmd) Run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
-		log.Fatal("Missing devId")
+		logg.Fatal("Missing devId")
 	}
 	if len(args) < 2 {
-		log.Fatal("Missing service name")
+		logg.Fatal("Missing service name")
 	}
 
 	devID := args[0]
@@ -51,7 +51,7 @@ func (p *PipeCmd) Run(args []string) int {
 
 	auth, err := api.CreateClientAuth()
 	if err != nil {
-		log.Fatal("Missing client credentials")
+		logg.Fatal("Missing client credentials")
 	}
 
 	if strings.Contains(devID, ".") {
@@ -71,7 +71,7 @@ func (p *PipeCmd) Run(args []string) int {
 	c.OnError = p.onError
 	c.OnData = p.onData
 	if err = tunnel.Connect(&c, devID, service, service, auth); err != nil {
-		log.Fatal(err)
+		logg.Fatal(err)
 	}
 
 	buff := make([]byte, 8192)
@@ -87,7 +87,7 @@ func (p *PipeCmd) Run(args []string) int {
 				c.CloseWrite()
 				break
 			} else {
-				log.Fatal("error reading from stdin: ", err)
+				logg.Fatal("error reading from stdin: ", err)
 			}
 		}
 
@@ -100,7 +100,7 @@ func (p *PipeCmd) Run(args []string) int {
 
 func (p *PipeCmd) onError(err error) {
 	if !p.sentEOF {
-		log.Fatal("Lost connection")
+		logg.Fatal("Lost connection")
 	}
 	p.ws.Close()
 }

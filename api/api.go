@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	"github.com/ondevice/ondevice/logg"
 )
 
 func delete(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
@@ -32,10 +33,11 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	}
 
 	url := auth.GetURL(endpoint, params, "https")
-	log.Printf("%s request to URL %s\n", method, url)
+	logg.Debugf("%s request to URL %s\n", method, url)
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		log.Fatal("Failed request", err)
+		// TODO return err
+		logg.Fatal("Failed request", err)
 	}
 	req.Header.Add("Authorization", auth.GetAuthHeader())
 
@@ -107,6 +109,6 @@ func _getObject(tgtValue interface{}, body []byte, err error) error {
 		return err
 	}
 
-	//log.Println("getJSON: ", tgtValue, string(body))
+	//logg.Debug("getJSON: ", tgtValue, string(body))
 	return nil
 }

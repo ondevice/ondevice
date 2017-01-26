@@ -1,8 +1,12 @@
 package config
 
-import "gopkg.in/ini.v1"
-import "log"
-import "os/user"
+import (
+	"os/user"
+
+	"github.com/ondevice/ondevice/logg"
+	"gopkg.in/ini.v1"
+)
+
 import "path"
 
 // if not nil, this will be used instead of `~/.config/ondevice` (mainly used for testing)
@@ -20,7 +24,7 @@ func GetConfigPath(filename string) string {
 
 	var u, err = user.Current()
 	if err != nil {
-		log.Fatal("Couldn't get current user", err)
+		logg.Fatal("Couldn't get current user", err)
 	}
 
 	return path.Join(u.HomeDir, ".config/ondevice", filename)

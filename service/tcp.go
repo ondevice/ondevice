@@ -1,8 +1,9 @@
 package service
 
 import (
-	"log"
 	"net"
+
+	"github.com/ondevice/ondevice/logg"
 )
 
 // TCPHandler -- protocol handler connecting to a tcp server
@@ -44,8 +45,7 @@ func (t *TCPHandler) onEOF() {
 func (t *TCPHandler) onTunnelData(data []byte) {
 	_, err := t.sock.Write(data)
 	if err != nil {
-		log.Print("TCPHandler error: ", err)
-		// TODO close the tunnel
+		logg.Error("TCPHandler error: ", err)
 		t.tunnel.Close()
 		t.sock.Close()
 	}
@@ -57,14 +57,14 @@ func (t *TCPHandler) receive() {
 	for {
 		count, err := t.sock.Read(buff)
 		if err != nil {
-			log.Print("TCPHandler socket error: ", err)
+			logg.Error("TCPHandler socket error: ", err)
 			t.tunnel.Close()
 			t.sock.Close()
 			return
 		}
 
 		if t.tunnel == nil {
-			log.Fatal("ERROR: TCPHandler.tunnel is null!!!")
+			logg.Fatal("ERROR: TCPHandler.tunnel is null!!!")
 		}
 		t.tunnel.Write(buff[:count])
 	}

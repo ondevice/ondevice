@@ -3,8 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/url"
+
+	"github.com/ondevice/ondevice/logg"
 )
 
 // Device -- state info for a specific device
@@ -100,7 +101,7 @@ func SetProperties(devID string, props map[string]string, auths ...Authenticatio
 
 func _propertyList(data propertyListResponse, err error) (map[string]string, error) {
 	if err != nil {
-		log.Fatal("Couldn't get device properties", err)
+		logg.Fatal("Couldn't get device properties", err)
 	}
 
 	// simply return the first element

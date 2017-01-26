@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/ondevice/ondevice/logg"
 )
 
 const _longHelpHelp = `ondevice help [cmd]
@@ -43,7 +45,7 @@ func (h HelpCmd) Run(args []string) int {
 		cmd := args[0]
 		h.help(cmd)
 	} else {
-		log.Fatal("USAGE: ondevice help [cmd]")
+		logg.Fatal("USAGE: ondevice help [cmd]")
 	}
 
 	return 0
@@ -83,7 +85,7 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInte
 		}
 
 		if _, ok := cmds[name]; !ok {
-			log.Fatal("Command not found: ", name)
+			logg.Fatal("Command not found: ", name)
 		}
 		cmd := cmds[name]
 		fmt.Printf("    %s %s\n", name, cmd.args())
@@ -96,7 +98,7 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInte
 func (h HelpCmd) help(cmdName string) {
 	cmd := Get(cmdName)
 	if cmd == nil {
-		log.Fatal("Command not found:" + cmdName)
+		logg.Fatal("Command not found:" + cmdName)
 	} else {
 		fmt.Println(cmd.longHelp())
 	}

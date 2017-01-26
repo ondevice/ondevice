@@ -2,11 +2,11 @@ package tunnel
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
 )
 
@@ -55,6 +55,6 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 }
 
 func (t *Tunnel) _pingTimeout() {
-	log.Print("tunnel timeout, closing connection")
+	logg.Error("tunnel timeout, closing connection")
 	t.Close()
 }

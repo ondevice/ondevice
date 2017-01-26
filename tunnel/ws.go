@@ -2,11 +2,11 @@ package tunnel
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/logg"
 )
 
 // WSListener -- WebSocket listener
@@ -46,7 +46,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	hdr.Add("Authorization", auth.GetAuthHeader())
 
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
-	//log.Printf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
+	logg.Debugf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
 	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *Connection) receive() {
 	for {
 		msgType, msg, err := c.ws.ReadMessage()
 		if err != nil {
-			log.Println("read error: ", err)
+			logg.Error("read error: ", err)
 			if c.OnError != nil {
 				c.OnError(err)
 			}

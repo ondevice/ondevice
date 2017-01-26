@@ -3,12 +3,12 @@ package tunnel
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
 )
 
@@ -44,7 +44,7 @@ func GetErrorCodeName(code int) string {
 
 // CloseWrite -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
 func (t *Tunnel) CloseWrite() {
-	log.Print("Sending EOF...")
+	logg.Debug("Sending EOF...")
 	t.SendBinary([]byte("meta:EOF"))
 }
 
@@ -60,10 +60,12 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 	parts := bytes.SplitN(msg, []byte(":"), 2)
 
 	if _type != websocket.BinaryMessage {
-		log.Fatal("Got non-binary message over the tunnel")
+		logg.Error("Got non-binary message over the tunnel")
+		return
 	}
 	if len(parts) < 2 {
-		log.Fatal("Missing colon in tunnel message")
+		logg.Error("Missing colon in tunnel message")
+		return
 	}
 	msgType := string(parts[0])
 	msg = parts[1]
@@ -73,7 +75,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		metaType := string(parts[0])
 
 		if metaType == "ping" {
-			//log.Print("got tunnel ping")
+			//logg.Debug("got tunnel ping")
 			pong := []byte("meta:pong")
 			t.lastPing = time.Now()
 			t.wdog.Kick()
@@ -84,10 +86,10 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			}
 			t.SendBinary(pong)
 		} else if metaType == "pong" {
-			//log.Print("got tunnel pong: ", string(msg))
+			logg.Debug("got tunnel pong: ", string(msg))
 			t.lastPing = time.Now()
 		} else if metaType == "connected" {
-			log.Print("connected")
+			logg.Debug("connected")
 			t.connected <- nil
 		} else if metaType == "EOF" {
 			if t.OnEOF != nil {
@@ -118,7 +120,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		}
 		t._error(err)
 	} else {
-		log.Println("Unsupported tunnel message type: ", msgType)
+		logg.Warning("Unsupported tunnel message type: ", msgType)
 	}
 }
 
@@ -126,6 +128,6 @@ func (t *Tunnel) _error(err error) {
 	if t.OnError != nil {
 		t.OnError(err)
 	} else {
-		log.Print("Error: ", err)
+		logg.Error(err)
 	}
 }

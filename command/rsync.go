@@ -2,9 +2,10 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"syscall"
+
+	"github.com/ondevice/ondevice/logg"
 )
 
 const _longRsyncHelp = `Copy files from/to devices using rsync
@@ -50,9 +51,9 @@ func (r RsyncCommand) Run(args []string) int {
 
 	err := syscall.Exec(rsyncPath, a, nil)
 	if err != nil {
-		log.Fatal("Failed to run ", rsyncPath, ": ", err)
+		logg.Fatal("Failed to run ", rsyncPath, ": ", err)
 	}
 
-	log.Fatal("We shouldn't be here")
+	logg.Fatal("We shouldn't be here")
 	return -1
 }

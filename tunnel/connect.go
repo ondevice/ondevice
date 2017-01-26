@@ -2,10 +2,10 @@ package tunnel
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
 )
 
@@ -40,12 +40,11 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 }
 
 func (t *Tunnel) _sendPing() {
-	log.Print("~~sendPing~~")
 	t.SendBinary([]byte("meta:ping:hell:no"))
 	if t.lastPing.IsZero() {
 		// ignored
 	} else if t.lastPing.Add(180 * time.Second).Before(time.Now()) {
-		log.Print("tunnel timeout, closing connection...")
+		logg.Error("tunnel timeout, closing connection...")
 		t.wdog.Stop()
 		t.Close()
 		return // prevent restarting the watchdog

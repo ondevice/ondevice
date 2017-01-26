@@ -1,10 +1,10 @@
 package command
 
 import (
-	"log"
 	"time"
 
 	"github.com/ondevice/ondevice/daemon"
+	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 )
 
@@ -17,7 +17,7 @@ func (d DaemonCommand) args() string {
 }
 
 func (d DaemonCommand) longHelp() string {
-	log.Fatal("Implement me!!!")
+	logg.Fatal("Implement me!!!")
 	return ""
 }
 
@@ -28,7 +28,7 @@ func (d DaemonCommand) shortHelp() string {
 // Run -- implements `ondevice daemon`
 func (d DaemonCommand) Run(args []string) int {
 	if !daemon.TryLock() {
-		log.Fatal("Couldn't acquire lock file")
+		logg.Fatal("Couldn't acquire lock file")
 	}
 
 	// TODO start the unix socket, etc.
@@ -39,7 +39,7 @@ func (d DaemonCommand) Run(args []string) int {
 		if err != nil {
 			// only abort here if it's an authentication issue
 			if _, ok := err.(tunnel.AuthenticationError); ok {
-				log.Fatal(err)
+				logg.Fatal(err)
 			}
 
 			// sleep for a bit to avoid spamming the servers
@@ -50,7 +50,7 @@ func (d DaemonCommand) Run(args []string) int {
 				retryDelay = 10 * time.Second
 			}
 
-			log.Printf("device error - retrying in %ds", retryDelay/time.Second)
+			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
 			time.Sleep(retryDelay)
 
 			retryDelay = time.Duration(float32(retryDelay) * 1.5)
@@ -59,7 +59,7 @@ func (d DaemonCommand) Run(args []string) int {
 		d.Wait()
 
 		// connection was successful -> restart after 10sec
-		log.Print("lost device connection, reconnecting in 10s")
+		logg.Warning("lost device connection, reconnecting in 10s")
 		retryDelay = 10
 		time.Sleep(retryDelay * time.Second)
 	}

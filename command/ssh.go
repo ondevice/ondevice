@@ -2,12 +2,12 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"syscall"
 
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 )
 
 const sshFlags = "1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:"
@@ -79,14 +79,14 @@ func (s SSHCommand) Run(args []string) int {
 	a = append(a, args...)
 
 	// TODO detect OSs that don't support the exec syscall and use something else instead
-	//log.Fatal("resulting command: ", a) // uncomment this to print the command (instead of running it)
+	//logg.Fatal("resulting command: ", a) // uncomment this to print the command (instead of running it)
 	err := syscall.Exec(sshPath, a, nil)
 	if err != nil {
-		log.Fatal("Failed to run ", sshPath, ": ", err)
+		logg.Fatal("Failed to run ", sshPath, ": ", err)
 	}
 
 	// nothing here should ever be executed
-	log.Fatal("This should never happen")
+	logg.Fatal("This should never happen")
 	return -1
 }
 
@@ -100,13 +100,13 @@ func (s SSHCommand) _parseArgs(args []string) (string, []string) {
 		arg := args[i]
 
 		if len(arg) == 0 {
-			log.Fatal("Failed to parse SSH arguments: got an empty argument while looking for '[user@]host'")
+			logg.Fatal("Failed to parse SSH arguments: got an empty argument while looking for '[user@]host'")
 		} else if arg == "-" {
-			log.Fatal("Stray '-' SSH argument")
+			logg.Fatal("Stray '-' SSH argument")
 		} else if arg[0] == '-' {
 			hasValue, ok := flags[arg[1]]
 			if !ok {
-				log.Fatal("Unsupported SSH argument: ", arg)
+				logg.Fatal("Unsupported SSH argument: ", arg)
 			}
 			if hasValue && len(arg) == 2 {
 				// the value's in the next argument, push both to outArgs
@@ -116,13 +116,13 @@ func (s SSHCommand) _parseArgs(args []string) (string, []string) {
 				// the value's part of arg
 				outArgs = append(outArgs, arg)
 			} else if !hasValue && len(arg) > 2 { // && !hasValue
-				log.Fatal("Got value for flag that doesn't expect one: ", arg)
+				logg.Fatal("Got value for flag that doesn't expect one: ", arg)
 			} else if !hasValue && len(arg) == 2 {
 				// a simple flag)
 				outArgs = append(outArgs, arg)
 			} else {
 				// yay to defensive programming
-				log.Fatal("this should never happen (fifth state of two binary values)")
+				logg.Fatal("this should never happen (fifth state of two binary values)")
 			}
 		} else {
 			// first non-option argument -> extract target and keep the rest as-is
@@ -132,7 +132,7 @@ func (s SSHCommand) _parseArgs(args []string) (string, []string) {
 		}
 	}
 
-	log.Fatal("Missing SSH target user/host!")
+	logg.Fatal("Missing SSH target user/host!")
 	return "", nil
 }
 
@@ -145,7 +145,7 @@ func (s SSHCommand) _parseTarget(target string) (tgtHost string, tgtUser string)
 		tgtUser = parts[0]
 		tgtHost = parts[1]
 	} else {
-		log.Fatal("SplitN(..., 2) returned odd number of results: ", len(parts))
+		logg.Fatal("SplitN(..., 2) returned odd number of results: ", len(parts))
 	}
 
 	// always use qualified device names

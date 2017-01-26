@@ -6,8 +6,10 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/ondevice/ondevice/util"
 )
 
 // Tunnel -- an ondevice.io tunnel ()
@@ -15,10 +17,13 @@ type Tunnel struct {
 	Connection
 	Side      string // "client" or "device"
 	connected chan error
+	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
+	lastPing  time.Time
 
-	OnClose func()
-	OnData  func(data []byte)
-	OnEOF   func()
+	OnClose   func()
+	OnData    func(data []byte)
+	OnEOF     func()
+	OnTimeout func()
 }
 
 // GetErrorCodeName -- returns a string representing the given 'HTTP-ish' tunnel error code
@@ -68,15 +73,19 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		metaType := string(parts[0])
 
 		if metaType == "ping" {
+			//log.Print("got tunnel ping")
 			pong := []byte("meta:pong")
+			t.lastPing = time.Now()
+			t.wdog.Kick()
+
 			if len(parts) > 1 {
 				pong = append(pong, byte(':'))
-				pong = append(pong, parts[1]...)
+				pong = append(pong, msg[5:]...)
 			}
 			t.SendBinary(pong)
-			// TODO update 't.lastPing'
 		} else if metaType == "pong" {
-			// TODO update 't.lastPing'
+			//log.Print("got tunnel pong: ", string(msg))
+			t.lastPing = time.Now()
 		} else if metaType == "connected" {
 			log.Print("connected")
 			t.connected <- nil

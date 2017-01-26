@@ -2,10 +2,12 @@ package tunnel
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/util"
 )
 
 // Accept -- Accept an incoming tunnel connection
@@ -26,6 +28,8 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 	auth.SetServerURL(brokerURL)
 
 	t.connected = make(chan error)
+	t.OnTimeout = t._pingTimeout
+	t.wdog = util.NewWatchdog(180*time.Second, t.OnTimeout)
 	err = OpenWebsocket(&t.Connection, "/accept", params, t.onMessage, auth)
 
 	if err != nil {
@@ -44,4 +48,9 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 	t.connected = nil
 
 	return err
+}
+
+func (t *Tunnel) _pingTimeout() {
+	log.Print("tunnel timeout, closing connection")
+	t.Close()
 }

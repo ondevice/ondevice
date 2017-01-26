@@ -16,17 +16,17 @@ var _commands = map[string]Command{
 	"device": new(DeviceCmd),
 	"help":   new(HelpCmd),
 	"list":   new(ListCmd),
-	"pipe":   new(PipeCmd),
+	":pipe":  new(PipeCmd),
 	"rsync":  new(RsyncCommand),
 	"setup":  new(SetupCmd),
 	"ssh":    new(SSHCommand),
 }
 
 var deviceCmds = []string{"daemon"}
-var clientCmds = []string{"device", "list", "pipe", "rsync", "ssh"}
+var clientCmds = []string{"device", "list", ":pipe", "rsync", "ssh"}
 
 // hide these commands from `ondevice help`
-var internalCmds = map[string]int{"pipe": 0}
+var internalCmds = map[string]int{":pipe": 0}
 
 // Get -- Return specified command (or nil if not found)
 func Get(cmd string) Command {

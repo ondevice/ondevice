@@ -36,7 +36,7 @@ func (p *PipeCmd) shortHelp() string {
 	return "Pipes a device's service to stdout/stdin"
 }
 
-// Run -- implements `ondevice pipe`
+// Run -- implements `ondevice :pipe`
 func (p *PipeCmd) Run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
@@ -82,7 +82,7 @@ func (p *PipeCmd) Run(args []string) int {
 			if count == 0 && err == io.EOF {
 				// we can't simply call c.Close() here because the other side might still
 				// send data. A simple test would be (assuming the device has the 'echo' service enabled):
-				//   echo hello | ondevice pipe <dev> echo
+				//   echo hello | ondevice :pipe <dev> echo
 				p.sentEOF = true
 				c.CloseWrite()
 				break

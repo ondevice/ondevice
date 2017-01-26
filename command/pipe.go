@@ -13,7 +13,7 @@ import (
 	"github.com/ondevice/ondevice/tunnel"
 )
 
-// PipeCmd -- `ondevice pipe` implementation
+// PipeCmd -- `ondevice :pipe` implementation
 type PipeCmd struct {
 	ws *websocket.Conn
 

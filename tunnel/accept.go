@@ -29,7 +29,6 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 
 	t.connected = make(chan error)
 	t.OnTimeout = t._pingTimeout
-	t.wdog = util.NewWatchdog(180*time.Second, t.OnTimeout)
 	err = OpenWebsocket(&t.Connection, "/accept", params, t.onMessage, auth)
 
 	if err != nil {
@@ -46,6 +45,11 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 
 	close(t.connected)
 	t.connected = nil
+
+	// init watchdog
+	if err == nil {
+		t.wdog = util.NewWatchdog(180*time.Second, t.OnTimeout)
+	}
 
 	return err
 }

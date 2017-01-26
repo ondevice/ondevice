@@ -35,13 +35,15 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
 	// TODO use the new 'key' param instead of 'id'
 	params := map[string]string{"id": config.GetDeviceKey()}
 	rc := DeviceSocket{}
-	rc.wdog = util.NewWatchdog(180*time.Second, rc.onPingTimeout)
 
 	err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...)
 
 	if err != nil {
 		return nil, err
 	}
+
+	rc.wdog = util.NewWatchdog(180*time.Second, rc.onPingTimeout)
+
 	return &rc, nil
 }
 

@@ -20,6 +20,7 @@ var _commands = map[string]Command{
 	"rsync":  new(RsyncCommand),
 	"setup":  new(SetupCmd),
 	"ssh":    new(SSHCommand),
+	"status": new(StatusCmd),
 }
 
 var deviceCmds = []string{"daemon"}

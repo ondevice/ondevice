@@ -94,8 +94,7 @@ func getState() control.DeviceState {
 	rc, err := control.GetState()
 	if err != nil {
 		// can't query device socket -> assume daemon is not running
-		// TODO make me a debug message
-		logg.Warning("Couldn't query device state: ", err)
+		logg.Debug("Couldn't query device state: ", err)
 		rc = control.DeviceState{}
 	}
 

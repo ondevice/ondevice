@@ -66,6 +66,8 @@ func (h HelpCmd) listCommands() {
 
 	l.Println("\n- Other commands:")
 	h._listCommands(nil, cmds, showInternal)
+
+	l.Println()
 }
 
 func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInternal bool) {

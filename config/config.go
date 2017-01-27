@@ -30,6 +30,11 @@ func GetConfigPath(filename string) string {
 	return path.Join(u.HomeDir, ".config/ondevice", filename)
 }
 
+// GetVersion -- Returns the app version
+func GetVersion() string {
+	return "0.3.9"
+}
+
 // GetValue -- Get a configuration value (as string)
 func GetValue(section string, key string) (string, error) {
 	path := GetConfigPath("ondevice.conf")

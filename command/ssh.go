@@ -56,8 +56,7 @@ func (s SSHCommand) shortHelp() string {
 	return "Connect to your devices using the ssh protocol"
 }
 
-// Run -- `ondevice ssh` implementation
-func (s SSHCommand) Run(args []string) int {
+func (s SSHCommand) run(args []string) int {
 	sshPath := "/usr/bin/ssh"
 
 	// parse args (to detect the ones before 'user@host')

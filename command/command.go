@@ -7,7 +7,7 @@ type Command interface {
 	args() string
 	shortHelp() string
 	longHelp() string
-	Run(args []string) int
+	run(args []string) int
 }
 
 // TODO find a way to make me const
@@ -45,5 +45,5 @@ func Run(cmdName string, args []string) int {
 	if cmd == nil {
 		logg.Fatal("Command not found:", cmdName)
 	}
-	return cmd.Run(args)
+	return cmd.run(args)
 }

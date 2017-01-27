@@ -26,8 +26,7 @@ func (d DaemonCommand) shortHelp() string {
 	return "Run the ondevice device daemon"
 }
 
-// Run -- implements `ondevice daemon`
-func (d DaemonCommand) Run(args []string) int {
+func (d DaemonCommand) run(args []string) int {
 	if !daemon.TryLock() {
 		logg.Fatal("Couldn't acquire lock file")
 	}

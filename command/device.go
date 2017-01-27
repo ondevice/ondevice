@@ -24,8 +24,7 @@ func (d DeviceCmd) shortHelp() string {
 	return "List/manipulate device properties"
 }
 
-// Run -- `ondevice device` implementation
-func (d DeviceCmd) Run(args []string) int {
+func (d DeviceCmd) run(args []string) int {
 	if len(args) < 1 {
 		logg.Fatal("Error: missing deviceId")
 	} else if len(args) < 2 {

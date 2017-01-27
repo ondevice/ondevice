@@ -36,8 +36,7 @@ func (p *PipeCmd) shortHelp() string {
 	return "Pipes a device's service to stdout/stdin"
 }
 
-// Run -- implements `ondevice :pipe`
-func (p *PipeCmd) Run(args []string) int {
+func (p *PipeCmd) run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
 		logg.Fatal("Missing devId")

@@ -38,8 +38,7 @@ func (l SetupCmd) shortHelp() string {
 	return "Log in to the ondevice.io service"
 }
 
-// Run -- implements 'ondevice login'
-func (l SetupCmd) Run(args []string) int {
+func (l SetupCmd) run(args []string) int {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("User: ")
 	user, _ := reader.ReadString('\n')

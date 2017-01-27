@@ -44,8 +44,7 @@ func (l ListCmd) shortHelp() string {
 	return "List your devices"
 }
 
-// Run -- implements `ondevice list`
-func (l ListCmd) Run(args []string) int {
+func (l ListCmd) run(args []string) int {
 	// parse args
 	opts := ListOpts
 	if _, err := flags.ParseArgs(&opts, args); err != nil {

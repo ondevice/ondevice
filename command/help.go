@@ -37,8 +37,7 @@ func (h HelpCmd) shortHelp() string {
 	return "Shows this help screen"
 }
 
-// Run -- run `ondevice help <args>`
-func (h HelpCmd) Run(args []string) int {
+func (h HelpCmd) run(args []string) int {
 	if len(args) == 0 {
 		h.listCommands()
 	} else if len(args) == 1 {

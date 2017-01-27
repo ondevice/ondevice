@@ -39,8 +39,7 @@ func (s *StatusCmd) shortHelp() string {
 	return "Prints the client and local device status"
 }
 
-// Run -- implements 'ondevice status'
-func (s *StatusCmd) Run(args []string) int {
+func (s *StatusCmd) run(args []string) int {
 	if len(args) == 0 {
 		return print()
 	} else if len(args) != 1 || args[0] != "--json" {

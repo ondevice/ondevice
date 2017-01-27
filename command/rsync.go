@@ -41,8 +41,7 @@ func (r RsyncCommand) longHelp() string {
 	return _longRsyncHelp
 }
 
-// Run -- `ondevice rsync` implementation
-func (r RsyncCommand) Run(args []string) int {
+func (r RsyncCommand) run(args []string) int {
 	rsyncPath := "/usr/bin/rsync"
 
 	// TODO this will fail if argv[0] contains spaces

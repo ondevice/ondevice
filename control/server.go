@@ -81,6 +81,6 @@ func _sendJSON(w http.ResponseWriter, data interface{}) {
 	}
 	// TODO make sure we're not messing up the encoding
 
-	logg.Error("Sending JSON response: ", string(d))
+	logg.Debug("Sending JSON response: ", string(d))
 	io.WriteString(w, string(d))
 }

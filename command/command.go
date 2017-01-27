@@ -21,9 +21,10 @@ var _commands = map[string]Command{
 	"setup":  new(SetupCmd),
 	"ssh":    new(SSHCommand),
 	"status": new(StatusCmd),
+	"stop":   new(StopCmd),
 }
 
-var deviceCmds = []string{"daemon"}
+var deviceCmds = []string{"daemon", "stop"}
 var clientCmds = []string{"device", "list", ":pipe", "rsync", "ssh"}
 
 // hide these commands from `ondevice help`

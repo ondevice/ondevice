@@ -13,20 +13,20 @@ import (
 type DaemonCommand struct {
 }
 
-func (d DaemonCommand) args() string {
+func (d *DaemonCommand) args() string {
 	return "[-f]"
 }
 
-func (d DaemonCommand) longHelp() string {
+func (d *DaemonCommand) longHelp() string {
 	logg.Fatal("Implement me!!!")
 	return ""
 }
 
-func (d DaemonCommand) shortHelp() string {
+func (d *DaemonCommand) shortHelp() string {
 	return "Run the ondevice device daemon"
 }
 
-func (d DaemonCommand) run(args []string) int {
+func (d *DaemonCommand) run(args []string) int {
 	if !daemon.TryLock() {
 		logg.Fatal("Couldn't acquire lock file")
 	}

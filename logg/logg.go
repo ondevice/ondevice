@@ -108,6 +108,11 @@ func Debugf(fmt string, args ...interface{}) {
 	Logf(DEBUG, fmt, args...)
 }
 
+// SetLevel -- Set the minimum log level
+func SetLevel(level int) {
+	_level = level
+}
+
 func _getName(level int) string {
 	rc, _ := _levels[level]
 	return rc

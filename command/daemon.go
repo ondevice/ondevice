@@ -3,6 +3,7 @@ package command
 import (
 	"time"
 
+	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
 	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
@@ -31,7 +32,8 @@ func (d DaemonCommand) Run(args []string) int {
 		logg.Fatal("Couldn't acquire lock file")
 	}
 
-	// TODO start the unix socket, etc.
+	c := control.StartServer()
+
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT and maybe a unix socket call)
 	retryDelay := 10 * time.Second
 	for true {
@@ -56,6 +58,8 @@ func (d DaemonCommand) Run(args []string) int {
 			retryDelay = time.Duration(float32(retryDelay) * 1.5)
 			continue
 		}
+
+		c.Daemon = d
 		d.Wait()
 
 		// connection was successful -> restart after 10sec

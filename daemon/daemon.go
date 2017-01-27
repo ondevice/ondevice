@@ -20,6 +20,7 @@ type DeviceSocket struct {
 
 	lastPing time.Time
 	wdog     *util.Watchdog
+	IsOnline bool
 
 	OnConnection func(tunnelID string, service string, protocol string)
 	OnError      func(error)
@@ -88,6 +89,7 @@ func (d *DeviceSocket) onError(msg *map[string]interface{}) {
 	message := _getString(msg, "msg")
 	var codeName = tunnel.GetErrorCodeName(int(code))
 
+	d.IsOnline = false
 	logg.Errorf("Device ERROR: %s - %s ", codeName, message)
 }
 
@@ -104,6 +106,7 @@ func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
 	}
 
 	logg.Infof("Connection established, online as '%s'", devID)
+	d.IsOnline = true
 
 	// update the key if changed
 	if config.GetDeviceKey() != key {
@@ -161,6 +164,7 @@ func (d *DeviceSocket) onPing(msg pingMsg) {
 
 func (d *DeviceSocket) onPingTimeout() {
 	logg.Warning("Haven't got a ping from the API server in a while, closing connection...")
+	d.IsOnline = false
 	d.Close()
 	d.wdog.Stop()
 }

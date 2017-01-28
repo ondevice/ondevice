@@ -9,5 +9,5 @@ deps:
 	go get gopkg.in/ini.v1
 
 install:
-	echo "-- implement me --" >&2
-	false
+	mkdir -p $(DESTDIR)/usr/bin/
+	install -o root -g root ./ondevice $(DESTDIR)/usr/bin/

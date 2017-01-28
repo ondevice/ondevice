@@ -58,7 +58,7 @@ func _dropPrivileges() int {
 	// TODO allow the user to override these paths (e.g. using environment vars or commandline flags)
 	_setupFile("ondevice.pid", "/var/run/ondevice.pid", int(uid), int(gid), 0644)
 	_setupFile("ondevice.sock", "/var/run/ondevice.sock", int(uid), int(gid), 0664)
-	config.SetFilePath("ondevice.conf", "/etc/ondevice/ondevice.conf")
+	config.SetFilePath("ondevice.conf", "/var/lib/ondevice/ondevice.conf")
 
 	return int(uid)
 }

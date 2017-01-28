@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 )
 
@@ -40,6 +41,7 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 		logg.Fatal("Failed request", err)
 	}
 	req.Header.Add("Authorization", auth.GetAuthHeader())
+	req.Header.Add("User-agent", fmt.Sprintf("ondevice v%s", config.GetVersion()))
 
 	if body != nil {
 		req.Body = ioutil.NopCloser(bytes.NewReader(body))

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 )
 
@@ -44,6 +45,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	}
 
 	hdr.Add("Authorization", auth.GetAuthHeader())
+	hdr.Add("User-agent", fmt.Sprintf("ondevice v%s", config.GetVersion()))
 
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
 	logg.Debugf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())

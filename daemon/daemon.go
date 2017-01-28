@@ -33,9 +33,16 @@ type pingMsg struct {
 
 // Connect -- Go online
 func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
-	// TODO use the new 'key' param instead of 'id'
 	params := map[string]string{"key": config.GetDeviceKey()}
 	rc := DeviceSocket{}
+
+	if len(auths) == 0 {
+		auth, err := api.CreateDeviceAuth()
+		if err != nil {
+			logg.Fatal("Couldn't get device auth: ", err)
+		}
+		auths = []api.Authentication{auth}
+	}
 
 	err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...)
 

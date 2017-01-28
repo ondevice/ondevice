@@ -1,6 +1,9 @@
 package config
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 func _getAuth(section string) (string, string, error) {
 	username, uerr := GetValue(section, "user")
@@ -38,5 +41,9 @@ func GetClientUserAuth(username string) (string, string, error) {
 
 // GetDeviceAuth -- Get the device authentication
 func GetDeviceAuth() (string, string, error) {
+	if os.Getenv("ONDEVICE_USER") != "" || os.Getenv("ONDEVICE_AUTH") != "" {
+		return os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), nil
+	}
+
 	return _getAuth("device")
 }

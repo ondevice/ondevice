@@ -49,9 +49,10 @@ func _dropPrivileges() int {
 	}
 
 	// see if ondevice.conf exists
-	_, err = os.Stat("/etc/ondevice/ondevice.conf")
+	cfgFile := "/var/lib/ondevice/ondevice.conf"
+	_, err = os.Stat(cfgFile)
 	if os.IsNotExist(err) {
-		logg.Fatal("Couldn't find /etc/ondevice/ondevice.conf")
+		logg.Fatal("Couldn't find ", cfgFile)
 	}
 
 	// TODO use other paths for other OSs

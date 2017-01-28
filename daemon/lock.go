@@ -21,7 +21,7 @@ import (
 //
 //
 func TryLock() bool {
-	lockFile := config.GetConfigPath("ondevice.lock")
+	lockFile := config.GetConfigPath("ondevice.pid")
 
 	fd, err := syscall.Open(lockFile, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
@@ -35,11 +35,8 @@ func TryLock() bool {
 
 	// only do this if we've got the
 	logg.Debug("Writing to PID file: ", os.Getpid())
-	pidFile, err := os.Create(config.GetConfigPath("ondevice.pid"))
-	if err != nil {
-		logg.Fatal("Couldn't open PID file: ", err)
-	}
-	pidFile.WriteString(fmt.Sprintf("%d\n", os.Getpid()))
+	pidstr := fmt.Sprintf("%d\n", os.Getpid())
+	syscall.Write(fd, []byte(pidstr))
 
 	return true
 }

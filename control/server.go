@@ -14,8 +14,6 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const SchemeUnix = "unix"
-
 // ControlSocket instance
 type ControlSocket struct {
 	Daemon *daemon.DeviceSocket
@@ -24,8 +22,8 @@ type ControlSocket struct {
 // StartServer -- Start the unix domain socket server (probably won't work on Windows)
 func StartServer(u url.URL) *ControlSocket {
 	var proto, path string
-	if u.Scheme == SchemeUnix || u.Scheme == "" {
-		proto = SchemeUnix
+	if u.Scheme == "unix" || u.Scheme == "" {
+		proto = "unix"
 		path = u.Path
 	} else if u.Scheme == "http" {
 		proto = "tcp"
@@ -38,7 +36,7 @@ func StartServer(u url.URL) *ControlSocket {
 }
 
 func (c *ControlSocket) run(protocol string, path string) {
-	if protocol == SchemeUnix {
+	if protocol == "unix" {
 		os.Remove(path)
 		defer os.Remove(path)
 	}
@@ -55,13 +53,6 @@ func (c *ControlSocket) run(protocol string, path string) {
 }
 
 func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
-	/*	data := map[string]interface{}{
-		"version": "0.0.0",
-		"device": map[string]string{
-			"state": "offline",
-		},
-	}*/
-
 	devState := "offline"
 	if c.Daemon != nil && c.Daemon.IsOnline {
 		devState = "online"

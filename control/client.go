@@ -30,8 +30,8 @@ func getSocketURLs() []url.URL {
 	}
 
 	return []url.URL{
-		url.URL{Scheme: SchemeUnix, Path: config.GetConfigPath("ondevice.sock")},
-		url.URL{Scheme: SchemeUnix, Path: "/var/run/ondevice/ondevice.sock"},
+		url.URL{Scheme: "unix", Path: config.GetConfigPath("ondevice.sock")},
+		url.URL{Scheme: "unix", Path: "/var/run/ondevice/ondevice.sock"},
 	}
 }
 
@@ -44,8 +44,8 @@ func getJSON(tgt interface{}, endpoint string) error {
 			for _, url := range urls {
 				var protocol, path string
 
-				if url.Scheme == SchemeUnix || url.Scheme == "" {
-					protocol = SchemeUnix
+				if url.Scheme == "unix" || url.Scheme == "" {
+					protocol = "unix"
 					path = url.Path
 				} else if url.Scheme == "http" {
 					protocol = "tcp"

@@ -78,19 +78,15 @@ func SetValue(section string, key string, value string) error {
 	path := GetConfigPath("ondevice.conf")
 
 	cfg, err := ini.InsensitiveLoad(path)
-	if err != nil {
+	if os.IsNotExist(err) {
+		logg.Debug("Creating new ondevice.conf")
+		cfg = ini.Empty()
+	} else if err != nil {
 		return err
 	}
 
-	s, err := cfg.GetSection(section)
-	if err != nil {
-		return err
-	}
-
-	k, err := s.GetKey(key)
-	if err != nil {
-		return err
-	}
+	s := cfg.Section(section)
+	k := s.Key(key)
 
 	k.SetValue(value)
 

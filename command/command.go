@@ -16,12 +16,12 @@ var _commands = map[string]Command{
 	"device": new(DeviceCmd),
 	"help":   new(HelpCmd),
 	"list":   new(ListCmd),
-	":pipe":  new(PipeCmd),
+	"login":  new(LoginCmd),
 	"rsync":  new(RsyncCommand),
-	"setup":  new(SetupCmd),
 	"ssh":    new(SSHCommand),
 	"status": new(StatusCmd),
 	"stop":   new(StopCmd),
+	":pipe":  new(PipeCmd),
 }
 
 var deviceCmds = []string{"daemon", "stop"}

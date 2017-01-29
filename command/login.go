@@ -23,22 +23,22 @@ User: <enter your user name>
 Auth: <enter your credentials>
 `
 
-// SetupCmd -- `ondevice login` implementation
-type SetupCmd struct{}
+// LoginCmd -- `ondevice login` implementation
+type LoginCmd struct{}
 
-func (l SetupCmd) args() string {
+func (l *LoginCmd) args() string {
 	return ""
 }
 
-func (l SetupCmd) longHelp() string {
+func (l *LoginCmd) longHelp() string {
 	return _longLoginHelp
 }
 
-func (l SetupCmd) shortHelp() string {
+func (l *LoginCmd) shortHelp() string {
 	return "Log in to the ondevice.io service"
 }
 
-func (l SetupCmd) run(args []string) int {
+func (l *LoginCmd) run(args []string) int {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("User: ")
 	user, _ := reader.ReadString('\n')

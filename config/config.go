@@ -1,13 +1,15 @@
 package config
 
 import (
+	"os"
 	"os/user"
+	"path/filepath"
+
+	"path"
 
 	"github.com/ondevice/ondevice/logg"
 	"gopkg.in/ini.v1"
 )
-
-import "path"
 
 // if not nil, this will be used instead of `~/.config/ondevice` (mainly used for testing)
 var _configPathOverride *string
@@ -91,7 +93,14 @@ func SetValue(section string, key string, value string) error {
 	}
 
 	k.SetValue(value)
-	cfg.SaveTo(path)
+
+	tmpPath := filepath.Join(filepath.Dir(path), ".ondevice.conf.tmp")
+	if err = cfg.SaveTo(tmpPath); err != nil {
+		return err
+	}
+	if err = os.Rename(tmpPath, path); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -73,7 +73,7 @@ func (p *PipeCmd) run(args []string) int {
 		logg.Fatal(err)
 	}
 
-	buff := make([]byte, 8192)
+	buff := make([]byte, 8100)
 	var count int
 
 	for {

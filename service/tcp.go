@@ -52,7 +52,7 @@ func (t *TCPHandler) onTunnelData(data []byte) {
 }
 
 func (t *TCPHandler) receive() {
-	buff := make([]byte, 8192)
+	buff := make([]byte, 8100)
 
 	for {
 		count, err := t.sock.Read(buff)

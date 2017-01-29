@@ -46,6 +46,10 @@ func (c *ControlSocket) run(protocol string, path string) {
 		log.Fatal(err)
 	}
 
+	if protocol == "unix" {
+		os.Chmod(path, 0664)
+	}
+
 	http.HandleFunc("/state", c.getState)
 
 	err = http.Serve(l, nil)

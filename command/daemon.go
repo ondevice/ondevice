@@ -1,6 +1,7 @@
 package command
 
 import (
+	"net/url"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
@@ -35,9 +36,26 @@ Options:
   Path to the ondevice.pid file
   Default: ~/.config/ondevice/ondevice.pid
 
---sock=/path/to/ondevice.sock
+--sock=unix:///path/to/ondevice.sock
   Path to the ondevice.sock file
-  Default: ~/.config/ondevice/ondevice.sock
+  Default: unix://~/.config/ondevice/ondevice.sock
+
+
+Example Socket URLs:
+- unix:///home/user/.config/ondevice/ondevice.sock
+  User's ondevice.sock path - clients will use this URL first when connecting
+- unix:///var/run/ondevice.sock
+  Default system-wide ondevice.sock path - if the above failed, clients will try
+  this one instead.
+- /var/run/ondevice.sock
+  Same as the above (since unix:// is the default URL scheme here)
+- http://localhost:1234/
+	Listen on TCP port 1234.
+  Note that there's currently support for neither SSL nor authentication so use
+  this only if absolutely necessary
+
+On the client side, set the ONDEVICE_HOST environment variable to match the
+socket parameter.
 `
 
 // DaemonCommand -- `ondevice daemon` implementation
@@ -48,11 +66,11 @@ type DaemonCommand struct {
 var DaemonOpts struct {
 	Configfile string `long:"conf" description:"Path to ondevice.conf (default: ~/.config/ondevice.conf)"`
 	Pidfile    string `long:"pidfile" description:"Path to ondevice.pid (default: ~/.config/ondevice.pid)"`
-	Socketpath string `long:"sock" description:"Path to ondevice.sock (default: ~/.config/ondevice.sock)"`
+	SocketURL  string `long:"sock" description:"ondevice.sock URL (default: unix://~/.config/ondevice.sock)"`
 }
 
 func (d *DaemonCommand) args() string {
-	return "[--conf=ondevice.conf] [--pidfile=ondevice.pid] [--sock=ondevice.sock]"
+	return "[--conf=ondevice.conf] [--pidfile=ondevice.pid] [--sock=unix://ondevice.sock]"
 }
 
 func (d *DaemonCommand) longHelp() string {
@@ -64,13 +82,13 @@ func (d *DaemonCommand) shortHelp() string {
 }
 
 func (d *DaemonCommand) run(args []string) int {
-	_parseArgs(args)
+	url := _parseArgs(args)
 
 	if !daemon.TryLock() {
 		logg.Fatal("Couldn't acquire lock file")
 	}
 
-	c := control.StartServer()
+	c := control.StartServer(url)
 
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT and maybe a unix socket call)
 	retryDelay := 10 * time.Second
@@ -109,7 +127,7 @@ func (d *DaemonCommand) run(args []string) int {
 	return 0
 }
 
-func _parseArgs(args []string) {
+func _parseArgs(args []string) url.URL {
 	opts := DaemonOpts
 	if _, err := flags.ParseArgs(&opts, args); err != nil {
 		logg.Fatal(err)
@@ -121,7 +139,13 @@ func _parseArgs(args []string) {
 	if opts.Pidfile != "" {
 		config.SetFilePath("ondevice.pid", opts.Pidfile)
 	}
-	if opts.Socketpath != "" {
-		config.SetFilePath("ondevice.sock", opts.Socketpath)
+	if opts.SocketURL != "" {
+		if rc, err := url.Parse(opts.SocketURL); err != nil {
+			logg.Fatal("Couldn't parse socket URL: ", err)
+		} else {
+			return *rc
+		}
 	}
+
+	return url.URL{Scheme: "unix", Path: config.GetConfigPath("ondevice.sock")}
 }

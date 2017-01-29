@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/ondevice/ondevice/config"
@@ -13,28 +14,31 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
+const SchemeUnix = "unix"
+
 // ControlSocket instance
 type ControlSocket struct {
 	Daemon *daemon.DeviceSocket
 }
 
-// TODO make the socket path configurable (something in the likes of DOCKER_HOST for docker)
-func getSocketPath() (string, string) {
-	//	return "tcp", "localhost:1236"
-	path := config.GetConfigPath("ondevice.sock")
-	return "unix", path
-}
-
 // StartServer -- Start the unix domain socket server (probably won't work on Windows)
-func StartServer() *ControlSocket {
+func StartServer(u url.URL) *ControlSocket {
+	var proto, path string
+	if u.Scheme == SchemeUnix || u.Scheme == "" {
+		proto = SchemeUnix
+		path = u.Path
+	} else if u.Scheme == "http" {
+		proto = "tcp"
+		path = u.Host
+	}
+
 	rc := ControlSocket{}
-	go rc.run()
+	go rc.run(proto, path)
 	return &rc
 }
 
-func (c *ControlSocket) run() {
-	protocol, path := getSocketPath()
-	if protocol == "unix" {
+func (c *ControlSocket) run(protocol string, path string) {
+	if protocol == SchemeUnix {
 		os.Remove(path)
 		defer os.Remove(path)
 	}

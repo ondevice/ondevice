@@ -6,13 +6,60 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
+
+	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/logg"
 )
+
+func getSocketURLs() []url.URL {
+	if env := os.Getenv("ONDEVICE_HOST"); env != "" {
+		// e.g.: unix:///var/run/ondevice.sock
+		//   http://localhost:1234/
+
+		u, err := url.Parse(env)
+		if err != nil {
+			logg.Fatal("Failed to parse ONDEVICE_HOST: ", err)
+		}
+
+		return []url.URL{*u}
+	}
+
+	return []url.URL{
+		url.URL{Scheme: SchemeUnix, Path: config.GetConfigPath("ondevice.sock")},
+		url.URL{Scheme: SchemeUnix, Path: "/var/run/ondevice.sock"},
+	}
+}
 
 func getJSON(tgt interface{}, endpoint string) error {
 	transport := &http.Transport{
 		Dial: func(proto, addr string) (conn net.Conn, err error) {
-			return net.Dial(getSocketPath())
+			urls := getSocketURLs()
+			var firstError error
+
+			for _, url := range urls {
+				var protocol, path string
+
+				if url.Scheme == SchemeUnix || url.Scheme == "" {
+					protocol = SchemeUnix
+					path = url.Path
+				} else if url.Scheme == "http" {
+					protocol = "tcp"
+					path = url.Host
+				}
+
+				c, err := net.Dial(protocol, path)
+				if err == nil {
+					// it worked
+					return c, nil
+				} else if firstError == nil {
+					firstError = err
+				}
+			}
+
+			return nil, firstError
 		},
 	}
 

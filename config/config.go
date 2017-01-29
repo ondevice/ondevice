@@ -94,6 +94,8 @@ func SetValue(section string, key string, value string) error {
 
 	k.SetValue(value)
 
+	// save to a temporary file and only replace the old file if successful
+	// (to avoid corrupting the config file)
 	tmpPath := filepath.Join(filepath.Dir(path), ".ondevice.conf.tmp")
 	if err = cfg.SaveTo(tmpPath); err != nil {
 		return err

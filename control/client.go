@@ -16,8 +16,10 @@ import (
 
 func getSocketURLs() []url.URL {
 	if env := os.Getenv("ONDEVICE_HOST"); env != "" {
-		// e.g.: unix:///var/run/ondevice.sock
-		//   http://localhost:1234/
+		// e.g.:
+		// - unix:///var/run/ondevice/ondevice.sock
+		// - /var/run/ondevice/ondevice.sock
+		// - http://localhost:1234/
 
 		u, err := url.Parse(env)
 		if err != nil {
@@ -29,7 +31,7 @@ func getSocketURLs() []url.URL {
 
 	return []url.URL{
 		url.URL{Scheme: SchemeUnix, Path: config.GetConfigPath("ondevice.sock")},
-		url.URL{Scheme: SchemeUnix, Path: "/var/run/ondevice.sock"},
+		url.URL{Scheme: SchemeUnix, Path: "/var/run/ondevice/ondevice.sock"},
 	}
 }
 

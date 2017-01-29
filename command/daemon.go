@@ -44,10 +44,10 @@ Options:
 Example Socket URLs:
 - unix:///home/user/.config/ondevice/ondevice.sock
   User's ondevice.sock path - clients will use this URL first when connecting
-- unix:///var/run/ondevice.sock
+- unix:///var/run/ondevice/ondevice.sock
   Default system-wide ondevice.sock path - if the above failed, clients will try
   this one instead.
-- /var/run/ondevice.sock
+- /var/run/ondevice/ondevice.sock
   Same as the above (since unix:// is the default URL scheme here)
 - http://localhost:1234/
 	Listen on TCP port 1234.

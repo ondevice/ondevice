@@ -11,6 +11,35 @@ import (
 	"github.com/ondevice/ondevice/tunnel"
 )
 
+const _longDaemonHelp = `ondevice daemon [--conf=...] [--pidfile=...] [--sock=...]
+
+Starts the ondevice daemon (the device side of the tunnels).
+
+On debian based systems instead of running 'ondevice daemon' directly, you
+should install the ondevice-daemon package instead (which will also take care
+of setting up the credentials)
+
+Make sure you run 'ondevice login' and authenticate with your device key first.
+
+Usually you'll only want to have one 'ondevice daemon' instance per device.
+If you want to run multiple, you'll have to specify the .conf, .pid and .sock
+files manually.
+Concurrent daemon instances can't use the same ondevice.conf file!!!
+
+Options:
+--conf=/path/to/ondevice.conf
+  Path to the ondevice.conf file
+  Default: ~/.config/ondevice/ondevice.conf
+
+--pidfile=/path/to/ondevice.pid
+  Path to the ondevice.pid file
+  Default: ~/.config/ondevice/ondevice.pid
+
+--sock=/path/to/ondevice.sock
+  Path to the ondevice.sock file
+  Default: ~/.config/ondevice/ondevice.sock
+`
+
 // DaemonCommand -- `ondevice daemon` implementation
 type DaemonCommand struct {
 }
@@ -27,8 +56,7 @@ func (d *DaemonCommand) args() string {
 }
 
 func (d *DaemonCommand) longHelp() string {
-	logg.Fatal("Implement me!!!")
-	return ""
+	return _longDaemonHelp
 }
 
 func (d *DaemonCommand) shortHelp() string {

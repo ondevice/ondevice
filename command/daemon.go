@@ -3,6 +3,8 @@ package command
 import (
 	"time"
 
+	flags "github.com/jessevdk/go-flags"
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
 	"github.com/ondevice/ondevice/logg"
@@ -13,8 +15,15 @@ import (
 type DaemonCommand struct {
 }
 
+// DaemonOpts -- commandline arguments for `ondevice daemon`
+var DaemonOpts struct {
+	Configfile string `long:"conf" description:"Path to ondevice.conf (default: ~/.config/ondevice.conf)"`
+	Pidfile    string `long:"pidfile" description:"Path to ondevice.pid (default: ~/.config/ondevice.pid)"`
+	Socketpath string `long:"sock" description:"Path to ondevice.sock (default: ~/.config/ondevice.sock)"`
+}
+
 func (d *DaemonCommand) args() string {
-	return "[-f]"
+	return "[--conf=ondevice.conf] [--pidfile=ondevice.pid] [--sock=ondevice.sock]"
 }
 
 func (d *DaemonCommand) longHelp() string {
@@ -27,6 +36,8 @@ func (d *DaemonCommand) shortHelp() string {
 }
 
 func (d *DaemonCommand) run(args []string) int {
+	_parseArgs(args)
+
 	if !daemon.TryLock() {
 		logg.Fatal("Couldn't acquire lock file")
 	}
@@ -68,4 +79,21 @@ func (d *DaemonCommand) run(args []string) int {
 	}
 
 	return 0
+}
+
+func _parseArgs(args []string) {
+	opts := DaemonOpts
+	if _, err := flags.ParseArgs(&opts, args); err != nil {
+		logg.Fatal(err)
+	}
+
+	if opts.Configfile != "" {
+		config.SetFilePath("ondevice.conf", opts.Configfile)
+	}
+	if opts.Pidfile != "" {
+		config.SetFilePath("ondevice.pid", opts.Pidfile)
+	}
+	if opts.Socketpath != "" {
+		config.SetFilePath("ondevice.sock", opts.Socketpath)
+	}
 }

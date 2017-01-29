@@ -68,6 +68,24 @@ func GetValue(section string, key string) (string, error) {
 	return val.String(), nil
 }
 
+// SetAuth -- Set client/user authentication details
+func SetAuth(scope, user, auth string) error {
+	if scope != "client" && scope != "device" {
+		// panic instead of returning an error (since it pretty much has to be a programming error)
+		logg.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
+	}
+
+	if err := SetValue(scope, "user", user); err != nil {
+		return err
+	}
+
+	if err := SetValue(scope, "auth", auth); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SetFilePath -- Override a config file's path (e.g. to satisfy standard OS paths)
 func SetFilePath(filename string, path string) {
 	_fileOverrides[filename] = path

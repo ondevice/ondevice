@@ -59,12 +59,14 @@ func (l *LoginCmd) run(args []string) int {
 		role := roles[i]
 		if role == "client" {
 			logg.Info("updating client auth")
-			config.SetValue("client", "user", user)
-			config.SetValue("client", "auth", string(auth))
+			if err := config.SetAuth("client", user, string(auth)); err != nil {
+				logg.Fatal("Failed to set client auth: ", err)
+			}
 		} else if role == "device" {
 			logg.Info("updating device auth")
-			config.SetValue("device", "user", user)
-			config.SetValue("device", "auth", string(auth))
+			if err := config.SetAuth("device", user, string(auth)); err != nil {
+				logg.Fatal("Failed to set device auth: ", err)
+			}
 		}
 	}
 

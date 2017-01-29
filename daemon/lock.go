@@ -21,11 +21,12 @@ import (
 //
 //
 func TryLock() bool {
-	lockFile := config.GetConfigPath("ondevice.pid")
+	pidFile := config.GetConfigPath("ondevice.pid")
 
-	fd, err := syscall.Open(lockFile, os.O_CREATE|os.O_WRONLY, 0600)
+	fd, err := syscall.Open(pidFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logg.Fatal("Couldn't open lock file: ", err)
+		logg.Info("pidfile: ", pidFile)
+		logg.Fatal("Couldn't open ondevice.pid: ", err)
 	}
 
 	if err = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {

@@ -2,6 +2,7 @@ package command
 
 import (
 	"net/url"
+	"os"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
@@ -82,6 +83,10 @@ func (d *DaemonCommand) shortHelp() string {
 }
 
 func (d *DaemonCommand) run(args []string) int {
+	if os.Getuid() == 0 {
+		logg.Fatal("`ondevice daemon` should not be run as root")
+	}
+
 	url := _parseArgs(args)
 
 	if !daemon.TryLock() {

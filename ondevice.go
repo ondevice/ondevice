@@ -8,10 +8,6 @@ import (
 )
 
 func main() {
-	if os.Getuid() == 0 {
-		logg.Fatal("`ondevice` should not be run as root")
-	}
-
 	if len(os.Args) < 2 {
 		logg.Fatal("Missing command! try 'ondevice help'")
 	}

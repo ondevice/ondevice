@@ -48,7 +48,7 @@ func (r RsyncCommand) run(args []string) int {
 	a := []string{rsyncPath, "-e", fmt.Sprintf("%s ssh", os.Args[0])}
 	a = append(a, args...)
 
-	err := syscall.Exec(rsyncPath, a, nil)
+	err := syscall.Exec(rsyncPath, a, os.Environ())
 	if err != nil {
 		logg.Fatal("Failed to run ", rsyncPath, ": ", err)
 	}

@@ -77,9 +77,9 @@ func (s SSHCommand) run(args []string) int {
 	}
 	a = append(a, args...)
 
-	// TODO detect OSs that don't support the exec syscall and use something else instead
-	//logg.Fatal("resulting command: ", a) // uncomment this to print the command (instead of running it)
-	err := syscall.Exec(sshPath, a, nil)
+	// syscall.Exec will replace this app with ssh (yes, replace it, not just launch)
+	// therefore, unless there's an error, this is the last line of code to be executed
+	err := syscall.Exec(sshPath, a, os.Environ())
 	if err != nil {
 		logg.Fatal("Failed to run ", sshPath, ": ", err)
 	}

@@ -69,11 +69,10 @@ func (l ListCmd) print(devices []api.Device) {
 	// find the maximum lengths for each column
 	titles := []string{"ID", "State", "IP", "Version", "Name"}
 	widths := []int{2, 5, 2, 7, 4}
-	for i := range devices {
-		dev := devices[i]
+	for _, dev := range devices {
 		cols := _getColumns(dev)
-		for j := range cols {
-			width := len(cols[j])
+		for j, col := range cols {
+			width := len(col)
 			if width > widths[j] {
 				widths[j] = width
 			}
@@ -82,15 +81,13 @@ func (l ListCmd) print(devices []api.Device) {
 
 	_printColumns(widths, titles)
 
-	for i := range devices {
-		dev := devices[i]
+	for _, dev := range devices {
 		_printColumns(widths, _getColumns(dev))
 	}
 }
 
 func (l ListCmd) printJSON(devs []api.Device) {
-	for i := range devs {
-		dev := devs[i]
+	for _, dev := range devs {
 		out, err := json.Marshal(dev)
 		if err != nil {
 			logg.Fatal("JSON serialization failed: ", err)
@@ -108,8 +105,8 @@ func _printColumns(widths []int, cols []string) {
 		logg.Fatal("mismatch between cols and widths count", cols, widths)
 	}
 
-	for i := range widths {
-		_printValue(widths[i], cols[i])
+	for i, width := range widths {
+		_printValue(width, cols[i])
 		fmt.Print(" ")
 	}
 	fmt.Println("")

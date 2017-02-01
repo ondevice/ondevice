@@ -55,8 +55,7 @@ func (l *LoginCmd) run(args []string) int {
 		logg.Fatal(err)
 	}
 
-	for i := range roles {
-		role := roles[i]
+	for _, role := range roles {
 		if role == "client" {
 			logg.Info("updating client auth")
 			if err := config.SetAuth("client", user, string(auth)); err != nil {

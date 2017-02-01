@@ -44,8 +44,7 @@ func ListDevices(state string, props bool, auths ...Authentication) ([]Device, e
 	rc := resp.Devices
 	if state != "" {
 		rc = []Device{}
-		for i := range resp.Devices {
-			dev := resp.Devices[i]
+		for _, dev := range resp.Devices {
 			if dev.State == state {
 				rc = append(rc, dev)
 			}
@@ -70,8 +69,8 @@ func RemoveProperties(devID string, props []string, auths ...Authentication) (ma
 		return nil, fmt.Errorf("Can't delete empty list of properties")
 	}
 
-	for i := range props {
-		values.Add(props[i], "")
+	for _, prop := range props {
+		values.Add(prop, "")
 	}
 
 	obj := map[string][]string{"props": props}
@@ -105,8 +104,8 @@ func _propertyList(data propertyListResponse, err error) (map[string]string, err
 	}
 
 	// simply return the first element
-	for k := range data.Props {
-		return data.Props[k], nil
+	for _, prop := range data.Props {
+		return prop, nil
 	}
 
 	return nil, fmt.Errorf("Got empty property response")

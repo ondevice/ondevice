@@ -53,8 +53,8 @@ func (d DeviceCmd) removeProperties(devID string, args []string) {
 func (d DeviceCmd) setProperties(devID string, args []string) {
 	var props = make(map[string]string)
 
-	for i := range args {
-		s := strings.SplitN(args[i], "=", 2)
+	for _, arg := range args {
+		s := strings.SplitN(arg, "=", 2)
 		if _, ok := props[s[0]]; ok {
 			logg.Fatalf("Duplicate value for property '%s'", s[0])
 		}

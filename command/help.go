@@ -78,9 +78,7 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInte
 		}
 	}
 
-	for i := range names {
-		name := names[i]
-
+	for _, name := range names {
 		if _, ok := internalCmds[name]; !showInternal && ok {
 			continue // skip internal commands (unless showInternal is true)
 		}

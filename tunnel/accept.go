@@ -57,6 +57,8 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 }
 
 func (t *Tunnel) _pingTimeout() {
-	logg.Error("tunnel timeout, closing connection")
-	t.Close()
+	if !t.isClosed {
+		logg.Error("tunnel timeout, closing connection")
+		t.Close()
+	}
 }

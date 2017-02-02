@@ -22,7 +22,6 @@ type Tunnel struct {
 
 	readEOF, writeEOF bool
 
-	CloseListeners   []func()
 	DataListeners    []func(data []byte)
 	EOFListeners     []func()
 	TimeoutListeners []func()

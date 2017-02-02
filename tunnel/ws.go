@@ -16,6 +16,7 @@ type Connection struct {
 	ws       *websocket.Conn
 	isClosed bool
 
+	CloseListeners    []func()
 	ErrorListeners    []func(err error)
 	MessageListerners []func(int, []byte)
 
@@ -76,13 +77,6 @@ func (c *Connection) Close() {
 	c.ws.Close()
 }
 
-// OnMessage -- pass incoming WebSocket messages on to the listener function
-func (c *Connection) OnMessage(msgType int, msg []byte) {
-	for _, cb := range c.MessageListerners {
-		cb(msgType, msg)
-	}
-}
-
 func (c *Connection) receive() {
 	defer c._onClose()
 
@@ -139,7 +133,9 @@ func (c *Connection) _onClose() {
 
 	if !c.isClosed {
 		c.isClosed = true
-		// TODO for _, cb := range c.CloseListeners {}
+		for _, cb := range c.CloseListeners {
+			cb()
+		}
 	}
 }
 

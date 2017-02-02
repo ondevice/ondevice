@@ -3,6 +3,7 @@ package tunnel
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
@@ -83,15 +84,26 @@ func (c *Connection) OnMessage(msgType int, msg []byte) {
 }
 
 func (c *Connection) receive() {
-	defer c.ws.Close()
-	defer close(c.done)
+	defer c._onClose()
 
 	for {
 		msgType, msg, err := c.ws.ReadMessage()
 		if err != nil {
-			logg.Error("read error: ", err)
-			for _, cb := range c.ErrorListeners {
-				cb(err)
+			if e, ok := err.(*websocket.CloseError); ok {
+				if e.Code == 1000 {
+					// normal close
+				} else {
+					logg.Error("Websocket closed abnormally: ", err)
+				}
+			} else {
+				if !c.isClosed {
+					logg.Errorf("read error (type: %s): %s", reflect.TypeOf(err), err)
+					for _, cb := range c.ErrorListeners {
+						cb(err)
+					}
+				} else {
+					logg.Debug("Connetion.receive() interrupted by error: ", reflect.TypeOf(err), err)
+				}
 			}
 			return
 		}
@@ -119,6 +131,16 @@ func (c *Connection) SendText(msg string) {
 // Wait -- Wait for the connection to close
 func (c *Connection) Wait() {
 	<-c.done
+}
+
+func (c *Connection) _onClose() {
+	close(c.done)
+	c.ws.Close()
+
+	if !c.isClosed {
+		c.isClosed = true
+		// TODO for _, cb := range c.CloseListeners {}
+	}
 }
 
 func (e AuthenticationError) Error() string {

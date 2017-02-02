@@ -14,6 +14,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
 	t.connected = make(chan error)
+	t.Side = "client"
 	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
 	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)
 

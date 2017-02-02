@@ -79,7 +79,7 @@ func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
 	brokerURL := _getString(msg, "broker")
 	tunnelID := _getString(msg, "tunnelId")
 
-	logg.Infof("Connection request for %s@%s from user %s@%s", protocol, svc, clientUser, clientIP)
+	logg.Infof("Connection request for %s:%s from user %s@%s", protocol, svc, clientUser, clientIP)
 
 	handler := service.GetServiceHandler(svc, protocol)
 	if handler == nil {

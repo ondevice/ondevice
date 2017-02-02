@@ -44,10 +44,17 @@ func GetErrorCodeName(code int) string {
 	return ""
 }
 
-// CloseWrite -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
-func (t *Tunnel) CloseWrite() {
+// SendEOF -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
+func (t *Tunnel) SendEOF() {
+	if t.writeEOF == true {
+		logg.Warning("Attempting to close already closed write channel")
+		return
+	}
+
 	logg.Debug("Sending EOF...")
+	t.writeEOF = true
 	t.SendBinary([]byte("meta:EOF"))
+	t._checkClose()
 }
 
 func (t *Tunnel) Write(data []byte) {
@@ -96,6 +103,8 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		} else if metaType == "EOF" {
 			t.readEOF = true
 
+			t._checkClose()
+
 			// call listeners
 			for _, cb := range t.EOFListeners {
 				cb()
@@ -130,6 +139,21 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		t._error(err)
 	} else {
 		logg.Warning("Unsupported tunnel message type: ", msgType)
+	}
+}
+
+// _checkClose -- after sending/receiving EOF this method checks if the tunnel
+// should be closed
+func (t *Tunnel) _checkClose() {
+	if t.readEOF && t.writeEOF {
+		logg.Debug("EOF on both channels, closing tunnel - side: ", t.Side)
+		if t.Side == "device" {
+			time.AfterFunc(10*time.Second, t.Close)
+		} else if t.Side == "client" {
+			t.Close()
+		} else {
+			logg.Warning("Unsupported tunnel side: ", t.Side)
+		}
 	}
 }
 

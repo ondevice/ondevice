@@ -19,8 +19,7 @@ func (e *EchoHandler) onData(data []byte) {
 }
 
 func (e *EchoHandler) onEOF() {
-	//e.tunnel.CloseWrite()
-	e.tunnel.Close()
+	e.tunnel.SendEOF()
 }
 
 func (e *EchoHandler) receive() {

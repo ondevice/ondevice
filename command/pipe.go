@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
@@ -15,7 +14,7 @@ import (
 
 // PipeCmd -- `ondevice :pipe` implementation
 type PipeCmd struct {
-	ws *websocket.Conn
+	tunnel *tunnel.Tunnel
 
 	sentEOF bool
 
@@ -67,6 +66,7 @@ func (p *PipeCmd) run(args []string) int {
 
 	// initiate connection
 	c := tunnel.Tunnel{}
+	p.tunnel = &c
 	c.DataListeners = append(c.DataListeners, p.onData)
 	c.ErrorListeners = append(c.ErrorListeners, p.onError)
 	if err = tunnel.Connect(&c, devID, service, service, auth); err != nil {
@@ -83,7 +83,7 @@ func (p *PipeCmd) run(args []string) int {
 				// send data. A simple test would be (assuming the device has the 'echo' service enabled):
 				//   echo hello | ondevice :pipe <dev> echo
 				p.sentEOF = true
-				c.CloseWrite()
+				c.SendEOF()
 				break
 			} else {
 				logg.Fatal("error reading from stdin: ", err)
@@ -101,7 +101,7 @@ func (p *PipeCmd) onError(err error) {
 	if !p.sentEOF {
 		logg.Fatal("Lost connection")
 	}
-	p.ws.Close()
+	p.tunnel.Close()
 }
 
 // OnMessage -- Handles incoming WebSocket messages

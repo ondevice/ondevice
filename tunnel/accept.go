@@ -29,6 +29,7 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 
 	t.connected = make(chan error)
 	t.Side = "device"
+	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._pingTimeout)
 	err = OpenWebsocket(&t.Connection, "/accept", params, t.onMessage, auth)
 

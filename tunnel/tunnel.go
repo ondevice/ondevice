@@ -20,7 +20,8 @@ type Tunnel struct {
 	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
 	lastPing  time.Time
 
-	readEOF, writeEOF bool
+	readEOF, writeEOF       bool
+	bytesRead, bytesWritten int64
 
 	DataListeners    []func(data []byte)
 	EOFListeners     []func()
@@ -61,6 +62,7 @@ func (t *Tunnel) Write(data []byte) {
 	msg = append(msg, []byte("data:")...)
 	msg = append(msg, data...)
 
+	t.bytesWritten += int64(len(data))
 	t.SendBinary(msg)
 }
 
@@ -112,6 +114,8 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			t._error(fmt.Errorf("Unsupported meta message: %s", metaType))
 		}
 	} else if msgType == "data" {
+		t.bytesRead += int64(len(msg))
+
 		if len(t.DataListeners) == 0 {
 			panic("Tunnel: Missing OnData handler")
 		}
@@ -162,6 +166,16 @@ func (t *Tunnel) _error(err error) {
 	}
 	for _, cb := range t.ErrorListeners {
 		cb(err)
+	}
+}
+
+func (t *Tunnel) _onClose() {
+	// print log message and stop timers
+	// TODO stop timers
+	if t.Side == "client" {
+		logg.Debugf("Tunnel closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
+	} else if t.Side == "device" {
+		logg.Infof("Connection closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
 	}
 }
 

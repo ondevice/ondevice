@@ -15,6 +15,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 
 	t.connected = make(chan error)
 	t.Side = "client"
+	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
 	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)
 

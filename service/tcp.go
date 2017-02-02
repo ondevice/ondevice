@@ -8,22 +8,18 @@ import (
 
 // TCPHandler -- protocol handler connecting to a tcp server
 type TCPHandler struct {
-	ProtocolHandler
+	ProtocolHandlerBase
 
 	sock net.Conn
 	addr string
 }
 
 // NewTCPHandler -- Create new TCPHandler
-func NewTCPHandler() *ProtocolHandler {
+func NewTCPHandler() ProtocolHandler {
 	rc := new(TCPHandler)
 	rc.addr = "127.0.0.1:22"
-	rc.OnData = rc.onTunnelData
-	rc.OnEOF = rc.onEOF
-	rc.Connect = rc.connect
-	rc.Receive = rc.receive
 
-	return &rc.ProtocolHandler
+	return rc
 }
 
 func (t *TCPHandler) connect() error {
@@ -42,7 +38,7 @@ func (t *TCPHandler) onEOF() {
 	t.tunnel.Close()
 }
 
-func (t *TCPHandler) onTunnelData(data []byte) {
+func (t *TCPHandler) onData(data []byte) {
 	_, err := t.sock.Write(data)
 	if err != nil {
 		logg.Error("TCPHandler error: ", err)
@@ -68,4 +64,8 @@ func (t *TCPHandler) receive() {
 		}
 		t.tunnel.Write(buff[:count])
 	}
+}
+
+func (t *TCPHandler) self() *ProtocolHandlerBase {
+	return &t.ProtocolHandlerBase
 }

@@ -10,19 +10,15 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-// WSListener -- WebSocket listener
-type WSListener interface {
-	OnMessage(msgType int, data []byte)
-}
-
 // Connection -- WebSocket connection
 type Connection struct {
 	ws       *websocket.Conn
 	isClosed bool
 
-	OnError   func(err error)
-	onMessage func(int, []byte)
-	done      chan struct{}
+	ErrorListeners    []func(err error)
+	MessageListerners []func(int, []byte)
+
+	done chan struct{}
 }
 
 // AuthenticationError -- error indicating authentication issues
@@ -62,7 +58,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	}
 
 	c.ws = ws
-	c.onMessage = onMessage
+	c.MessageListerners = append(c.MessageListerners, onMessage)
 	c.done = make(chan struct{})
 
 	go c.receive()
@@ -81,7 +77,9 @@ func (c *Connection) Close() {
 
 // OnMessage -- pass incoming WebSocket messages on to the listener function
 func (c *Connection) OnMessage(msgType int, msg []byte) {
-	c.onMessage(msgType, msg)
+	for _, cb := range c.MessageListerners {
+		cb(msgType, msg)
+	}
 }
 
 func (c *Connection) receive() {
@@ -92,12 +90,14 @@ func (c *Connection) receive() {
 		msgType, msg, err := c.ws.ReadMessage()
 		if err != nil {
 			logg.Error("read error: ", err)
-			if c.OnError != nil {
-				c.OnError(err)
+			for _, cb := range c.ErrorListeners {
+				cb(err)
 			}
 			return
 		}
-		c.onMessage(msgType, msg)
+		for _, cb := range c.MessageListerners {
+			cb(msgType, msg)
+		}
 	}
 }
 

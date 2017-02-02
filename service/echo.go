@@ -2,23 +2,31 @@ package service
 
 // EchoHandler -- ProtocolHandler implementation that simply returns the data it receives
 type EchoHandler struct {
-	ProtocolHandler
+	ProtocolHandlerBase
 }
 
 // NewEchoHandler -- Create an EchoHandler instance
-func NewEchoHandler() *ProtocolHandler {
-	rc := EchoHandler{}
-	rc.OnData = rc.onData
-	rc.OnEOF = rc.onRemoteEOF
-	return &rc.ProtocolHandler
+func NewEchoHandler() ProtocolHandler {
+	return new(EchoHandler)
 }
 
-func (e *EchoHandler) onRemoteEOF() {
+func (e *EchoHandler) connect() error {
+	return nil /* nop */
+}
 
+func (e *EchoHandler) onData(data []byte) {
+	e.tunnel.Write(data)
+}
+
+func (e *EchoHandler) onEOF() {
+	//e.tunnel.CloseWrite()
 	e.tunnel.Close()
 }
 
-// OnData -- Incoming message handler - simply sending them back to their origin
-func (e *EchoHandler) onData(data []byte) {
-	e.tunnel.Write(data)
+func (e *EchoHandler) receive() {
+	/* nop */
+}
+
+func (e *EchoHandler) self() *ProtocolHandlerBase {
+	return &e.ProtocolHandlerBase
 }

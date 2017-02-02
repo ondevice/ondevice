@@ -20,10 +20,12 @@ type Tunnel struct {
 	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
 	lastPing  time.Time
 
-	OnClose   func()
-	OnData    func(data []byte)
-	OnEOF     func()
-	OnTimeout func()
+	readEOF, writeEOF bool
+
+	CloseListeners   []func()
+	DataListeners    []func(data []byte)
+	EOFListeners     []func()
+	TimeoutListeners []func()
 }
 
 // GetErrorCodeName -- returns a string representing the given 'HTTP-ish' tunnel error code
@@ -92,17 +94,24 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			logg.Debug("connected")
 			t.connected <- nil
 		} else if metaType == "EOF" {
-			if t.OnEOF != nil {
-				t.OnEOF()
+			t.readEOF = true
+
+			// call listeners
+			for _, cb := range t.EOFListeners {
+				cb()
 			}
 		} else {
 			t._error(fmt.Errorf("Unsupported meta message: %s", metaType))
 		}
 	} else if msgType == "data" {
-		if t.OnData == nil {
+		if len(t.DataListeners) == 0 {
 			panic("Tunnel: Missing OnData handler")
 		}
-		t.OnData(msg)
+
+		// call listeners
+		for _, cb := range t.DataListeners {
+			cb(msg)
+		}
 	} else if msgType == "error" {
 		parts := strings.SplitN(string(msg), ":", 2)
 		var code int
@@ -125,9 +134,16 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 }
 
 func (t *Tunnel) _error(err error) {
-	if t.OnError != nil {
-		t.OnError(err)
-	} else {
+	if len(t.ErrorListeners) == 0 {
 		logg.Error(err)
+	}
+	for _, cb := range t.ErrorListeners {
+		cb(err)
+	}
+}
+
+func (t *Tunnel) _onTimeout() {
+	for _, cb := range t.TimeoutListeners {
+		cb()
 	}
 }

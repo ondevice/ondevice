@@ -5,19 +5,25 @@ import (
 	"github.com/ondevice/ondevice/tunnel"
 )
 
-// ProtocolHandler -- Service protocol implementations
-type ProtocolHandler struct {
+// ProtocolHandlerBase -- ProtocolHandler base struct
+type ProtocolHandlerBase struct {
 	tunnel *tunnel.Tunnel
+}
 
-	Connect func() error
-	OnData  func(data []byte)
-	OnEOF   func()
-	Receive func()
+// ProtocolHandler -- ProtocolHandler interface
+type ProtocolHandler interface {
+	self() *ProtocolHandlerBase
+
+	connect() error
+	receive()
+
+	onData(data []byte)
+	onEOF()
 }
 
 // GetProtocolHandler -- Get
-func GetProtocolHandler(name string) *ProtocolHandler {
-	var rc *ProtocolHandler
+func GetProtocolHandler(name string) ProtocolHandler {
+	var rc ProtocolHandler
 	switch name {
 	case "echo":
 		rc = NewEchoHandler()
@@ -25,19 +31,22 @@ func GetProtocolHandler(name string) *ProtocolHandler {
 		rc = NewTCPHandler()
 	}
 
-	if rc.Connect != nil {
-		err := rc.Connect()
-		if err != nil {
-			logg.Error("GetProtocolHandler error: ", err)
-			return nil
-		}
+	err := rc.connect()
+	if err != nil {
+		logg.Error("GetProtocolHandler error: ", err)
+		return nil
 	}
+
+	p := rc.self()
+	p.tunnel = new(tunnel.Tunnel)
+	p.tunnel.DataListeners = append(p.tunnel.DataListeners, rc.onData)
+	p.tunnel.EOFListeners = append(p.tunnel.EOFListeners, rc.onEOF)
 
 	return rc
 }
 
 // GetServiceHandler -- Get the ProtocolHandler for a given service
-func GetServiceHandler(svc string, protocol string) *ProtocolHandler {
+func GetServiceHandler(svc string, protocol string) ProtocolHandler {
 	// TODO implement actual services
 	if svc != protocol {
 		logg.Errorf("protocol/service mismatch: svc=%s, protocol=%s", svc, protocol)
@@ -48,19 +57,15 @@ func GetServiceHandler(svc string, protocol string) *ProtocolHandler {
 }
 
 // Start -- Start the tunnel handler
-func (p *ProtocolHandler) Start(tunnelID string, brokerURL string) {
-	go p.run(tunnelID, brokerURL)
+func Start(p ProtocolHandler, tunnelID string, brokerURL string) {
+	go run(p, tunnelID, brokerURL)
 }
 
-func (p *ProtocolHandler) run(tunnelID string, brokerURL string) {
-	p.tunnel = new(tunnel.Tunnel)
-	p.tunnel.OnEOF = p.OnEOF
-	p.tunnel.OnData = p.OnData
+func run(p ProtocolHandler, tunnelID string, brokerURL string) {
+	data := p.self()
 
-	err := tunnel.Accept(p.tunnel, tunnelID, brokerURL)
+	err := tunnel.Accept(data.tunnel, tunnelID, brokerURL)
 	if err == nil {
-		if p.Receive != nil {
-			go p.Receive()
-		}
+		go p.receive()
 	}
 }

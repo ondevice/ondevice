@@ -67,8 +67,8 @@ func (p *PipeCmd) run(args []string) int {
 
 	// initiate connection
 	c := tunnel.Tunnel{}
-	c.OnError = p.onError
-	c.OnData = p.onData
+	c.DataListeners = append(c.DataListeners, p.onData)
+	c.ErrorListeners = append(c.ErrorListeners, p.onError)
 	if err = tunnel.Connect(&c, devID, service, service, auth); err != nil {
 		logg.Fatal(err)
 	}

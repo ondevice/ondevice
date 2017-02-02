@@ -14,7 +14,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
 	t.connected = make(chan error)
-	t.OnTimeout = t._sendPing
+	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
 	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)
 
 	if err != nil {
@@ -33,7 +33,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	t.connected = nil
 
 	if err == nil {
-		t.wdog = util.NewWatchdog(60*time.Second, t.OnTimeout)
+		t.wdog = util.NewWatchdog(60*time.Second, t._onTimeout)
 	}
 
 	return err

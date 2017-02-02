@@ -88,7 +88,7 @@ func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
 		return
 	}
 
-	handler.Start(tunnelID, brokerURL)
+	service.Start(handler, tunnelID, brokerURL)
 }
 
 func (d *DeviceSocket) onError(msg *map[string]interface{}) {

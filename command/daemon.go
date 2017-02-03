@@ -10,7 +10,7 @@ import (
 	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
 	"github.com/ondevice/ondevice/logg"
-	"github.com/ondevice/ondevice/tunnel"
+	"github.com/ondevice/ondevice/util"
 )
 
 const _longDaemonHelp = `ondevice daemon [--conf=...] [--pidfile=...] [--sock=...]
@@ -101,7 +101,7 @@ func (d *DaemonCommand) run(args []string) int {
 		d, err := daemon.Connect()
 		if err != nil {
 			// only abort here if it's an authentication issue
-			if _, ok := err.(tunnel.AuthenticationError); ok {
+			if err.Code() == util.AuthenticationError {
 				logg.Fatal(err)
 			}
 

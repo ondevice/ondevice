@@ -27,7 +27,7 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 	// set brokerURL
 	auth.SetServerURL(brokerURL)
 
-	t.connected = make(chan error)
+	t.connected = make(chan util.APIError)
 	t.Side = "device"
 	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._pingTimeout)

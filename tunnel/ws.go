@@ -9,6 +9,7 @@ import (
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
+	"github.com/ondevice/ondevice/util"
 )
 
 // Connection -- WebSocket connection
@@ -17,26 +18,21 @@ type Connection struct {
 	isClosed bool
 
 	CloseListeners    []func()
-	ErrorListeners    []func(err error)
+	ErrorListeners    []func(err util.APIError)
 	MessageListerners []func(int, []byte)
 
 	done chan struct{}
 }
 
-// AuthenticationError -- error indicating authentication issues
-type AuthenticationError struct {
-	msg string
-}
-
 // OpenWebsocket -- Open a websocket connection
-func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) error {
+func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) util.APIError {
 	hdr := http.Header{}
 
 	var auth api.Authentication
 	if len(auths) == 0 {
 		var err error
 		if auth, err = api.CreateClientAuth(); err != nil {
-			return err
+			return util.NewAPIError(util.OtherError, err.Error())
 		}
 	} else {
 		auth = auths[0]
@@ -52,11 +48,11 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	if err != nil {
 		if resp != nil {
 			if resp.StatusCode == 401 {
-				return AuthenticationError{"API server authentication failed"}
+				return util.NewAPIError(resp.StatusCode, "API server authentication failed")
 			}
-			return fmt.Errorf("Error opening websocket (response code: %s): %s", resp.Status, err)
+			return util.NewAPIError(resp.StatusCode, "Error opening websocket: ", err)
 		}
-		return fmt.Errorf("Error opening websocket: %s", err)
+		return util.NewAPIError(util.OtherError, "Error opening websocket: ", err)
 	}
 
 	c.ws = ws
@@ -93,7 +89,7 @@ func (c *Connection) receive() {
 				if !c.isClosed {
 					logg.Errorf("read error (type: %s): %s", reflect.TypeOf(err), err)
 					for _, cb := range c.ErrorListeners {
-						cb(err)
+						cb(util.NewAPIError(util.OtherError, err.Error()))
 					}
 				} else {
 					logg.Debug("Connetion.receive() interrupted by error: ", reflect.TypeOf(err), err)
@@ -137,8 +133,4 @@ func (c *Connection) _onClose() {
 			cb()
 		}
 	}
-}
-
-func (e AuthenticationError) Error() string {
-	return e.msg
 }

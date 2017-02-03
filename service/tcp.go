@@ -2,6 +2,7 @@ package service
 
 import (
 	"net"
+	"reflect"
 
 	"github.com/ondevice/ondevice/logg"
 )
@@ -53,7 +54,7 @@ func (t *TCPHandler) receive() {
 	for {
 		count, err := t.sock.Read(buff)
 		if err != nil {
-			logg.Error("TCPHandler socket error: ", err)
+			logg.Errorf("TCPHandler socket error (%s): %s", reflect.TypeOf(err), err)
 			t.tunnel.Close()
 			t.sock.Close()
 			return

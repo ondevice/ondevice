@@ -32,7 +32,7 @@ type pingMsg struct {
 }
 
 // Connect -- Go online
-func Connect(auths ...api.Authentication) (*DeviceSocket, error) {
+func Connect(auths ...api.Authentication) (*DeviceSocket, util.APIError) {
 	params := map[string]string{"key": config.GetDeviceKey()}
 	rc := DeviceSocket{}
 

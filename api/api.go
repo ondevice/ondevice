@@ -38,7 +38,7 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		// TODO return err
-		logg.Fatal("Failed request", err)
+		logg.Fatal("Failed to create request", err)
 	}
 	req.Header.Add("Authorization", auth.GetAuthHeader())
 	req.Header.Add("User-agent", fmt.Sprintf("ondevice v%s", config.GetVersion()))

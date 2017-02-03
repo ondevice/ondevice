@@ -3,6 +3,8 @@ package logg
 import (
 	"fmt"
 	"log"
+
+	"github.com/ondevice/ondevice/util"
 )
 
 const (
@@ -116,4 +118,17 @@ func SetLevel(level int) {
 func _getName(level int) string {
 	rc, _ := _levels[level]
 	return rc
+}
+
+// FailWithAPIError -- call Fatal with a nice error message matching the API error we got
+func FailWithAPIError(err util.APIError) {
+	if err.Code() == util.NotFoundError {
+		Fatal("Not found: ", err.Error())
+	} else if err.Code() == util.AuthenticationError {
+		Fatal("Authentication failed (try running ondevice login)")
+	} else if err.Code() == util.ForbiddenError {
+		Fatal("Access denied (are you sure your API key has the required roles?)")
+	} else {
+		Fatalf("Unexpected API error (code %d): %s", err.Code(), err.Error())
+	}
 }

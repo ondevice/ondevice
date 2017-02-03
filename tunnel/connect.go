@@ -1,7 +1,6 @@
 package tunnel
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/ondevice/ondevice/api"
@@ -10,10 +9,10 @@ import (
 )
 
 // Connect to a service on one of your devices
-func Connect(t *Tunnel, devID string, service string, protocol string, auths ...api.Authentication) error {
+func Connect(t *Tunnel, devID string, service string, protocol string, auths ...api.Authentication) util.APIError {
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
-	t.connected = make(chan error)
+	t.connected = make(chan util.APIError)
 	t.Side = "client"
 	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
@@ -28,7 +27,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	case err = <-t.connected:
 		break
 	case <-time.After(time.Second * 30):
-		err = fmt.Errorf("Timeout while connecting to %s", devID)
+		err = util.NewAPIError(util.OtherError, "Timeout while connecting to ", devID)
 	}
 
 	close(t.connected)

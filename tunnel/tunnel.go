@@ -2,7 +2,7 @@ package tunnel
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +16,7 @@ import (
 type Tunnel struct {
 	Connection
 	Side      string // "client" or "device"
-	connected chan error
+	connected chan util.APIError
 	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
 	lastPing  time.Time
 
@@ -46,6 +46,7 @@ func GetErrorCodeName(code int) string {
 
 // SendEOF -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
 func (t *Tunnel) SendEOF() {
+	logg.Info("sending EOF")
 	if t.writeEOF == true {
 		logg.Warning("Attempting to close already closed write channel")
 		return
@@ -58,9 +59,7 @@ func (t *Tunnel) SendEOF() {
 }
 
 func (t *Tunnel) Write(data []byte) {
-	var msg = make([]byte, 0, len(data)+5)
-	msg = append(msg, []byte("data:")...)
-	msg = append(msg, data...)
+	msg := append([]byte("data:"), data...)
 
 	t.bytesWritten += int64(len(data))
 	t.SendBinary(msg)
@@ -102,6 +101,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			logg.Debug("connected")
 			t.connected <- nil
 		} else if metaType == "EOF" {
+			logg.Info("Got EOF")
 			t.readEOF = true
 
 			t._checkClose()
@@ -111,7 +111,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 				cb()
 			}
 		} else {
-			t._error(fmt.Errorf("Unsupported meta message: %s", metaType))
+			t._error(util.NewAPIError(util.OtherError, "Unsupported meta message: ", metaType))
 		}
 	} else if msgType == "data" {
 		t.bytesRead += int64(len(msg))
@@ -135,7 +135,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			errMsg = parts[1]
 		}
 
-		err := fmt.Errorf("%s (%d): %s", GetErrorCodeName(code), code, errMsg)
+		err := util.NewAPIError(code, errMsg)
 		if t.connected != nil {
 			t.connected <- err
 		}
@@ -160,7 +160,7 @@ func (t *Tunnel) _checkClose() {
 	}
 }
 
-func (t *Tunnel) _error(err error) {
+func (t *Tunnel) _error(err util.APIError) {
 	if len(t.ErrorListeners) == 0 {
 		logg.Error(err)
 	}

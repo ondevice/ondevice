@@ -2,7 +2,6 @@ package tunnel
 
 import (
 	"bytes"
-	"log"
 	"strconv"
 	"strings"
 	"time"

@@ -1,3 +1,11 @@
+### v0.4.2 (2017-02-04)
+
+Bugfix release:
+
+- fixed issue with cleanly closing connections
+- printing byte counts when connections close
+- improved certain error messages
+- some other minor improvements
 
 ### v0.4.1 (2017-01-30)
 

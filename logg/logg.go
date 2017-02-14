@@ -3,6 +3,7 @@ package logg
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/ondevice/ondevice/util"
 )
@@ -24,12 +25,33 @@ var _level = INFO
 var _levels = map[int]string{}
 
 func init() {
-	// Debug, Info, Warning, Error, Fatal
 	_levels[DEBUG] = "Debug"
 	_levels[INFO] = "Info"
 	_levels[WARNING] = "Warning"
 	_levels[ERROR] = "Error"
 	_levels[FATAL] = "Fatal"
+
+	if level := os.Getenv("ONDEVICE_LOG"); level != "" {
+		switch level {
+		case "debug":
+			_level = DEBUG
+			break
+		case "info":
+			_level = INFO
+			break
+		case "warning":
+			_level = WARNING
+			break
+		case "error":
+			_level = ERROR
+			break
+		case "fatal":
+			_level = FATAL
+			break
+		default:
+			log.Fatalf("Unsupported log level: '%s' - try one of debug/info/warning/error/fatal", level)
+		}
+	}
 }
 
 // Log -- log message with the given log level

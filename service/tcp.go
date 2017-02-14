@@ -11,8 +11,9 @@ import (
 type TCPHandler struct {
 	ProtocolHandlerBase
 
-	sock net.Conn
-	addr string
+	sock     net.Conn
+	addr     string
+	isClosed bool
 }
 
 // NewTCPHandler -- Create new TCPHandler
@@ -21,6 +22,17 @@ func NewTCPHandler() ProtocolHandler {
 	rc.addr = "127.0.0.1:22"
 
 	return rc
+}
+
+// Close -- Close both connections
+func (t *TCPHandler) Close() {
+	if t.isClosed {
+		return
+	}
+	logg.Debug("TCPHandler.Close()")
+	t.sock.Close()
+	t.tunnel.Close()
+	t.isClosed = true
 }
 
 func (t *TCPHandler) connect() error {
@@ -34,17 +46,15 @@ func (t *TCPHandler) connect() error {
 }
 
 func (t *TCPHandler) onEOF() {
-	// TODO close socket + tunnel
-	t.sock.Close()
-	t.tunnel.Close()
+	logg.Debug("TCPHandler.onEOF()")
+	t.Close()
 }
 
 func (t *TCPHandler) onData(data []byte) {
 	_, err := t.sock.Write(data)
 	if err != nil {
 		logg.Error("TCPHandler error: ", err)
-		t.tunnel.Close()
-		t.sock.Close()
+		t.Close()
 	}
 }
 
@@ -55,9 +65,7 @@ func (t *TCPHandler) receive() {
 		count, err := t.sock.Read(buff)
 		if err != nil {
 			logg.Errorf("TCPHandler socket error (%s): %s", reflect.TypeOf(err), err)
-			t.tunnel.Close()
-			t.sock.Close()
-			return
+			break
 		}
 
 		if t.tunnel == nil {
@@ -65,6 +73,9 @@ func (t *TCPHandler) receive() {
 		}
 		t.tunnel.Write(buff[:count])
 	}
+
+	logg.Debug("TCPHandler: done receiving")
+	t.Close()
 }
 
 func (t *TCPHandler) self() *ProtocolHandlerBase {

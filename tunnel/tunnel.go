@@ -14,7 +14,9 @@ import (
 // Tunnel -- an ondevice.io tunnel ()
 type Tunnel struct {
 	Connection
-	Side      string // "client" or "device"
+
+	// Side -- either DeviceSide or ClientSide
+	Side      string
 	connected chan util.APIError
 	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
 	lastPing  time.Time
@@ -26,6 +28,13 @@ type Tunnel struct {
 	EOFListeners     []func()
 	TimeoutListeners []func()
 }
+
+const (
+	// ClientSide -- This Tunnel instance represents the client side of the tunnel (see Tunnel.Side)
+	ClientSide = "client"
+	// DeviceSide -- This Tunnel instance represents the device side of the tunnel (see Tunnel.Side)
+	DeviceSide = "device"
+)
 
 // GetErrorCodeName -- returns a string representing the given 'HTTP-ish' tunnel error code
 func GetErrorCodeName(code int) string {
@@ -142,11 +151,11 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 func (t *Tunnel) _checkClose() {
 	if t.readEOF && t.writeEOF {
 		logg.Debug("EOF on both channels, closing tunnel - side: ", t.Side)
-		if t.Side == "device" {
+		if t.Side == DeviceSide {
 			// it's the client's job to actually close the tunnel - but if it doesn't
 			// do that in time, we'll do it ourselves
 			time.AfterFunc(10*time.Second, t.Close)
-		} else if t.Side == "client" {
+		} else if t.Side == ClientSide {
 			t.Close()
 		} else {
 			logg.Warning("Unsupported tunnel side: ", t.Side)
@@ -168,9 +177,9 @@ func (t *Tunnel) _onClose() {
 
 	// print log message and stop timers
 	// TODO stop timers
-	if t.Side == "client" {
+	if t.Side == ClientSide {
 		logg.Debugf("Tunnel closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
-	} else if t.Side == "device" {
+	} else if t.Side == DeviceSide {
 		logg.Infof("Connection closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
 	}
 }

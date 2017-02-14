@@ -43,7 +43,7 @@ func GetConfigPath(filename string) string {
 
 // GetVersion -- Returns the app version
 func GetVersion() string {
-	return "0.4.2"
+	return "0.4.3"
 }
 
 // GetValue -- Get a configuration value (as string)

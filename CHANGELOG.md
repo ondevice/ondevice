@@ -1,3 +1,10 @@
+### v0.4.3 (2017-02-14)
+
+Bugfix release:
+
+- added support for the `ONDEVICE_LOG` environment variable to set the log level
+- fixed issue with closing tunnel sessions and slightly cleaned up the code responsible for it
+
 ### v0.4.2 (2017-02-04)
 
 Bugfix release:

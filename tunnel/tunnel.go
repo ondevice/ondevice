@@ -100,15 +100,8 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			logg.Debug("connected")
 			t.connected <- nil
 		} else if metaType == "EOF" {
-			logg.Info("Got EOF")
-			t.readEOF = true
-
+			t._onEOF()
 			t._checkClose()
-
-			// call listeners
-			for _, cb := range t.EOFListeners {
-				cb()
-			}
 		} else {
 			t._error(util.NewAPIError(util.OtherError, "Unsupported meta message: ", metaType))
 		}
@@ -150,6 +143,8 @@ func (t *Tunnel) _checkClose() {
 	if t.readEOF && t.writeEOF {
 		logg.Debug("EOF on both channels, closing tunnel - side: ", t.Side)
 		if t.Side == "device" {
+			// it's the client's job to actually close the tunnel - but if it doesn't
+			// do that in time, we'll do it ourselves
 			time.AfterFunc(10*time.Second, t.Close)
 		} else if t.Side == "client" {
 			t.Close()
@@ -169,12 +164,27 @@ func (t *Tunnel) _error(err util.APIError) {
 }
 
 func (t *Tunnel) _onClose() {
+	t._onEOF() // always fire the EOF signal
+
 	// print log message and stop timers
 	// TODO stop timers
 	if t.Side == "client" {
 		logg.Debugf("Tunnel closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
 	} else if t.Side == "device" {
 		logg.Infof("Connection closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
+	}
+}
+
+func (t *Tunnel) _onEOF() {
+	logg.Debug("Tunnel._onEOF()")
+	if t.readEOF == true {
+		return
+	}
+	t.readEOF = true
+
+	// call listeners
+	for _, cb := range t.EOFListeners {
+		cb()
 	}
 }
 

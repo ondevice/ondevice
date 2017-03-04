@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
@@ -21,7 +22,8 @@ type Connection struct {
 	ErrorListeners    []func(err util.APIError)
 	MessageListerners []func(int, []byte)
 
-	done chan struct{}
+	writeLock sync.Mutex
+	done      chan struct{}
 }
 
 // OpenWebsocket -- Open a websocket connection
@@ -105,17 +107,23 @@ func (c *Connection) receive() {
 
 // SendBinary -- Send binary WebSocket message
 func (c *Connection) SendBinary(data []byte) {
+	c.writeLock.Lock()
 	c.ws.WriteMessage(websocket.BinaryMessage, data)
+	c.writeLock.Unlock()
 }
 
 // SendJSON -- Send a JSON text message to the WebSocket
 func (c *Connection) SendJSON(value interface{}) {
+	c.writeLock.Lock()
 	c.ws.WriteJSON(value)
+	c.writeLock.Unlock()
 }
 
 // SendText -- send a raw text websocket messge (use SendJson instead where possible)
 func (c *Connection) SendText(msg string) {
+	c.writeLock.Lock()
 	c.ws.WriteMessage(websocket.TextMessage, []byte(msg))
+	c.writeLock.Unlock()
 }
 
 // Wait -- Wait for the connection to close

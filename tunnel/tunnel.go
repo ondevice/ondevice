@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -21,9 +22,13 @@ type Tunnel struct {
 	wdog      *util.Watchdog // the client will use this to periodically send 'meta:ping' messages, the device will respond (and kick the Watchdog in the process)
 	lastPing  time.Time
 
-	readEOF, writeEOF       bool
-	bytesRead, bytesWritten int64
+	readEOF, writeEOF bool
 
+	// metrics:
+	bytesRead, bytesWritten int64
+	startTs                 time.Time
+
+	// listeners
 	DataListeners    []func(data []byte)
 	EOFListeners     []func()
 	TimeoutListeners []func()
@@ -50,6 +55,12 @@ func GetErrorCodeName(code int) string {
 	}
 
 	return ""
+}
+
+func (t *Tunnel) _initTunnel(side string) {
+	t.connected = make(chan util.APIError)
+	t.Side = side
+	t.startTs = time.Now()
 }
 
 // SendEOF -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
@@ -176,12 +187,15 @@ func (t *Tunnel) _onClose() {
 	t._onEOF() // always fire the EOF signal
 
 	// print log message and stop timers
-	// TODO stop timers
+	duration := time.Now().Sub(t.startTs)
+	msg := fmt.Sprintf("Tunnel closed, bytesRead=%d, bytesWritten=%d, duration=%s", t.bytesRead, t.bytesWritten, duration.String())
 	if t.Side == ClientSide {
-		logg.Debugf("Tunnel closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
+		logg.Debug(msg)
 	} else if t.Side == DeviceSide {
-		logg.Infof("Connection closed, bytesRead=%d, bytesWritten=%d", t.bytesRead, t.bytesWritten)
+		logg.Info(msg)
 	}
+
+	// TODO stop timers
 }
 
 func (t *Tunnel) _onEOF() {

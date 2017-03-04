@@ -12,8 +12,7 @@ import (
 func Connect(t *Tunnel, devID string, service string, protocol string, auths ...api.Authentication) util.APIError {
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
-	t.connected = make(chan util.APIError)
-	t.Side = "client"
+	t._initTunnel(ClientSide)
 	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
 	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)

@@ -50,8 +50,15 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 	u.RawQuery = query.Encode()
 
 	// use ws:// if the API server URL was http:// (for local testing)
-	if u.Scheme == "http" && scheme == "wss" {
-		u.Scheme = "ws"
+	if u.Scheme == "http" {
+		// server URL was using http:// (for local testing) -> use http:// and ws:// (instead of their secure counterparts)
+		if scheme == "wss" {
+			u.Scheme = "ws"
+		} else if scheme == "https" {
+			u.Scheme = "http"
+		} else {
+			u.Scheme = scheme
+		}
 	} else {
 		u.Scheme = scheme
 	}

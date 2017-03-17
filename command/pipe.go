@@ -68,6 +68,7 @@ func (p *PipeCmd) run(args []string) int {
 	// initiate connection
 	c := tunnel.Tunnel{}
 	p.tunnel = &c
+	c.CloseListeners = append(c.CloseListeners, p.onClose)
 	c.DataListeners = append(c.DataListeners, p.onData)
 	c.ErrorListeners = append(c.ErrorListeners, p.onError)
 	if e := tunnel.Connect(&c, devID, service, service, auth); e != nil {
@@ -96,6 +97,13 @@ func (p *PipeCmd) run(args []string) int {
 
 	c.Wait()
 	return 0
+}
+
+func (p *PipeCmd) onClose() {
+	// odds are run() is currently blocking in the p.reader.Read(). Close stdin to
+	// allow it to return gracefully
+	logg.Debug("Pipe: Connection closed")
+	os.Stdin.Close()
 }
 
 func (p *PipeCmd) onError(err util.APIError) {

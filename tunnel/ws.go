@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
@@ -46,6 +47,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
 	logg.Debugf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
+	websocket.DefaultDialer.HandshakeTimeout = 60 * time.Second
 	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
 	if err != nil {
 		if resp != nil {
@@ -72,7 +74,10 @@ func (c *Connection) Close() {
 		return
 	}
 	c.isClosed = true
-	c.ws.Close()
+
+	if c.ws != nil { // could happen if a goroutine caught us before we are connected
+		c.ws.Close()
+	}
 }
 
 func (c *Connection) receive() {

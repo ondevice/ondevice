@@ -35,7 +35,7 @@ func GetConfigPath(filename string) string {
 
 	var u, err = user.Current()
 	if err != nil {
-		logg.Fatal("Couldn't get current user", err)
+		logg.Fatal("Couldn't get current user: ", err)
 	}
 
 	return path.Join(u.HomeDir, ".config/ondevice", filename)
@@ -94,6 +94,10 @@ func SetFilePath(filename string, path string) {
 // SetValue -- create/update a config value
 func SetValue(section string, key string, value string) error {
 	path := GetConfigPath("ondevice.conf")
+
+	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
+		return err
+	}
 
 	cfg, err := ini.InsensitiveLoad(path)
 	if os.IsNotExist(err) {

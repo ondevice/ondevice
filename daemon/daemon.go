@@ -44,14 +44,11 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, util.APIError) {
 		auths = []api.Authentication{auth}
 	}
 
-	err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...)
-
-	if err != nil {
+	if err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...); err != nil {
 		return nil, err
 	}
 
-	rc.wdog = util.NewWatchdog(180*time.Second, rc.onPingTimeout)
-
+	rc.wdog = util.NewWatchdog(180*time.Second, rc.onTimeout)
 	return &rc, nil
 }
 
@@ -129,6 +126,9 @@ func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
 }
 
 func (d *DeviceSocket) onMessage(_type int, data []byte) {
+	// got message from the API server -> reset watchdog
+	d.wdog.Kick()
+
 	if _type == websocket.BinaryMessage {
 		logg.Error("Got a binary message over the device websocket: ", string(data))
 		return
@@ -162,15 +162,14 @@ func (d *DeviceSocket) onPing(msg pingMsg) {
 	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
 	logg.Debugf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
-	d.wdog.Kick()
 	resp := make(map[string]interface{}, 1)
 	resp["_type"] = "pong"
 	resp["ts"] = msg.Ts
 	d.SendJSON(resp)
 }
 
-func (d *DeviceSocket) onPingTimeout() {
-	logg.Warning("Haven't got a ping from the API server in a while, closing connection...")
+func (d *DeviceSocket) onTimeout() {
+	logg.Warning("Haven't heard from the API server in a while, closing connection...")
 	d.IsOnline = false
 	d.Close()
 	d.wdog.Stop()

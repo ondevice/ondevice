@@ -113,6 +113,7 @@ func (d *DaemonCommand) run(args []string) int {
 				retryDelay = 10 * time.Second
 			}
 
+			logg.Debug("device error: ", err)
 			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
 			time.Sleep(retryDelay)
 

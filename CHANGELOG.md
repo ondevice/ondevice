@@ -1,3 +1,13 @@
+### v0.4.4 (2017-04-02)
+
+Bugfix release:
+
+- using [glide](https://glide.sh/) for dependency management
+- added timeout to OpenWebsocket() (fixes rare reconnect issue, see #14)
+- Config.SetValue() now recursively creates the config dir (if it doesn't exist)
+- fixed issue with ondevice ssh not properly exiting when the connection was lost (see #15)
+- fixed synchronisation issue in websocket.Write()
+
 ### v0.4.3 (2017-02-14)
 
 Bugfix release:

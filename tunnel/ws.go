@@ -73,7 +73,6 @@ func (c *Connection) Close() {
 	if c.isClosed {
 		return
 	}
-	c.isClosed = true
 
 	if c.ws != nil { // could happen if a goroutine caught us before we are connected
 		c.ws.Close()

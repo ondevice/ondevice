@@ -61,17 +61,17 @@ func (t *Tunnel) _initTunnel(side string) {
 	t.connected = make(chan util.APIError)
 	t.Side = side
 	t.startTs = time.Now()
+	t.CloseListeners = append([]func(){t._onClose}, t.CloseListeners...)
 }
 
 // SendEOF -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
 func (t *Tunnel) SendEOF() {
-	logg.Info("sending EOF")
 	if t.writeEOF == true {
-		logg.Warning("Attempting to close already closed write channel")
+		logg.Debug("Attempted to close already closed write channel")
 		return
 	}
 
-	logg.Debug("Sending EOF...")
+	logg.Info("sending EOF")
 	t.writeEOF = true
 	t.SendBinary([]byte("meta:EOF"))
 	t._checkClose()
@@ -184,7 +184,8 @@ func (t *Tunnel) _error(err util.APIError) {
 }
 
 func (t *Tunnel) _onClose() {
-	t._onEOF() // always fire the EOF signal
+	t.writeEOF = true // no need to send an EOF over a closed tunnel
+	t._onEOF()        // always fire the EOF signal
 
 	// print log message and stop timers
 	duration := time.Now().Sub(t.startTs)

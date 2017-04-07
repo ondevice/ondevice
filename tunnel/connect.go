@@ -13,7 +13,6 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
 	t._initTunnel(ClientSide)
-	t.CloseListeners = append(t.CloseListeners, t._onClose)
 	t.TimeoutListeners = append(t.TimeoutListeners, t._sendPing)
 	err := OpenWebsocket(&t.Connection, "/connect", params, t.onMessage, auths...)
 
@@ -40,7 +39,7 @@ func Connect(t *Tunnel, devID string, service string, protocol string, auths ...
 }
 
 func (t *Tunnel) _sendPing() {
-	t.SendBinary([]byte("meta:ping:hell:no"))
+	t.SendBinary([]byte("meta:ping:hello"))
 	if t.lastPing.IsZero() {
 		// ignored
 	} else if t.lastPing.Add(180 * time.Second).Before(time.Now()) {

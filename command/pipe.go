@@ -102,7 +102,7 @@ func (p *PipeCmd) run(args []string) int {
 func (p *PipeCmd) onClose() {
 	// odds are run() is currently blocking in the p.reader.Read(). Close stdin to
 	// allow it to return gracefully
-	logg.Debug("Pipe: Connection closed")
+	logg.Info("Tunnel closed")
 	os.Stdin.Close()
 }
 

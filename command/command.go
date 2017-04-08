@@ -21,14 +21,14 @@ var _commands = map[string]Command{
 	"ssh":    new(SSHCommand),
 	"status": new(StatusCmd),
 	"stop":   new(StopCmd),
-	":pipe":  new(PipeCmd),
+	"pipe":   new(PipeCmd),
 }
 
 var deviceCmds = []string{"daemon", "stop"}
-var clientCmds = []string{"device", "list", ":pipe", "rsync", "ssh"}
+var clientCmds = []string{"device", "list", "pipe", "rsync", "ssh"}
 
 // hide these commands from `ondevice help`
-var internalCmds = map[string]int{":pipe": 0}
+var internalCmds = map[string]int{"pipe": 0}
 
 // Get -- Return specified command (or nil if not found)
 func Get(cmd string) Command {

@@ -30,7 +30,7 @@ the data it gets back to the sender. Therefore the above command is equivalent
 to simply calling 'echo hello world' (as long as your device is online).
 `
 
-// PipeCmd -- `ondevice :pipe` implementation
+// PipeCmd -- `ondevice pipe` implementation
 type PipeCmd struct {
 	tunnel *tunnel.Tunnel
 
@@ -100,7 +100,7 @@ func (p *PipeCmd) run(args []string) int {
 			if count == 0 && err == io.EOF {
 				// we can't simply call c.Close() here because the other side might still
 				// send data. A simple test would be (assuming the device has the 'echo' service enabled):
-				//   echo hello | ondevice :pipe <dev> echo
+				//   echo hello | ondevice pipe <dev> echo
 				p.sentEOF = true
 				c.SendEOF()
 				break

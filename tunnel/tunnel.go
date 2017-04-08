@@ -71,7 +71,7 @@ func (t *Tunnel) SendEOF() {
 		return
 	}
 
-	logg.Info("sending EOF")
+	logg.Debug("sending EOF")
 	t.writeEOF = true
 	t.SendBinary([]byte("meta:EOF"))
 	t._checkClose()

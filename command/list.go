@@ -19,7 +19,8 @@ var ListOpts struct {
 	State      string `long:"state" description:"Filter output by device state, one of online/offline"`
 }
 
-const _longListHelp = `ondevice list
+const _longListHelp = `
+ondevice list
 
 List your devices
 
@@ -30,6 +31,24 @@ Options:
   include properties (only affects JSON output)
 --state <online/offline>
   limit to devices that are on/offline
+
+Example:
+
+  $ ondevice list
+  ID                State   IP             Version         Name
+  demo.7t91ta   offline                ondevice v0.4.3
+  demo.fbqh2p   offline 192.168.1.23   ondevice v0.3.9
+  demo.q5dkpm   online  127.0.0.1      ondevice v0.4.2
+  demo.thm7br   offline 10.0.0.127     ondevice v0.4.3
+
+  $ ondevice list --json --props
+  {"id":"demo.7t91ta",state":"offline","stateTs":1490197318991,"version":"ondevice v0.4.3"}
+  {"id":"demo.fbqh2p","ip":"192.168.1.23","state":"offline","stateTs":1485721709598,"version":"ondevice v0.3.9"}
+  {"id":"demo.q5dkpm","ip":"127.0.0.1","state":"offline","stateTs":1487068641353,"version":"ondevice v0.4.2","props":{"test":"1234"}}
+  {"id":"demo.thm7br","ip":"10.0.0.127","state":"offline","stateTs":1490963689912,"version":"ondevice v0.4.3"}
+
+Keep in mind that JSON fields may be missing or null
+
 `
 
 func (l ListCmd) args() string {

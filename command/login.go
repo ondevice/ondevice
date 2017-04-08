@@ -12,15 +12,15 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longLoginHelp = `ondevice login
+const _longLoginHelp = `
+ondevice login
 
-Log in to the ondevice.io service
+Log in to the ondevice.io service using one of your API keys.
 
 Example:
-
-$ ondevice login
-User: <enter your user name>
-Auth: <enter your credentials>
+  $ ondevice login
+  User: <enter your user name>
+  Auth: <enter your credentials>
 `
 
 // LoginCmd -- `ondevice login` implementation

@@ -11,10 +11,10 @@ import (
 // StopCmd -- Stops the ondevice daemon (by sending SIGTERM)
 type StopCmd struct{}
 
-const _longStopHelp = `ondevice stop
+const _longStopHelp = `
+ondevice stop
 
-Finds a running ondevice daemon (using the ondevice.pid file) and
-
+Finds a running ondevice daemon (using the ondevice.pid file) and tries to terminate it.
 `
 
 func (s *StopCmd) args() string {
@@ -22,7 +22,7 @@ func (s *StopCmd) args() string {
 }
 
 func (s *StopCmd) longHelp() string {
-	return ""
+	return _longStopHelp
 }
 
 func (s *StopCmd) shortHelp() string {

@@ -8,16 +8,45 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
+const _longDeviceHelp = `
+ondevice device <devId> props
+ondevice device <devId> set [key1=val1 ...]
+ondevice device <devId> rm [key1 key2 ...]
+
+This command allows you to change all your devices' properties.
+It requires a client key with the 'manage' authorization.
+
+Properties can be used to keep track of your devices, to manage their characteristics,
+keep tracks of running maintenance scripts, etc.
+
+- ondevice device <devId> props
+  lists that device's properties, one per line, as 'key=value' pairs
+- ondevice device <devId> set [key=val...]
+  sets one or more device properties, again as 'key=value' pairs
+- ondevice device <devId> rm [key ...]
+  removes one or more device properties by name
+
+Each of the invocations will print the resulting property list.
+
+Example:
+  $ ondevice device q5dkpm props
+  $ ondevice device q5dkpm set test=1234 foo=bar
+  test=1234
+  foo=bar
+  $ ondevice device q5dkpm rm foo
+  test=1234
+
+`
+
 // DeviceCmd -- `ondevice device` implementation
 type DeviceCmd struct{}
 
 func (d DeviceCmd) args() string {
-	return "<devId> <props/set/rm> [...]"
+	return "<devId> <props/set/rm> [key1=val1 ...]"
 }
 
 func (d DeviceCmd) longHelp() string {
-	logg.Fatal("impl me")
-	return ""
+	return _longDeviceHelp
 }
 
 func (d DeviceCmd) shortHelp() string {

@@ -12,7 +12,8 @@ import (
 
 const sshFlags = "1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:"
 
-const _longSSHHelp = `Connect to your devices using the 'ssh' command.
+const _longSSHHelp = `
+Connect to your devices using the 'ssh' command.
 
 Usage:
     ondevice ssh [<user>@]<device> [ssh-arguments...]

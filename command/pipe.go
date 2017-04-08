@@ -13,6 +13,23 @@ import (
 	"github.com/ondevice/ondevice/util"
 )
 
+const _longPipeHelp = `
+ondevice pipe <devId> <service>
+
+Sends data from stdin to the specified service - and prints whatever it gets in
+return to stdout.
+
+This command is used internally by 'ondevice ssh' to serve as ssh's ProxyCommand.
+
+Example:
+  $ echo hello world | ondevice pipe <devId> echo
+  hello world
+
+Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
+the data it gets back to the sender. Therefore the above command is equivalent
+to simply calling 'echo hello world' (as long as your device is online).
+`
+
 // PipeCmd -- `ondevice :pipe` implementation
 type PipeCmd struct {
 	tunnel *tunnel.Tunnel

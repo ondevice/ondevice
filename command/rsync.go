@@ -8,7 +8,8 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longRsyncHelp = `Copy files from/to devices using rsync
+const _longRsyncHelp = `
+Copy files from/to devices using rsync
 
 Usage:
 

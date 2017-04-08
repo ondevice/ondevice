@@ -8,7 +8,8 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longHelpHelp = `ondevice help [cmd]
+const _longHelpHelp = `
+ondevice help [cmd]
 
 Lists commands (if [cmd] was omitted) or shows details for a specific command)
 

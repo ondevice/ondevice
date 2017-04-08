@@ -13,7 +13,8 @@ import (
 	"github.com/ondevice/ondevice/util"
 )
 
-const _longDaemonHelp = `ondevice daemon [--conf=...] [--pidfile=...] [--sock=...]
+const _longDaemonHelp = `
+ondevice daemon [--conf=...] [--pidfile=...] [--sock=...]
 
 Starts the ondevice daemon (the device side of the tunnels).
 

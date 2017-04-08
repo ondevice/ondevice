@@ -12,7 +12,8 @@ import (
 // StatusCmd -- implements 'ondevice status'
 type StatusCmd struct{}
 
-const _longStatusHelp = `ondevice status [--json]
+const _longStatusHelp = `
+ondevice status [--json]
 
 Print status and version information on the local ondevice client/device
 
@@ -25,6 +26,30 @@ Exit Codes:
 1: on error
 2: daemon running but not online
 3: daemon not running (or unreachable)
+
+Examples:
+
+  $ ondevice status
+  Device:
+    devID:  demo.q5dkpm
+    state:  online
+    version:  0.4.4
+
+  Client:
+    version:  0.4.4
+
+  $ ondevice status --json
+  {
+    "version": "0.4.4",
+    "client": {
+      "version": "0.4.4"
+    },
+    "device": {
+      "devId": "demo.q5dkpm",
+      "state": "online"
+    }
+  }
+
 `
 
 func (s *StatusCmd) args() string {

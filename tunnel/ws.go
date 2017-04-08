@@ -74,9 +74,7 @@ func (c *Connection) Close() {
 		return
 	}
 
-	if c.ws != nil { // could happen if a goroutine caught us before we are connected
-		c.ws.Close()
-	}
+	c._onClose()
 }
 
 func (c *Connection) receive() {
@@ -137,7 +135,10 @@ func (c *Connection) Wait() {
 
 func (c *Connection) _onClose() {
 	close(c.done)
-	c.ws.Close()
+
+	if c.ws != nil { // could happen if a goroutine called us before we are connected
+		c.ws.Close()
+	}
 
 	if !c.isClosed {
 		c.isClosed = true

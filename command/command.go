@@ -44,7 +44,7 @@ func List() map[string]Command {
 func Run(cmdName string, args []string) int {
 	cmd := Get(cmdName)
 	if cmd == nil {
-		logg.Fatal("Command not found:", cmdName)
+		logg.Fatal("Command not found: ", cmdName)
 	}
 	return cmd.run(args)
 }

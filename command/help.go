@@ -98,7 +98,7 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInte
 func (h HelpCmd) help(cmdName string) {
 	cmd := Get(cmdName)
 	if cmd == nil {
-		logg.Fatal("Command not found:" + cmdName)
+		logg.Fatal("Command not found: " + cmdName)
 	} else {
 		fmt.Println(cmd.longHelp())
 	}

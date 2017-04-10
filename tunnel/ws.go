@@ -134,14 +134,13 @@ func (c *Connection) Wait() {
 }
 
 func (c *Connection) _onClose() {
-	close(c.done)
-
 	if c.ws != nil { // could happen if a goroutine called us before we are connected
 		c.ws.Close()
 	}
 
 	if !c.isClosed {
 		c.isClosed = true
+		close(c.done)
 		for _, cb := range c.CloseListeners {
 			cb()
 		}

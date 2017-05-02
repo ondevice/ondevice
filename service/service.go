@@ -65,7 +65,9 @@ func run(p ProtocolHandler, tunnelID string, brokerURL string) {
 	data := p.self()
 
 	err := tunnel.Accept(data.tunnel, tunnelID, brokerURL)
-	if err == nil {
+	if err != nil {
+		logg.Error("Accepting tunnel failed: ", err)
+	} else {
 		go p.receive()
 	}
 }

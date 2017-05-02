@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/base64"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 
@@ -28,8 +29,7 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 	server := a.apiServer
 
 	if server == "" {
-		server = "https://api.ondevice.io/"
-		//server = "http://localhost:8080/"
+		server = _apiServer
 	}
 
 	u, err := url.Parse(server)
@@ -59,6 +59,8 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 		} else {
 			u.Scheme = scheme
 		}
+	} else if u.Scheme == "ws" && scheme == "wss" {
+		u.Scheme = "ws"
 	} else {
 		u.Scheme = scheme
 	}
@@ -96,3 +98,11 @@ func CreateDeviceAuth() (Authentication, error) {
 	}
 	return CreateAuth(user, auth), nil
 }
+
+func init() {
+	if os.Getenv("ONDEVICE_SERVER") != "" {
+		_apiServer = os.Getenv("ONDEVICE_SERVER")
+	}
+}
+
+var _apiServer = "https://api.ondevice.io/"

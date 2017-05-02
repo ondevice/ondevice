@@ -136,7 +136,9 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 
 	msg := new(map[string]interface{})
 
-	json.Unmarshal(data, msg)
+	if err := json.Unmarshal(data, msg); err != nil {
+		logg.Fatalf("Malformed device message: %s", data)
+	}
 
 	msgType := _getString(msg, "_type")
 	switch msgType {
@@ -185,6 +187,14 @@ func _getInt(m *map[string]interface{}, key string) int64 {
 }
 
 func _getString(m *map[string]interface{}, key string) string {
-	//logg.Debugf("-- %s: %s", key, (*m)[key])
-	return (*m)[key].(string)
+	if val , ok := (*m)[key]; ok {
+		if rc, ok := val.(string); ok {
+			return rc
+		} else {
+			logg.Warningf("Not a string (key %s): %s", key, val)
+			return ""
+		}
+	} else {
+		return ""
+	}
 }

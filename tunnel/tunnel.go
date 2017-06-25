@@ -118,6 +118,9 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			t.lastPing = time.Now()
 		} else if metaType == "connected" {
 			logg.Debug("connected")
+			if err := t.state.Event("connected"); err != nil {
+				logg.Error("State change failed (ev: 'connected'): ", err)
+			}
 			t.connected <- nil
 		} else if metaType == "EOF" {
 			t._onEOF()

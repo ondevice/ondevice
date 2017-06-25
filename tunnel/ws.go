@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/looplab/fsm"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
@@ -15,9 +16,16 @@ import (
 )
 
 // Connection -- WebSocket connection
+//
+// internal state machine:
+// - initial (OpenWebsocket() sets the state to 'connecting' pretty soon after creating the state machine, so this state isn't all too relevant)
+// - connecting: event: "connect", from: initial
+// - open: event: "connected", from: connecting
+// - error: event: "error", from: initial, connecting, open
+// - closed: event: "close", from: initial, connecting, open, error, timeout
 type Connection struct {
-	ws       *websocket.Conn
-	isClosed bool
+	ws    *websocket.Conn
+	state *fsm.FSM
 
 	CloseListeners    []func()
 	ErrorListeners    []func(err util.APIError)
@@ -29,6 +37,20 @@ type Connection struct {
 
 // OpenWebsocket -- Open a websocket connection
 func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) util.APIError {
+	if c.state != nil {
+		panic("OpenWebsocket() called twice on a single Connection!")
+	}
+	c.state = fsm.NewFSM("initial", fsm.Events{
+		{Name: "connect", Src: []string{"initial"}, Dst: "connecting"},
+		{Name: "connected", Src: []string{"connecting"}, Dst: "open"},
+		{Name: "error", Src: []string{"initial", "connecting", "open"}, Dst: "error"},
+		{Name: "close", Src: []string{"initial", "connecting", "open", "error"}, Dst: "closed"},
+	}, fsm.Callbacks{
+		"after_error":  c._onError,
+		"enter_closed": c._onClose,
+		"enter_state":  c._onStatechange,
+	})
+
 	hdr := http.Header{}
 
 	var auth api.Authentication
@@ -47,6 +69,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
 	logg.Debugf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
+	c.state.Event("connect")
 	websocket.DefaultDialer.HandshakeTimeout = 60 * time.Second
 	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
 	if err != nil {
@@ -70,15 +93,18 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 
 // Close -- Close the underlying WebSocket connection
 func (c *Connection) Close() {
-	if c.isClosed {
-		return
+	if err := c.state.Event("close"); err != nil {
+		// TODO do error handling (and ignore 'already in closed state' error)
 	}
+}
 
-	c._onClose()
+// IsClosed -- Returns true for closed connections (either being closed normally or due to an error/timeout)
+func (c *Connection) IsClosed() bool {
+	return c.state != nil && c.state.Is("closed")
 }
 
 func (c *Connection) receive() {
-	defer c._onClose()
+	defer c.Close()
 
 	for {
 		msgType, msg, err := c.ws.ReadMessage()
@@ -90,11 +116,9 @@ func (c *Connection) receive() {
 					logg.Error("Websocket closed abnormally: ", err)
 				}
 			} else {
-				if !c.isClosed {
+				if !c.IsClosed() {
 					logg.Errorf("read error (type: %s): %s", reflect.TypeOf(err), err)
-					for _, cb := range c.ErrorListeners {
-						cb(util.NewAPIError(util.OtherError, err.Error()))
-					}
+					c._error(util.NewAPIError(util.OtherError, err.Error()))
 				} else {
 					logg.Debug("Connetion.receive() interrupted by error: ", reflect.TypeOf(err), err)
 				}
@@ -133,16 +157,34 @@ func (c *Connection) Wait() {
 	<-c.done
 }
 
-func (c *Connection) _onClose() {
-	if c.ws != nil { // could happen if a goroutine called us before we are connected
+// _error -- Puts the connection into the 'error' state and closes it
+func (c *Connection) _error(err util.APIError) {
+	c.state.Event("error", err)
+}
+
+func (c *Connection) _onClose(ev *fsm.Event) {
+	if c.ws != nil { // could be nil if a goroutine called us before we are connected
 		c.ws.Close()
 	}
 
-	if !c.isClosed {
-		c.isClosed = true
-		close(c.done)
-		for _, cb := range c.CloseListeners {
-			cb()
-		}
+	close(c.done)
+	for _, cb := range c.CloseListeners {
+		cb()
 	}
+}
+
+func (c *Connection) _onError(ev *fsm.Event) {
+	err, ok := ev.Args[0].(util.APIError)
+	if !ok {
+		panic("Connection._onError() expects an APIError parameter!")
+	}
+	for _, cb := range c.ErrorListeners {
+		cb(err)
+	}
+
+	c.Close()
+}
+
+func (c *Connection) _onStatechange(ev *fsm.Event) {
+	logg.Debugf("Connection state changed: ", ev.Src, " -> ", ev.Dst)
 }

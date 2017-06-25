@@ -5,6 +5,7 @@ import:
 - package: github.com/howeyc/gopass
 - package: github.com/jessevdk/go-flags
   version: ^1.2.0
+- package: github.com/looplab/fsm
 - package: gopkg.in/ini.v1
   version: ^1.27.0
 testImport:

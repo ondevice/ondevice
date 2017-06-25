@@ -187,7 +187,7 @@ func _getInt(m *map[string]interface{}, key string) int64 {
 }
 
 func _getString(m *map[string]interface{}, key string) string {
-	if val , ok := (*m)[key]; ok {
+	if val, ok := (*m)[key]; ok {
 		if rc, ok := val.(string); ok {
 			return rc
 		} else {

@@ -48,7 +48,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	}, fsm.Callbacks{
 		"after_error":  c._onError,
 		"enter_closed": c._onClose,
-		"enter_state":  c._onStatechange,
+		"enter_state":  c._onStateChange,
 	})
 
 	hdr := http.Header{}
@@ -185,6 +185,6 @@ func (c *Connection) _onError(ev *fsm.Event) {
 	c.Close()
 }
 
-func (c *Connection) _onStatechange(ev *fsm.Event) {
+func (c *Connection) _onStateChange(ev *fsm.Event) {
 	logg.Debugf("Connection state changed: ", ev.Src, " -> ", ev.Dst)
 }

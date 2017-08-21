@@ -132,24 +132,27 @@ func (c *Connection) receive() {
 }
 
 // SendBinary -- Send binary WebSocket message
-func (c *Connection) SendBinary(data []byte) {
+func (c *Connection) SendBinary(data []byte) error {
 	c.writeLock.Lock()
-	c.ws.WriteMessage(websocket.BinaryMessage, data)
-	c.writeLock.Unlock()
+	defer c.writeLock.Unlock()
+
+	return c.ws.WriteMessage(websocket.BinaryMessage, data)
 }
 
 // SendJSON -- Send a JSON text message to the WebSocket
-func (c *Connection) SendJSON(value interface{}) {
+func (c *Connection) SendJSON(value interface{}) error {
 	c.writeLock.Lock()
-	c.ws.WriteJSON(value)
-	c.writeLock.Unlock()
+	defer c.writeLock.Unlock()
+
+	return c.ws.WriteJSON(value)
 }
 
 // SendText -- send a raw text websocket messge (use SendJson instead where possible)
-func (c *Connection) SendText(msg string) {
+func (c *Connection) SendText(msg string) error {
 	c.writeLock.Lock()
-	c.ws.WriteMessage(websocket.TextMessage, []byte(msg))
-	c.writeLock.Unlock()
+	defer c.writeLock.Unlock()
+
+	return c.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 }
 
 // Wait -- Wait for the connection to close

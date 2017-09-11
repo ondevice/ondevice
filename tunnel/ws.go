@@ -189,5 +189,5 @@ func (c *Connection) _onError(ev *fsm.Event) {
 }
 
 func (c *Connection) _onStateChange(ev *fsm.Event) {
-	logg.Debugf("Connection state changed: ", ev.Src, " -> ", ev.Dst)
+	logg.Debug("Connection state changed: ", ev.Src, " -> ", ev.Dst)
 }

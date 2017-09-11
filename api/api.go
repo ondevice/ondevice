@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -51,6 +52,13 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 
 	client := http.Client{}
 	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New("Authentication failed")
+	}
 
 	return resp, err
 }

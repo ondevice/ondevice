@@ -29,6 +29,9 @@ func GetProtocolHandler(name string) ProtocolHandler {
 		rc = NewEchoHandler()
 	case "ssh":
 		rc = NewTCPHandler()
+	default:
+		logg.Errorf("Unsupported protocol: '%s'", name)
+		return nil
 	}
 
 	err := rc.connect()

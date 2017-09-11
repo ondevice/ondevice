@@ -14,6 +14,7 @@ type Command interface {
 var _commands = map[string]Command{
 	"daemon": new(DaemonCommand),
 	"device": new(DeviceCmd),
+	"event":  new(EventsCommand),
 	"help":   new(HelpCmd),
 	"list":   new(ListCmd),
 	"login":  new(LoginCmd),
@@ -25,7 +26,7 @@ var _commands = map[string]Command{
 }
 
 var deviceCmds = []string{"daemon", "stop"}
-var clientCmds = []string{"device", "list", "pipe", "rsync", "ssh"}
+var clientCmds = []string{"device", "event", "list", "pipe", "rsync", "ssh"}
 
 // hide these commands from `ondevice help`
 var internalCmds = map[string]int{"pipe": 0}

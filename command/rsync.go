@@ -8,41 +8,7 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longRsyncHelp = `
-Copy files from/to devices using rsync
-
-Usage:
-
-ondevice rsync [rsync-options...]
-
-Examples:
-
-- ondevice rsync -av /source/path/ root@myDev:/target/path/
-    copy the local /src/path to myDev's /target/path/ as root
-    (and pass the -a and -v options to rsync)
-- ondevice rsync me@otherDev:/etc/motd /tmp/other.motd
-    copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
-
-This command is only a thin wrapper around the 'rsync' client (using its '-e'
-argument to make it use 'ondevice ssh' internally).
-`
-
-// RsyncCommand -- implements `ondevice rsync`
-type RsyncCommand struct{}
-
-func (r RsyncCommand) args() string {
-	return "[rsync args...]"
-}
-
-func (r RsyncCommand) shortHelp() string {
-	return "Copy files from/to your devices using rsync"
-}
-
-func (r RsyncCommand) longHelp() string {
-	return _longRsyncHelp
-}
-
-func (r RsyncCommand) run(args []string) int {
+func rsyncRun(args []string) int {
 	rsyncPath := "/usr/bin/rsync"
 
 	// TODO this will fail if argv[0] contains spaces
@@ -56,4 +22,26 @@ func (r RsyncCommand) run(args []string) int {
 
 	logg.Fatal("We shouldn't be here")
 	return -1
+}
+
+// RsyncCommand -- implements `ondevice rsync`
+var RsyncCommand = BaseCommand{
+	Arguments: "[rsync args...]",
+	ShortHelp: "Copy files from/to your devices using rsync",
+	RunFn:     rsyncRun,
+	LongHelp: `$ ondevice rsync [rsync-options...]
+
+Copy files from/to devices using rsync
+
+Examples:
+
+- ondevice rsync -av /source/path/ root@myDev:/target/path/
+    copy the local /src/path to myDev's /target/path/ as root
+    (and pass the -a and -v options to rsync)
+- ondevice rsync me@otherDev:/etc/motd /tmp/other.motd
+    copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
+
+This command is only a thin wrapper around the 'rsync' client (using its '-e'
+argument to make it use 'ondevice ssh' internally).
+`,
 }

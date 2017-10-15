@@ -13,25 +13,9 @@ import (
 	"github.com/ondevice/ondevice/util"
 )
 
-const _longPipeHelp = `
-ondevice pipe <devId> <service>
-
-Sends data from stdin to the specified service - and prints whatever it gets in
-return to stdout.
-
-This command is used internally by 'ondevice ssh' to serve as ssh's ProxyCommand.
-
-Example:
-  $ echo hello world | ondevice pipe <devId> echo
-  hello world
-
-Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
-the data it gets back to the sender. Therefore the above command is equivalent
-to simply calling 'echo hello world' (as long as your device is online).
-`
-
-// PipeCmd -- `ondevice pipe` implementation
-type PipeCmd struct {
+// pipeCommand -- `ondevice pipe` implementation
+type pipeCommand struct {
+	BaseCommand
 	tunnel *tunnel.Tunnel
 
 	sentEOF bool
@@ -40,20 +24,7 @@ type PipeCmd struct {
 	writer *bufio.Writer
 }
 
-func (p *PipeCmd) args() string {
-	return "<devId> <service>"
-}
-
-func (p *PipeCmd) longHelp() string {
-	logg.Fatal("implement me")
-	return ""
-}
-
-func (p *PipeCmd) shortHelp() string {
-	return "Pipes a device's service to stdout/stdin"
-}
-
-func (p *PipeCmd) run(args []string) int {
+func (p pipeCommand) run(args []string) int {
 	// parse arguments
 	if len(args) < 1 {
 		logg.Fatal("Missing devId")
@@ -116,14 +87,14 @@ func (p *PipeCmd) run(args []string) int {
 	return 0
 }
 
-func (p *PipeCmd) onClose() {
+func (p *pipeCommand) onClose() {
 	// odds are run() is currently blocking in the p.reader.Read(). Close stdin to
 	// allow it to return gracefully
 	logg.Debug("Tunnel closed")
 	os.Stdin.Close()
 }
 
-func (p *PipeCmd) onError(err util.APIError) {
+func (p *pipeCommand) onError(err util.APIError) {
 	if err.Code() != util.OtherError {
 		logg.FailWithAPIError(err)
 	} else if !p.sentEOF {
@@ -133,7 +104,31 @@ func (p *PipeCmd) onError(err util.APIError) {
 }
 
 // OnMessage -- Handles incoming WebSocket messages
-func (p *PipeCmd) onData(data []byte) {
+func (p *pipeCommand) onData(data []byte) {
 	p.writer.Write(data)
 	p.writer.Flush()
+}
+
+// PipeCommand -- Implements `ondevice pipe`
+var PipeCommand = pipeCommand{
+	BaseCommand: BaseCommand{
+		Arguments: "<devId> <service>",
+		ShortHelp: "Pipes a device's service to stdout/stdin",
+		RunFn:     nil,
+		LongHelp: `$ ondevice pipe <devId> <service>
+
+Sends data from stdin to the specified service - and prints whatever it gets in
+return to stdout.
+
+This command is used internally by 'ondevice ssh' to serve as ssh's ProxyCommand.
+
+Example:
+  $ echo hello world | ondevice pipe <devId> echo
+  hello world
+
+	Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
+	the data it gets back to the sender. Therefore the above command is equivalent
+	to simply calling 'echo hello world' (as long as your device is online).
+`,
+	},
 }

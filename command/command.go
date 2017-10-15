@@ -44,7 +44,7 @@ var _commands = map[string]Command{
 	"ssh":    new(SSHCommand),
 	"status": StatusCommand,
 	"stop":   StopCommand,
-	"pipe":   new(PipeCmd),
+	"pipe":   PipeCommand,
 }
 
 var deviceCmds = []string{"daemon", "stop"}

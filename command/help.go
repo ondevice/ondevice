@@ -8,42 +8,12 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longHelpHelp = `
-ondevice help [cmd]
-
-Lists commands (if [cmd] was omitted) or shows details for a specific command)
-
-Examples:
-    - ondevice help
-      lists available commands
-    - ondevice help help
-      shows help for the 'ondevice help' command
-    - ondevice help login
-      shows help for the 'ondevice login' command
-`
-
-// HelpCmd - the 'help' command
-type HelpCmd struct {
-}
-
-func (h HelpCmd) args() string {
-	return "[cmd]"
-}
-
-func (h HelpCmd) longHelp() string {
-	return _longHelpHelp
-}
-
-func (h HelpCmd) shortHelp() string {
-	return "Shows this help screen"
-}
-
-func (h HelpCmd) run(args []string) int {
+func helpRun(args []string) int {
 	if len(args) == 0 {
-		h.listCommands()
+		helpListCommands()
 	} else if len(args) == 1 {
 		cmd := args[0]
-		h.help(cmd)
+		helpCommand(cmd)
 	} else {
 		logg.Fatal("USAGE: ondevice help [cmd]")
 	}
@@ -51,8 +21,8 @@ func (h HelpCmd) run(args []string) int {
 	return 0
 }
 
-// ListCommands -- implements `ondevice help`
-func (h HelpCmd) listCommands() {
+// helpListCommands -- implements `ondevice help` (without arguments)
+func helpListCommands() {
 	l := log.New(os.Stderr, "", 0)
 	l.Println("USAGE: ondevice <command> [...]")
 
@@ -60,18 +30,18 @@ func (h HelpCmd) listCommands() {
 	showInternal := false // TODO use a commandline flag or something
 
 	l.Println("\n- Device commands:")
-	h._listCommands(deviceCmds, cmds, showInternal)
+	helpListCommandsByName(deviceCmds, cmds, showInternal)
 
 	l.Println("\n- Client commands:")
-	h._listCommands(clientCmds, cmds, showInternal)
+	helpListCommandsByName(clientCmds, cmds, showInternal)
 
 	l.Println("\n- Other commands:")
-	h._listCommands(nil, cmds, showInternal)
+	helpListCommandsByName(nil, cmds, showInternal)
 
 	l.Println()
 }
 
-func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInternal bool) {
+func helpListCommandsByName(names []string, cmds map[string]Command, showInternal bool) {
 	if names == nil {
 		names = []string{}
 		for k := range cmds {
@@ -95,11 +65,32 @@ func (h HelpCmd) _listCommands(names []string, cmds map[string]Command, showInte
 	}
 }
 
-func (h HelpCmd) help(cmdName string) {
+func helpCommand(cmdName string) {
 	cmd := Get(cmdName)
 	if cmd == nil {
 		logg.Fatal("Command not found: " + cmdName)
 	} else {
 		fmt.Println(cmd.longHelp())
 	}
+}
+
+func init() {
+	// Registering the `help` command dynamically here to avoid initialization loops
+	Register("help", BaseCommand{
+		Arguments: "[cmd]",
+		ShortHelp: "Shows this help screen",
+		RunFn:     helpRun,
+		LongHelp: `$ ondevice help [cmd]
+
+Lists commands (if [cmd] was omitted) or shows details for a specific command)
+
+Examples:
+    - ondevice help
+      lists available commands
+    - ondevice help help
+      shows help for the 'ondevice help' command
+    - ondevice help login
+      shows help for the 'ondevice login' command
+`,
+	})
 }

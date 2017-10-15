@@ -114,7 +114,7 @@ var PipeCommand = pipeCommand{
 	BaseCommand: BaseCommand{
 		Arguments: "<devId> <service>",
 		ShortHelp: "Pipes a device's service to stdout/stdin",
-		RunFn:     nil,
+		RunFn:     nil, // we're implemnting our own run() method
 		LongHelp: `$ ondevice pipe <devId> <service>
 
 Sends data from stdin to the specified service - and prints whatever it gets in

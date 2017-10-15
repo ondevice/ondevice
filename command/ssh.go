@@ -10,59 +10,15 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
+// option list copied from debian jessie's openssh source package (from ssh.c, line 509)
 const sshFlags = "1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:"
 
-const _longSSHHelp = `
-Connect to your devices using the 'ssh' command.
-
-Usage:
-    ondevice ssh [<user>@]<device> [ssh-arguments...]
-
-This is a relatively thin wrapper around the 'ssh' command.
-The main difference to invoking ssh directly is that instead of regular host names you'll have to specify an ondevice deviceId.
-The connection is routed through the ondevice.io network.
-
-ondevice ssh will try to parse ssh's arguments, the first non-argument has to be
-the user@hostname combo.
-
-See ssh's documentation for further details.
-
-Examples:
-- ondevice ssh device1
-    simply connect to device1
-- ondevice ssh user@device1
-    open an SSH connection to device1, logging in as 'user'
-- ondevice ssh device1 echo hello world
-    run 'echo hello world' on device1
-- ondevice ssh device1 -N -L 1234:localhost:80
-    Tunnel the HTTP server on device1 to the local port 1234 without opening
-    a shell
-- ondevice ssh device1 -D 1080
-    Starting a SOCKS5 proxy listening on port 1080. It'll redirect all traffic
-    to the target host.
-`
-
-// SSHCommand -- implements `ondevice ssh`
-type SSHCommand struct{}
-
-func (s SSHCommand) args() string {
-	return "[ssh-arguments...]"
-}
-
-func (s SSHCommand) longHelp() string {
-	return _longSSHHelp
-}
-
-func (s SSHCommand) shortHelp() string {
-	return "Connect to your devices using the ssh protocol"
-}
-
-func (s SSHCommand) run(args []string) int {
+func sshRun(args []string) int {
 	sshPath := "/usr/bin/ssh"
 
 	// parse args (to detect the ones before 'user@host')
-	target, args := s._parseArgs(args)
-	tgtHost, tgtUser := s._parseTarget(target)
+	target, args := sshParseArgs(args)
+	tgtHost, tgtUser := sshParseTarget(target)
 
 	// compose ProxyCommand
 	// TODO this will fail miserably if argv[0] or tgtHost contain spaces
@@ -90,9 +46,8 @@ func (s SSHCommand) run(args []string) int {
 	return -1
 }
 
-func (s SSHCommand) _parseArgs(args []string) (string, []string) {
-	// option list copied from debian jessie's openssh source package (from ssh.c, line 509)
-	flags := _getSSHFlags()
+func sshParseArgs(args []string) (string, []string) {
+	flags := sshGetFlags()
 	var target string
 	var outArgs []string
 
@@ -136,7 +91,7 @@ func (s SSHCommand) _parseArgs(args []string) (string, []string) {
 	return "", nil
 }
 
-func (s SSHCommand) _parseTarget(target string) (tgtHost string, tgtUser string) {
+func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	parts := strings.SplitN(target, "@", 2)
 	if len(parts) == 1 {
 		tgtUser = ""
@@ -159,7 +114,7 @@ func (s SSHCommand) _parseTarget(target string) (tgtHost string, tgtUser string)
 	return tgtHost, tgtUser
 }
 
-func _getSSHFlags() map[byte]bool {
+func sshGetFlags() map[byte]bool {
 	rc := map[byte]bool{}
 
 	for i := 0; i < len(sshFlags); i++ {
@@ -172,4 +127,38 @@ func _getSSHFlags() map[byte]bool {
 		rc[flag] = hasValue
 	}
 	return rc
+}
+
+// SSHCommand -- implements `ondevice ssh`
+var SSHCommand = BaseCommand{
+	Arguments: "[ssh-arguments...]",
+	ShortHelp: "Connect to your devices using the ssh protocol",
+	RunFn:     sshRun,
+	LongHelp: `$ ondevice ssh [<user>@]<device> [ssh-arguments...]
+
+Connect to your devices using the 'ssh' command.
+
+This is a relatively thin wrapper around the 'ssh' command.
+The main difference to invoking ssh directly is that instead of regular host names you'll have to specify an ondevice deviceId.
+The connection is routed through the ondevice.io network.
+
+ondevice ssh will try to parse ssh's arguments, the first non-argument has to be
+the user@hostname combo.
+
+See ssh's documentation for further details.
+
+Examples:
+- ondevice ssh device1
+  simply connect to device1
+- ondevice ssh user@device1
+  open an SSH connection to device1, logging in as 'user'
+- ondevice ssh device1 echo hello world
+  run 'echo hello world' on device1
+- ondevice ssh device1 -N -L 1234:localhost:80
+  Tunnel the HTTP server on device1 to the local port 1234 without opening
+  a shell
+- ondevice ssh device1 -D 1080
+  Starting a SOCKS5 proxy listening on port 1080. It'll redirect all traffic
+  to the target host.
+`,
 }

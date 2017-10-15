@@ -41,7 +41,7 @@ var _commands = map[string]Command{
 	"list":   ListCommand,
 	"login":  LoginCommand,
 	"rsync":  RsyncCommand,
-	"ssh":    new(SSHCommand),
+	"ssh":    SSHCommand,
 	"status": StatusCommand,
 	"stop":   StopCommand,
 	"pipe":   PipeCommand,

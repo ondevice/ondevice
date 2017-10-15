@@ -38,7 +38,7 @@ var _commands = map[string]Command{
 	"daemon": new(DaemonCommand),
 	"device": new(DeviceCmd),
 	"event":  new(EventsCommand),
-	"list":   new(ListCmd),
+	"list":   ListCommand,
 	"login":  LoginCommand,
 	"rsync":  RsyncCommand,
 	"ssh":    new(SSHCommand),

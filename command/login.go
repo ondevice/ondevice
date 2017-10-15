@@ -12,33 +12,7 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-const _longLoginHelp = `
-ondevice login
-
-Log in to the ondevice.io service using one of your API keys.
-
-Example:
-  $ ondevice login
-  User: <enter your user name>
-  Auth: <enter your credentials>
-`
-
-// LoginCmd -- `ondevice login` implementation
-type LoginCmd struct{}
-
-func (l *LoginCmd) args() string {
-	return ""
-}
-
-func (l *LoginCmd) longHelp() string {
-	return _longLoginHelp
-}
-
-func (l *LoginCmd) shortHelp() string {
-	return "Log in to the ondevice.io service"
-}
-
-func (l *LoginCmd) run(args []string) int {
+func loginRun(args []string) int {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("User: ")
 	user, _ := reader.ReadString('\n')
@@ -70,4 +44,20 @@ func (l *LoginCmd) run(args []string) int {
 	}
 
 	return 0
+}
+
+// LoginCommand -- implements `ondevice login`
+var LoginCommand = BaseCommand{
+	Arguments: "",
+	ShortHelp: "Log in to the ondevice.io service",
+	RunFn:     nil,
+	LongHelp: `$ ondevice login
+
+Log in to the ondevice.io service using one of your API keys.
+
+Example:
+  $ ondevice login
+  User: <enter your user name>
+  Auth: <enter your credentials>
+`,
 }

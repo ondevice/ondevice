@@ -36,7 +36,7 @@ func (c BaseCommand) run(args []string) int {
 
 var _commands = map[string]Command{
 	"daemon": new(DaemonCommand),
-	"device": new(DeviceCmd),
+	"device": DeviceCommand,
 	"event":  EventCommand,
 	"list":   ListCommand,
 	"login":  LoginCommand,

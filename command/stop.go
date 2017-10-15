@@ -8,28 +8,7 @@ import (
 	"github.com/ondevice/ondevice/logg"
 )
 
-// StopCmd -- Stops the ondevice daemon (by sending SIGTERM)
-type StopCmd struct{}
-
-const _longStopHelp = `
-ondevice stop
-
-Finds a running ondevice daemon (using the ondevice.pid file) and tries to terminate it.
-`
-
-func (s *StopCmd) args() string {
-	return ""
-}
-
-func (s *StopCmd) longHelp() string {
-	return _longStopHelp
-}
-
-func (s *StopCmd) shortHelp() string {
-	return "Stops the local ondevice daemon (if running)"
-}
-
-func (s *StopCmd) run(args []string) int {
+func runStop(args []string) int {
 	p, err := daemon.GetDaemonProcess()
 	if err != nil {
 		logg.Debug("GetDaemonProcess error: ", err)
@@ -53,6 +32,19 @@ func (s *StopCmd) run(args []string) int {
 		time.Sleep(1000 * time.Millisecond)
 	}
 
-	logg.Fatal("Failed to stop ondevice daemon in time")
+	logg.Fatal("Timeout trying to stop the ondevice daemon")
 	return 1
+}
+
+// StopCommand -- Stops the ondevice daemon (by sending SIGTERM)
+var StopCommand = BaseCommand{
+	Arguments: "",
+	LongHelp: `$ ondevice stop
+
+Stops a running ondevice daemon (using the ondevice.pid file) and tries to terminate it.
+
+Returns 0 on success or 1 on error
+`,
+	ShortHelp: "Stops the local ondevice daemon (if running)",
+	RunFn:     runStop,
 }

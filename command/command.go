@@ -10,7 +10,30 @@ type Command interface {
 	run(args []string) int
 }
 
-// TODO find a way to make me const
+// BaseCommand -- implements the Command interface
+type BaseCommand struct {
+	Arguments string
+	ShortHelp string
+	LongHelp  string
+	RunFn     func(args []string) int
+}
+
+func (c BaseCommand) args() string {
+	return c.Arguments
+}
+
+func (c BaseCommand) shortHelp() string {
+	return c.ShortHelp
+}
+
+func (c BaseCommand) longHelp() string {
+	return c.LongHelp
+}
+
+func (c BaseCommand) run(args []string) int {
+	return c.RunFn(args)
+}
+
 var _commands = map[string]Command{
 	"daemon": new(DaemonCommand),
 	"device": new(DeviceCmd),
@@ -21,7 +44,7 @@ var _commands = map[string]Command{
 	"rsync":  new(RsyncCommand),
 	"ssh":    new(SSHCommand),
 	"status": new(StatusCmd),
-	"stop":   new(StopCmd),
+	"stop":   StopCommand,
 	"pipe":   new(PipeCmd),
 }
 
@@ -48,4 +71,16 @@ func Run(cmdName string, args []string) int {
 		logg.Fatal("Command not found: ", cmdName)
 	}
 	return cmd.run(args)
+}
+
+// Register -- Registers a new (or replaces an existing) command
+//
+// pass cmd=nil to remove a Command
+func Register(cmdName string, cmd Command) {
+	if cmd != nil {
+		_commands[cmdName] = cmd
+	} else {
+		delete(_commands, cmdName)
+	}
+
 }

@@ -2,16 +2,27 @@ package api
 
 // KeyInfo -- API key info
 type KeyInfo struct {
-	Roles []string
+	Role        string
+	Permissions []string
 }
 
-// GetKeyInfo -- Returns the roles associated with the given credentials - or nil on error
-func GetKeyInfo(auth Authentication) ([]string, error) {
-	rc := KeyInfo{}
+// HasPermission -- Checks if the auth key has the requested permission
+func (i KeyInfo) HasPermission(permission string) bool {
+	for _, perm := range i.Permissions {
+		if perm == string(permission) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetKeyInfo -- Returns the role and permissions associated with the given credentials
+func GetKeyInfo(auth Authentication) (KeyInfo, error) {
+	var rc KeyInfo
 	err := getObject(&rc, "/keyInfo", nil, auth)
 	if err != nil {
-		return nil, err
+		return rc, err
 	}
 
-	return rc.Roles, nil
+	return rc, nil
 }

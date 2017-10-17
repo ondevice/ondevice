@@ -80,10 +80,13 @@ func _getBody(resp *http.Response, err error) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf("Authentication failed!")
-	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP error while querying key info: %d %s", resp.StatusCode, resp.Status)
+	if resp.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New("authentication failed")
+	} else if resp.StatusCode == http.StatusTooManyRequests {
+		var delayStr = resp.Header.Get("X-Ratelimit-Delay")
+		return nil, fmt.Errorf("Error: Too many requests (try again in %ss)", delayStr)
+	} else if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
 	defer resp.Body.Close()

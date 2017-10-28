@@ -7,11 +7,10 @@ import (
 	"os"
 	"time"
 
-	"git.coding.zone/ondevice/goserver/common/util"
-
 	flags "github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/logg"
+	"github.com/ondevice/ondevice/util"
 )
 
 var errAwaitMatch = errors.New("Await match")

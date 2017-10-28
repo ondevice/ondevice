@@ -6,6 +6,10 @@ import (
 )
 
 func _getAuth(section string) (string, string, error) {
+	if os.Getenv("ONDEVICE_USER") != "" || os.Getenv("ONDEVICE_AUTH") != "" {
+		return os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), nil
+	}
+
 	username, uerr := GetValue(section, "user")
 	auth, aerr := GetValue(section, "auth")
 
@@ -41,9 +45,5 @@ func GetClientUserAuth(username string) (string, string, error) {
 
 // GetDeviceAuth -- Get the device authentication
 func GetDeviceAuth() (string, string, error) {
-	if os.Getenv("ONDEVICE_USER") != "" || os.Getenv("ONDEVICE_AUTH") != "" {
-		return os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), nil
-	}
-
 	return _getAuth("device")
 }

@@ -23,6 +23,10 @@ build-alpine:
 	#docker rmi ondevice-alpine-build
 
 
+build-docker: build-alpine
+	docker build -f build/docker/Dockerfile -t ondevice/ondevice .
+
+
 install:
 	mkdir -p $(DESTDIR)/usr/bin/
 	install -o root -g root ./ondevice $(DESTDIR)/usr/bin/

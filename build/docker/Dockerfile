@@ -10,9 +10,9 @@ COPY /target/alpine/ondevice /usr/local/bin/
 # in other containers to talk to this ondevice dameon
 VOLUME /home/ondevice/.config/ondevice/
 
-# provide default credentials for the 'demo' user:
+# default credentials for the 'demo' user:
 ENV ONDEVICE_USER=demo
-ENV ONDEVICE_AUTH=ehb8f971h1
+ENV ONDEVICE_AUTH=5h42l5xylznw
 
 ENTRYPOINT [ "tini", "--", "/docker-entrypoint.sh" ]
 #ENTRYPOINT [ "/usr/local/bin/ondevice" ]

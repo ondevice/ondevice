@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
@@ -57,7 +58,9 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, errors.New("Authentication failed")
+		var errMsg = getErrorMessage(resp)
+
+		return nil, fmt.Errorf("Authentication failed: %s", errMsg)
 	}
 
 	return resp, err
@@ -124,4 +127,21 @@ func _getObject(tgtValue interface{}, body []byte, err error) error {
 
 	//logg.Debug("getJSON: ", tgtValue, string(body))
 	return nil
+}
+
+func getErrorMessage(resp *http.Response) string {
+	var contentType = strings.SplitN(resp.Header.Get("Content-type"), ";", 2)
+	if len(contentType) < 2 {
+		logg.Fatal("missing/malformed response content type: ", resp.Header.Get("Content-type"))
+	}
+
+	if contentType[0] == "text/plain" {
+		var body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			logg.Fatal("Failed to read response body: ", err)
+		}
+		return string(body)
+	}
+
+	return ""
 }

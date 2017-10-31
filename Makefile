@@ -23,7 +23,7 @@ build-alpine:
 	#docker rmi ondevice-alpine-build
 
 
-build-docker: build-alpine
+build-docker:
 	docker build -f build/docker/Dockerfile -t ondevice/ondevice .
 
 

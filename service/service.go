@@ -1,6 +1,8 @@
 package service
 
 import (
+	"os"
+
 	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 )
@@ -28,7 +30,16 @@ func GetProtocolHandler(name string) ProtocolHandler {
 	case "echo":
 		rc = NewEchoHandler()
 	case "ssh":
-		rc = NewTCPHandler()
+		// TODO This is only a temporary (and undocumented) way to get ssh working
+		//   in the docker image. As soon as we have proper support for services,
+		//   this will be removed (and the docker image will translate the SSH_ADDR
+		//   variable to a matching `ondevice service ...` call)
+		//   so don't rely on it working (except for the docker image of course)!
+		var addr = os.Getenv("SSH_ADDR")
+		if addr == "" {
+			addr = "127.0.0.1:22"
+		}
+		rc = NewTCPHandler(addr)
 	default:
 		logg.Errorf("Unsupported protocol: '%s'", name)
 		return nil

@@ -17,9 +17,9 @@ type TCPHandler struct {
 }
 
 // NewTCPHandler -- Create new TCPHandler
-func NewTCPHandler() ProtocolHandler {
+func NewTCPHandler(addr string) ProtocolHandler {
 	rc := new(TCPHandler)
-	rc.addr = "127.0.0.1:22"
+	rc.addr = addr
 
 	return rc
 }

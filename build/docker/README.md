@@ -3,10 +3,9 @@ ondevice docker image
 
 This is the official [ondevice.io] CLI docker image.
 
-It's based on [Alpine Linux][alpine] and ships with OpenSSH and rsync binaries.
+It's based on [Alpine Linux][alpine-image] and ships with OpenSSH and rsync binaries.
 
-ondevice.io is a service for giving you access to your SSH servers even if they're hidden away behind a NAT or firewall (e.g. your collection
-of Raspberry PIs or a NAS/server at home) - no need for setting up port forwarding.
+ondevice.io is a service for giving you access to your SSH servers even if they're hidden away behind a NAT or firewall (e.g. your collection of Raspberry PIs or a NAS/server at home) - no need for setting up port forwarding.
 
 
 ## Usage
@@ -28,12 +27,11 @@ ondevice expects a running SSH server at `ssh:22`, so instead of the above `$ssh
 - `--network=host -e SSH_ADDR=127.0.0.1:22` to use the host's network stack (and give the container access to the host's loopback interface)  
   Note that this will only work on Linux hosts, as Docker on macOS/Windows run inside a virtual machine with their own network stack
 - `-e SSH_PASSWORD=<password for the 'ondevice' user>`  
-  When this variable is present, instead of tunneling incoming connections to a real SSH server, it'll start the builtin `sshd`
-  (and set the password of the `ondevice` user to the value of `$SSH_PASSWORD`).  
+  When this variable is present, instead of tunneling incoming connections to a real SSH server, it'll start the builtin `sshd` (and set the password of the `ondevice` user to the value of `$SSH_PASSWORD`).  
   This is mainly intended for testing purposes.
 
 
-Let's look at an example (running the daemon in the foreground):
+Let's give it a try:
 
 ```
 $ docker run --rm -d -e SSH_ADDR=192.168.1.10:22 ondevice/ondevice daemon
@@ -109,5 +107,5 @@ Once you've done that, use your own credentials with `ONDEVICE_USER` and `ONDEVI
   Use `ondevice ssh ondevice@$devId` on the client to connect to the container's SSH server
 
 
-[alpine]: https://alpinelinux.org/
+[alpine-image]: https://hub.docker.com/_/alpine/
 [ondevice.io]: https://ondevice.io/

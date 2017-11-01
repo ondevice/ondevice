@@ -1,3 +1,14 @@
+### v0.5 (2017-11-01)
+
+- added `ondevice event`
+- added support for an official [ondevice/ondevice](https://hub.docker.com/r/ondevice/ondevice) docker image
+- added tunnel state machine (to fix state transition issues)
+- updated `ondevice login` to support the new AuthKey permission model
+- refactored the way commands are implemented (improving code readability)
+- added nicer error messages for 'authentication failed' and 'rate limit exceeded'
+- doing a os.Chmod(0600) when writing ondevice.conf 
+- a lot of minor fixes and improvements
+
 ### v0.4.4 (2017-04-02)
 
 Bugfix release:

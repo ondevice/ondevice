@@ -10,5 +10,15 @@ chown -R ondevice:ondevice /home/ondevice/.config/
 if echo "$1" | grep -q ^/; then
 	exec "$@"
 else
+	if [ -n "$SSH_PASSWORD" ]; then
+		# User wants to use the builtin sshd
+		export SSH_ADDR=localhost:22
+		echo "ondevice:$SSH_PASSWORD" | chpasswd
+		ssh-keygen -A
+
+		#start sshd
+		/usr/sbin/sshd -e
+	fi
+
 	exec su-exec ondevice ondevice "$@"
 fi

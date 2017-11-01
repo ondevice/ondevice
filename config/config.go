@@ -122,6 +122,9 @@ func SetValue(section string, key string, value string) error {
 	if err = cfg.SaveTo(tmpPath); err != nil {
 		return err
 	}
+	if err = os.Chmod(tmpPath, 0600); err != nil {
+		return err
+	}
 	if err = os.Rename(tmpPath, path); err != nil {
 		return err
 	}

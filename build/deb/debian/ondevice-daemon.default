@@ -1,0 +1,13 @@
+# This is the defaults-file for ondevice-daemon
+#
+
+
+# USERID specifies the local user account the ondevice daemon should run as
+# Default: ondevice
+#USERID=ondevice
+
+# ondevice.io account the device should be linked to
+ONDEVICE_USER=
+
+# ondevice.io device key
+ONDEVICE_AUTH=

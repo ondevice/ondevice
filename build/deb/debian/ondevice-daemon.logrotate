@@ -1,0 +1,8 @@
+/var/log/ondevice/ondevice.log {
+	weekly
+	minsize 100k
+
+	missingok
+	copytruncate
+	rotate 5
+}

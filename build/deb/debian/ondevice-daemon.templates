@@ -1,0 +1,25 @@
+Template: ondevice-daemon/ondevice-setup
+Type: boolean
+Default: false
+Description: set up ondevice-daemon?
+ Do you want to set up ondevice in device mode?
+ You're gonna need an ondevice account and a matching device key.
+ .
+ You can skip configuration now and set the values in /etc/default/ondevice-daemon later.
+
+Template: ondevice-daemon/user
+Type: string
+Description: Please enter your ondevice.io user name
+ To run ondevice-daemon, you'll need an account at https://ondevice.io/
+ .
+ You can skip configuration for now though by leaving either (or both of) the user/key prompts empty.
+ You'll have to manually edit /etc/ondevice/ondevice.conf in that case.
+
+Template: ondevice-daemon/auth
+Type: password
+Description: Please enter your ondevice.io device key
+ To run ondevice-daemon, you'll need an account at https://ondevice.io/
+ You need to use a key with 'device' permissions. 'client' keys won't work here.
+ .
+ You can skip configuration for now though by leaving either (or both of) the user/key prompts empty.
+ You'll have to manually edit /etc/ondevice/ondevice.conf in that case.

@@ -1,0 +1,87 @@
+ondevice (0.4.4) stable; urgency=low
+
+  * Debian: fixed logrotate issue
+  * using [glide](https://glide.sh/) for dependency management
+  * added timeout to OpenWebsocket() (fixes rare reconnect issue, see #14)
+  * Config.SetValue() now recursively creates the config dir (if it doesn't exist)
+  * fixed issue with ondevice ssh not properly exiting when the connection was lost (see #15)
+  * fixed synchronisation issue in websocket.Write()
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sun, 02 Apr 2017 21:40:48 +0200
+
+ondevice (0.4.3) stable; urgency=low
+
+  * added ONDEVICE_LOG variable support (to set the log level)
+  * fixed issues with closing tunnel sessions
+
+ -- ondevice.io debian team <debian@ondevice.io>  Tue, 14 Feb 2017 12:08:04 +0200
+
+ondevice (0.4.2) stable; urgency=low
+
+  * fixed issue with cleanly closing connections
+  * printing byte counts when connections close
+  * improved certain error messages
+  * some other minor improvements
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sat, 04 Feb 2017 18:31:18 +0200
+
+ondevice (0.4.1) stable; urgency=low
+
+  * fixed an issue that prevented the environment to be preserved when running ondevice ssh/rsync
+  * x11vnc is now 'Suggested' instead of 'Recommended'
+  * added logrotate config for /var/log/ondevice/ondevice.log
+  * recreating /var/run/ondevice/ in the init script (was causing issues when rebooting)
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sun, 30 Jan 2017 01:49:41 +0200
+
+ondevice (0.4.0deb1) stable; urgency=low
+
+  * fixed Broken and Replaces directives in debian/control (to allow for a smooth transition from 0.3.1)
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sun, 30 Jan 2017 01:49:41 +0200
+
+ondevice (0.4.0) stable; urgency=low
+
+  * first golang based client
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sun, 29 Jan 2017 23:12:29 +0200
+
+ondevice (0.3.1) stable; urgency=low
+
+  * fixed some system-wide config issues
+  * fixed issue with overwriting the control socket (was set up outside the FileLock)
+  * explicitly calling chmod after writing to the various config files
+
+ -- ondevice.io debian team <debian@ondevice.io>  Thu, 10 Nov 2016 13:34:07 +0200
+
+ondevice (0.3) stable; urgency=low
+
+  * added `ondevice.sock` UNIX socket
+  * added `/state` socket endpoint (shows info about the device daemon, current connections, etc.)
+  * reimplemented `ondevice status` to query `ondevice.sock` instead of making guesses about the daemon state
+  * we're sending ping messages through tunnels too
+  * added `--foreground` and `--configDir` arguments to `ondevice daemon`
+  * added support for setting the device authentiction using environment variables (in preparation of the ondevice-daemon debian package)
+
+ -- ondevice.io debian team <debian@ondevice.io>  Thu, 10 Nov 2016 00:24:32 +0200
+
+ondevice (0.2.6) stable; urgency=low
+
+  * fixed commandline parsing issue in `ondevice list`
+
+ -- ondevice.io debian team <debian@ondevice.io>  Thu, 22 Sep 2016 14:10:57 +0200
+
+ondevice (0.2.5) stable; urgency=low
+
+  * added `ondevice rsync`
+  * improved `ondevice ssh`'s argument parsing
+  * added `--props` argument to `ondevice list`
+  * improved error handling
+
+ -- ondevice.io debian team <debian@ondevice.io>  Thu, 22 Sep 2016 13:59:31 +0200
+
+ondevice (0.2.4) stable; urgency=low
+
+  * Initial debian package
+
+ -- ondevice.io debian team <debian@ondevice.io>  Sat, 17 Sep 2016 08:34:25 +0200

@@ -1,0 +1,29 @@
+Source: ondevice
+Section: python
+Priority: extra
+Maintainer: ondevice.io team <info@ondevice.io>
+Build-Depends: debhelper (>= 6)
+Standards-Version: 3.9.5
+
+Package: ondevice
+Architecture: any
+Pre-Depends: dpkg (>= 1.15), ${misc:Pre-Depends}
+Depends: ${misc:Depends}, openssh-client
+Recommends: openssh-server
+Suggests: x11vnc, rsync
+Breaks: ondevice-python3.5 (<< 0.3.3), ondevice-python3.4 (<< 0.3.3), ondevice-python2.7 (<< 0.3.3), ondevice-python2.6 (<< 0.3.3)
+Replaces: ondevice-python3.5 (<< 0.3.3), ondevice-python3.4 (<< 0.3.3), ondevice-python2.7 (<< 0.3.3), ondevice-python2.6 (<< 0.3.3)
+Description: official ondevice.io client
+ See https://ondevice.io/ for details
+ .
+ This is the ondevice client for debian based distributions
+
+Package: ondevice-daemon
+Architecture: all
+Pre-Depends: dpkg (>= 1.15)
+Depends: ondevice (= ${binary:Version})
+Description: ondevice.io daemon
+ Sets up `ondevice daemon` as a system daemon.
+ .
+ see https://ondevice.io/ for further details
+

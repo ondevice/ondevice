@@ -49,7 +49,7 @@ func loginRun(args []string) int {
 var LoginCommand = BaseCommand{
 	Arguments: "",
 	ShortHelp: "Log in to the ondevice.io service",
-	RunFn:     nil,
+	RunFn:     loginRun,
 	LongHelp: `$ ondevice login
 
 Log in to the ondevice.io service using one of your API keys.

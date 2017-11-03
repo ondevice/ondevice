@@ -7,24 +7,50 @@ import (
 	"strings"
 
 	"github.com/howeyc/gopass"
+	flags "github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 )
 
-func loginRun(args []string) int {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("User: ")
-	user, _ := reader.ReadString('\n')
-	user = strings.TrimSpace(user)
+type loginOpts struct {
+	BatchUser string `long:"batch" description:"If set, use that user to login and read the auth key from stdin"`
+}
 
-	fmt.Printf("Auth: ")
-	auth, err := gopass.GetPasswd()
-	if err != nil {
+func loginRun(args []string) int {
+	var user, auth string
+	var opts loginOpts
+	var err error
+	if _, err = flags.ParseArgs(&opts, args); err != nil {
 		logg.Fatal(err)
 	}
 
-	info, err := api.GetKeyInfo(api.CreateAuth(user, string(auth)))
+	reader := bufio.NewReader(os.Stdin)
+
+	if opts.BatchUser != "" {
+		user = opts.BatchUser
+		// run in batch mode
+		if auth, err = reader.ReadString('\n'); err != nil {
+			logg.Fatal("Failed to read auth key from stdin: ", err)
+		}
+		auth = strings.TrimSpace(auth)
+	} else {
+		fmt.Print("User: ")
+		user, err = reader.ReadString('\n')
+		if err != nil {
+			logg.Fatal("Failed to read user name: ", err)
+		}
+		user = strings.TrimSpace(user)
+
+		fmt.Printf("Auth: ")
+		var authBytes []byte
+		if authBytes, err = gopass.GetPasswd(); err != nil {
+			logg.Fatal(err)
+		}
+		auth = string(authBytes)
+	}
+
+	info, err := api.GetKeyInfo(api.CreateAuth(user, auth))
 	if err != nil {
 		logg.Fatal(err)
 	}
@@ -47,7 +73,7 @@ func loginRun(args []string) int {
 
 // LoginCommand -- implements `ondevice login`
 var LoginCommand = BaseCommand{
-	Arguments: "",
+	Arguments: "[--batch=username]",
 	ShortHelp: "Log in to the ondevice.io service",
 	RunFn:     loginRun,
 	LongHelp: `$ ondevice login
@@ -55,9 +81,10 @@ var LoginCommand = BaseCommand{
 Log in to the ondevice.io service using one of your API keys.
 
 Options:
---batch
-  run 'ondevice login' in batch mode, expecting
-
+--batch=username
+  Run in batch mode, using the given username and reading the authentication key
+  from stdin, e.g.:
+    echo '5h42l5xylznw'|ondevice login --batch=demo
 
 
 Example:

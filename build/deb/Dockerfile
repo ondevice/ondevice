@@ -6,6 +6,9 @@
 ARG SOURCE_IMAGE
 FROM ${SOURCE_IMAGE}
 
+ARG ARCH
+RUN test "${ARCH}" = "$(dpkg --print-architecture)"
+
 RUN apt-get update && apt-get -y install devscripts git curl wget
 
 RUN adduser --gecos builduser,,, --disabled-password user

@@ -25,5 +25,5 @@ package-deb-i386:
 
 _package-deb:
 	# builds and packages the i386+amd64 ondevice debian packages (as well as ondevice-daemon)
-	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' -t ondevice/package-deb-$(ARCH) .
+	docker build -f build/deb/Dockerfile '--build-arg=ARCH=$(ARCH)' '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' -t ondevice/package-deb-$(ARCH) .
 

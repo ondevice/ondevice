@@ -18,10 +18,10 @@ package-deb: package-deb-$(ARCH)
 
 package-deb-x86_64: package-deb-amd64
 package-deb-amd64:
-	$(MAKE) _package-deb ARCH=amd64 GOARCH=amd64 SOURCE_IMAGE=debian:jessie
+	$(MAKE) _package-deb ARCH=amd64 GOARCH=amd64 SOURCE_IMAGE=amd64/debian:jessie
 
 package-deb-i386:
-	$(MAKE) _package-deb ARCH=i386 GOARCH=386 SOURCE_IMAGE=vicamo/debian:jessie-i386
+	$(MAKE) _package-deb ARCH=i386 GOARCH=386 SOURCE_IMAGE=i386/debian:jessie
 
 _package-deb:
 	# builds and packages the i386+amd64 ondevice debian packages (as well as ondevice-daemon)

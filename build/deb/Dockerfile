@@ -37,12 +37,17 @@ RUN glide install
 RUN dpkg-buildpackage -us -uc
 RUN cp -a ../ondevice*.* /target/
 
-# TODO integration test stage
-
 #
-# final stage: collecting the artefacts
+# test stage
 #
 FROM ${SOURCE_IMAGE}
+RUN apt-get update && apt-get -y install ssh rsync ca-certificates
+
 RUN mkdir -p /target/
 COPY --from=0 /target/ /target/
+COPY /build/test.sh /
+RUN dpkg -i /target/ondevice_*.deb
+RUN apt-get -f install
+RUN /test.sh
+
 WORKDIR /target/

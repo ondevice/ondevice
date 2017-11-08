@@ -21,9 +21,9 @@ RUN mkdir -p /target/
 #RUN tar xfz go1.9.2*.tar.gz
 #RUN ln -s /usr/local/go/bin/* /usr/local/bin/
 
-ENV GOPATH=/go/
-ENV PATH=/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-RUN mkdir -p /go/bin /go/src
+#ENV GOPATH=/go/
+#ENV PATH=/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+#RUN mkdir -p /go/bin /go/src
 
 # install glide
 RUN curl https://glide.sh/get | sh

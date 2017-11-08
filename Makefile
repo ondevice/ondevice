@@ -23,9 +23,9 @@ package-deb-amd64:
 package-deb-i386:
 	$(MAKE) _package-deb ARCH=i386 GOARCH=386 SOURCE_IMAGE=i386/golang:1.9-stretch
 
-package-deb-armv7l: package-deb-armel
-package-deb-armel:
-	$(MAKE) _package-deb ARCH=armel GOARCH=armv6l SOURCE_IMAGE=golang:1.9-stretch
+package-deb-armv7l: package-deb-armhf
+package-deb-armhf:
+	$(MAKE) _package-deb ARCH=armhf GOARCH=armv6l SOURCE_IMAGE=golang:1.9-stretch
 
 
 _package-deb:

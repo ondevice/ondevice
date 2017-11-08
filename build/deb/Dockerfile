@@ -15,11 +15,11 @@ RUN adduser --gecos builduser,,, --disabled-password user
 RUN mkdir -p /target/
 
 # install go
-WORKDIR /usr/local/
-ARG GOARCH
-RUN wget https://storage.googleapis.com/golang/go1.9.2.linux-${GOARCH}.tar.gz
-RUN tar xfz go1.9.2*.tar.gz
-RUN ln -s /usr/local/go/bin/* /usr/local/bin/
+#WORKDIR /usr/local/
+#ARG GOARCH
+#RUN wget https://storage.googleapis.com/golang/go1.9.2.linux-${GOARCH}.tar.gz
+#RUN tar xfz go1.9.2*.tar.gz
+#RUN ln -s /usr/local/go/bin/* /usr/local/bin/
 
 ENV GOPATH=/go/
 ENV PATH=/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

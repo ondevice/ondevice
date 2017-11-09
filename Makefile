@@ -33,4 +33,5 @@ _package-deb:
 	docker build -f build/deb/Dockerfile '--build-arg=ARCH=$(ARCH)' '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' -t ondevice/package-deb-$(ARCH) .
 
 	# extract artefacts
-	#CONTAINER="$$(docker run --rm -d ondevice/package-deb-$(ARCH) sleep 60)" docker cp "$$CONTAINER:/build.tgz" /tmp/
+	rm -rf 'target/deb/$(ARCH)'
+	CONTAINER="$$(docker run --rm -d ondevice/package-deb-$(ARCH) sleep 60)"; docker cp "$$CONTAINER:/target" 'target/deb/$(ARCH)'

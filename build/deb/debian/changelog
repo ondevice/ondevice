@@ -1,3 +1,25 @@
+ondevice (0.5.1) stable; urgency=low
+
+  * Bugfix release:
+  * Fixed issue in `ondevice login`
+  * added `--batch=username` flag to `ondevice login`
+  * fixed issue with `ondevice list` on 32bit systems (were using a 32bit integer for the timestamp)
+
+ -- ondevice.io debian team <debian@ondevice.io>  Thu, 09 Nov 2017 23:21:08 +0100
+
+ondevice (0.5) stable; urgency=low
+
+  * added `ondevice event`
+  * added support for an official [ondevice/ondevice](https://hub.docker.com/r/ondevice/ondevice) docker image
+  * added tunnel state machine (to fix state transition issues)
+  * updated `ondevice login` to support the new AuthKey permission model
+  * refactored the way commands are implemented (improving code readability)
+  * added nicer error messages for 'authentication failed' and 'rate limit exceeded'
+  * doing a os.Chmod(0600) when writing ondevice.conf 
+  * a lot of minor fixes and improvements
+
+ -- ondevice.io debian team <debian@ondevice.io>  Wed, 01 Nov 2017 21:10:34 +0100
+
 ondevice (0.4.4) stable; urgency=low
 
   * Debian: fixed logrotate issue

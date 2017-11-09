@@ -46,10 +46,10 @@ $ docker exec --user=ondevice e7d1c2 ondevice status
 Device:
   devID:  demo.ci6lip
   state:  online
-  version:  0.5
+  version:  0.5.1
 
 Client:
-  version:  0.5
+  version:  0.5.1
 ```
 
 Ok, our new device is called `demo.ci6lip`.  
@@ -64,10 +64,10 @@ $ docker run --rm --volumes-from=e7d1c2 ondevice/ondevice status
 Device:
   devID:  demo.ci6lip
   state:  online
-  version:  0.5
+  version:  0.5.1
 
 Client:
-  version:  0.5
+  version:  0.5.1
 ```
 
 

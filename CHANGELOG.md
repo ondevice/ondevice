@@ -1,3 +1,11 @@
+### v0.5.1 (2017-11-09)
+
+Bugfix release:
+
+- Fixed issue in `ondevice login`
+- added `--batch=username` flag to `ondevice login`
+- fixed issue with `ondevice list` on 32bit systems (were using a 32bit integer for the timestamp)
+
 ### v0.5 (2017-11-01)
 
 - added `ondevice event`

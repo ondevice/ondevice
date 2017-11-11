@@ -5,3 +5,8 @@ services:
 
 script:
   - make package-deb-i386
+
+before_install:
+# update docker
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce

@@ -1,10 +1,11 @@
+# config file for travis-ci.org
+# -- currently disabled --
 sudo: required
-
 services:
   - docker
 
 script:
-  - make package-deb-i386
+  - make package-deb-i386 package-deb-amd64 build-docker
 
 before_install:
 # update docker

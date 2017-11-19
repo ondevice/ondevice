@@ -1,0 +1,6 @@
+#!/bin/bash -e
+#
+# Overwrite the root README.md with the one in this directory (otherwise the
+# root README.md would be used for the image description on hub.docker.com)
+
+cp -v build/docker/README.md ./

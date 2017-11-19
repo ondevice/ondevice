@@ -12,9 +12,6 @@ COPY ./ /go/src/github.com/ondevice/ondevice/
 WORKDIR /go/src/github.com/ondevice/ondevice/
 
 # trying to pinpoint a docker hub build issue:
-RUN pwd
-RUN ls -la
-
 RUN glide update
 RUN go build -o /build/ondevice
 

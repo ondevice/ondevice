@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# checks if build/docker/README.md and README.md are identical
+
+# first make sure this script is being executed from the build/docker/ dir
+curDir="$(pwd|rev|cut -d/ -f1,2|rev)"
+if [ "$curDir" != "build/docker" ]; then
+       echo "ERROR: expected to be in the build/docker directory, not '$PWD'" >&2
+       exit 1
+fi
+
+if ! cmp --silent README.md ../../README.md; then
+	echo 'ERROR: Please update the README.md in the `docker` branch!' >&2
+	exit 1
+fi

@@ -11,7 +11,7 @@ import (
 )
 
 // option list copied from debian jessie's openssh source package (from ssh.c, line 509)
-const sshFlags = "1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:"
+var sshFlags = sshParseFlags("1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:")
 
 func sshRun(args []string) int {
 	sshPath := "/usr/bin/ssh"
@@ -47,7 +47,6 @@ func sshRun(args []string) int {
 }
 
 func sshParseArgs(args []string) (string, []string) {
-	flags := sshGetFlags()
 	var target string
 	var outArgs []string
 
@@ -59,7 +58,7 @@ func sshParseArgs(args []string) (string, []string) {
 		} else if arg == "-" {
 			logg.Fatal("Stray '-' SSH argument")
 		} else if arg[0] == '-' {
-			hasValue, ok := flags[arg[1]]
+			hasValue, ok := sshFlags[arg[1]]
 			if !ok {
 				logg.Fatal("Unsupported SSH argument: ", arg)
 			}
@@ -114,13 +113,13 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	return tgtHost, tgtUser
 }
 
-func sshGetFlags() map[byte]bool {
+func sshParseFlags(flags string) map[byte]bool {
 	rc := map[byte]bool{}
 
-	for i := 0; i < len(sshFlags); i++ {
-		flag := sshFlags[i]
+	for i := 0; i < len(flags); i++ {
+		flag := flags[i]
 		hasValue := false
-		if sshFlags[i+1] == ':' {
+		if flags[i+1] == ':' {
 			hasValue = true
 			i++
 		}

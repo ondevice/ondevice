@@ -17,22 +17,31 @@ func sshRun(args []string) int {
 	sshPath := "/usr/bin/ssh"
 
 	// parse args (to detect the ones before 'user@host')
-	target, args := sshParseArgs(args)
-	tgtHost, tgtUser := sshParseTarget(target)
+	args, opts := sshParseArgs(sshFlags, args)
+	if len(args) < 1 {
+		logg.Fatal("missing target host")
+	}
+
+	// first non-option target is the [user@]host.
+	tgtHost, tgtUser := sshParseTarget(args[0])
+	args = args[1:]
 
 	// compose ProxyCommand
-	// TODO this will fail miserably if argv[0] or tgtHost contain spaces
-	proxyCmd := fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])
+	// TODO this will fail miserably if os.Args[0] contain spaces
 
-	// create something like `ssh -oProxyCommand=... user@ondevice:devId <opts`
-	a := make([]string, 0, 10)
-	a = append(a, sshPath, proxyCmd)
+	// compose the ssh command
+	var a = make([]string, 0, 20)
+	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
+	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
+	a = append(a, opts...) // ... ssh flags (-L -R -D ...)
+
+	// target [user@]devId (qualified devId with 'ondevice:' prefix)
 	if tgtUser != "" {
 		a = append(a, fmt.Sprintf("%s@ondevice:%s", tgtUser, tgtHost))
 	} else {
 		a = append(a, fmt.Sprintf("ondevice:%s", tgtHost))
 	}
-	a = append(a, args...)
+	a = append(a, args...) // non-option ssh arguments (command to be run on the host)
 
 	// syscall.Exec will replace this app with ssh (yes, replace it, not just launch)
 	// therefore, unless there's an error, this is the last line of code to be executed
@@ -46,10 +55,8 @@ func sshRun(args []string) int {
 	return -1
 }
 
-func sshParseArgs(args []string) (string, []string) {
-	var target string
-	var outArgs []string
-
+// sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)
+func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
@@ -58,36 +65,34 @@ func sshParseArgs(args []string) (string, []string) {
 		} else if arg == "-" {
 			logg.Fatal("Stray '-' SSH argument")
 		} else if arg[0] == '-' {
-			hasValue, ok := sshFlags[arg[1]]
+			hasValue, ok := flags[arg[1]]
 			if !ok {
 				logg.Fatal("Unsupported SSH argument: ", arg)
 			}
 			if hasValue && len(arg) == 2 {
 				// the value's in the next argument, push both to outArgs
-				outArgs = append(outArgs, arg, args[i+1])
+				outOpts = append(outOpts, arg, args[i+1])
 				i++
 			} else if hasValue && len(arg) > 2 {
 				// the value's part of arg
-				outArgs = append(outArgs, arg)
+				outOpts = append(outOpts, arg)
 			} else if !hasValue && len(arg) > 2 { // && !hasValue
 				logg.Fatal("Got value for flag that doesn't expect one: ", arg)
 			} else if !hasValue && len(arg) == 2 {
-				// a simple flag)
-				outArgs = append(outArgs, arg)
+				// a simple flag
+				outOpts = append(outOpts, arg)
 			} else {
 				// yay to defensive programming
 				logg.Fatal("this should never happen (fifth state of two binary values)")
 			}
 		} else {
-			// first non-option argument -> extract target and keep the rest as-is
-			target = arg
-			outArgs = append(outArgs, args[i+1:]...)
-			return target, outArgs
+			// first non-option argument -> we're done
+			outArgs = args[i:]
+			break
 		}
 	}
 
-	logg.Fatal("Missing SSH target user/host!")
-	return "", nil
+	return
 }
 
 func sshParseTarget(target string) (tgtHost string, tgtUser string) {
@@ -113,6 +118,8 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	return tgtHost, tgtUser
 }
 
+// sshParseFlags -- takes a getopt-style argument string and returns a map
+// of flag characters and whether or not they expect an argument
 func sshParseFlags(flags string) map[byte]bool {
 	rc := map[byte]bool{}
 

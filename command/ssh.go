@@ -33,13 +33,19 @@ func sshRun(args []string) int {
 	var a = make([]string, 0, 20)
 	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
+
+	if knownHostsFile := sshGetConfig(opts, "UserKnownHostsFile"); knownHostsFile == "" {
+		// use our own known_hosts file unless the user specified an override
+		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
+	}
+
 	a = append(a, opts...) // ... ssh flags (-L -R -D ...)
 
-	// target [user@]devId (qualified devId with 'ondevice:' prefix)
+	// target [user@]devId (qualified devId)
 	if tgtUser != "" {
-		a = append(a, fmt.Sprintf("%s@ondevice:%s", tgtUser, tgtHost))
+		a = append(a, fmt.Sprintf("%s@%s", tgtUser, tgtHost))
 	} else {
-		a = append(a, fmt.Sprintf("ondevice:%s", tgtHost))
+		a = append(a, tgtHost)
 	}
 	a = append(a, args...) // non-option ssh arguments (command to be run on the host)
 
@@ -53,6 +59,24 @@ func sshRun(args []string) int {
 	// nothing here should ever be executed
 	logg.Fatal("This should never happen")
 	return -1
+}
+
+// sshGetConfig -- returns the specified -o SSH option (if present)
+//
+// note that key is case insensitive
+func sshGetConfig(opts []string, key string) string {
+	key = strings.ToLower(key)
+	for _, opt := range opts {
+		if !strings.HasPrefix(opt, "-o") {
+			continue
+		}
+		var parts = strings.SplitN(opt[2:], "=", 2)
+		if strings.ToLower(parts[0]) == key {
+			return parts[1]
+		}
+	}
+
+	return ""
 }
 
 // sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)
@@ -70,8 +94,8 @@ func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts
 				logg.Fatal("Unsupported SSH argument: ", arg)
 			}
 			if hasValue && len(arg) == 2 {
-				// the value's in the next argument, push both to outArgs
-				outOpts = append(outOpts, arg, args[i+1])
+				// the value's in the next argument, push them as one (simplifying subsequent parsing)
+				outOpts = append(outOpts, arg+args[i+1])
 				i++
 			} else if hasValue && len(arg) > 2 {
 				// the value's part of arg
@@ -149,7 +173,7 @@ The main difference to invoking ssh directly is that instead of regular host nam
 The connection is routed through the ondevice.io network.
 
 ondevice ssh will try to parse ssh's arguments, the first non-argument has to be
-the user@hostname combo.
+the user@devId combo.
 
 See ssh's documentation for further details.
 

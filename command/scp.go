@@ -69,7 +69,12 @@ Examples:
 - ondevice scp me@otherDev:/etc/motd /tmp/other.motd
     copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
 
-This command is only a thin wrapper around the 'scp' client (using its '-oProxyCommand'
-argument to make it use 'ondevice ssh' internally).
+Notes:
+- while it is possible to copy files between two servers, scp will initiate
+  both connections simultaneously causing two concurrent password prompts
+	which won't work (unless of course you've set up ssh_agent properly).
+- uses scp's '-3' flag (allowing files to be copied between two remote devices)
+- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+  Override with ''-oUserKnownHostsFile=...'
 `,
 }

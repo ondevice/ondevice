@@ -34,7 +34,7 @@ func sshRun(args []string) int {
 	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
 
-	if knownHostsFile := sshGetConfig(opts, "UserKnownHostsFile"); knownHostsFile == "" {
+	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
 		// use our own known_hosts file unless the user specified an override
 		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
 	}
@@ -190,5 +190,9 @@ Examples:
 - ondevice ssh device1 -D 1080
   Starting a SOCKS5 proxy listening on port 1080. It'll redirect all traffic
   to the target host.
+
+Notes:
+- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+  Override with ''-oUserKnownHostsFile=...'
 `,
 }

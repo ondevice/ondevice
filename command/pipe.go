@@ -41,6 +41,11 @@ func (p pipeCommand) run(args []string) int {
 		logg.Fatal("Missing client credentials")
 	}
 
+	if strings.HasPrefix(devID, "ondevice:") {
+		// we use this format for ssh hostnames -> simply strip the prefix
+		devID = devID[9:]
+	}
+
 	if strings.Contains(devID, ".") {
 		parts := strings.SplitN(devID, ".", 2)
 		var user, pwd string

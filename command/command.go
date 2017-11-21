@@ -42,6 +42,7 @@ var _commands = map[string]Command{
 	"login":  LoginCommand,
 	"rsync":  RsyncCommand,
 	"scp":    SCPCommand,
+	"sftp":   SFTPCommand,
 	"ssh":    SSHCommand,
 	"status": StatusCommand,
 	"stop":   StopCommand,
@@ -49,7 +50,7 @@ var _commands = map[string]Command{
 }
 
 var deviceCmds = []string{"daemon", "stop"}
-var clientCmds = []string{"device", "event", "list", "pipe", "rsync", "scp", "ssh"}
+var clientCmds = []string{"device", "event", "list", "pipe", "rsync", "scp", "sftp", "ssh"}
 
 // hide these commands from `ondevice help`
 var internalCmds = map[string]int{"pipe": 0}

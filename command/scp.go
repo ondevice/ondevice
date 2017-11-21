@@ -25,7 +25,7 @@ func scpRun(args []string) int {
 			continue
 		} else if parts := strings.SplitN(arg, ":", 2); len(parts) == 2 {
 			// remote file -> parse and transform user@host part
-			// results in "[user@]ondevice:account.devId"
+			// results in "[user@]account.devId"
 			var tgtHost, tgtUser = sshParseTarget(parts[0])
 			if tgtUser != "" {
 				tgtHost = fmt.Sprintf("%s@%s", tgtUser, tgtHost)
@@ -57,7 +57,7 @@ var SCPCommand = BaseCommand{
 	Arguments: "[scp args...] [[user1@]host1:]file1 ... [[userN@]hostN:]fileN",
 	ShortHelp: "Copy files from/to your devices using scp",
 	RunFn:     scpRun,
-	LongHelp: `$ ondevice scp [rsync-options...]
+	LongHelp: `$ ondevice scp [scp-options...]
 
 Copy files from/to devices using scp
 
@@ -65,7 +65,7 @@ Examples:
 
 - ondevice scp -pv /source/path/ root@myDev:/target/path/
     copy the local /src/path to myDev's /target/path/ as root
-    (and pass the -p and -v options to rsync)
+    (and pass the -p and -v options to scp)
 - ondevice scp me@otherDev:/etc/motd /tmp/other.motd
     copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
 

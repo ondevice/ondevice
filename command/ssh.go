@@ -22,7 +22,7 @@ func sshRun(args []string) int {
 
 	// compose ProxyCommand
 	// TODO this will fail miserably if argv[0] or tgtHost contain spaces
-	proxyCmd := fmt.Sprintf("-oProxyCommand=%s pipe %s ssh", os.Args[0], tgtHost)
+	proxyCmd := fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])
 
 	// create something like `ssh -oProxyCommand=... user@ondevice:devId <opts`
 	a := make([]string, 0, 10)

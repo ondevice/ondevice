@@ -1,3 +1,9 @@
+### v0.5.2 (2017-11-27)
+
+- Added `ondevice scp` and `ondevice sftp`
+- using our own known_hosts file (since we're not using domain names, but devIds)
+- (using '%h' for ProxyCommand)
+
 ### v0.5.1 (2017-11-09)
 
 Bugfix release:

@@ -29,16 +29,18 @@ RUN mkdir -p /target/
 RUN curl https://glide.sh/get | sh
 
 COPY / /go/src/github.com/ondevice/ondevice/
-
 COPY /build/deb/debian/ /go/src/github.com/ondevice/ondevice/debian
 
+# fix permissions (TODO this is unusually slow)
 RUN chown -R user:user /go/ /target/
 USER user
+
 WORKDIR /go/src/github.com/ondevice/ondevice/
 
 RUN glide install
 ARG BUILD_ARGS
-RUN dpkg-buildpackage -us -uc ${BUILD_ARGS}
+ARG GOARCH
+RUN GOARCH=${GOARCH} dpkg-buildpackage -us -uc ${BUILD_ARGS}
 RUN cp -a ../ondevice*.* /target/
 
 #

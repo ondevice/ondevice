@@ -14,18 +14,17 @@ deps:
 build-docker:
 	docker build -f build/docker/Dockerfile -t ondevice/ondevice .
 
-package-deb: package-deb-$(ARCH)
+# run this on an amd64 host with docker installed
+package-deb: package-deb-amd64 package-deb-i386 package-deb-armhf
 
-package-deb-x86_64: package-deb-amd64
 package-deb-amd64:
 	$(MAKE) _package-deb ARCH=amd64 GOARCH=amd64 SOURCE_IMAGE=amd64/golang:1.9-stretch
 
 package-deb-i386:
 	$(MAKE) _package-deb ARCH=i386 GOARCH=386 SOURCE_IMAGE=i386/golang:1.9-stretch
 
-package-deb-armv7l: package-deb-armhf
 package-deb-armhf:
-	$(MAKE) _package-deb ARCH=armhf GOARCH=armv6l SOURCE_IMAGE=golang:1.9-stretch BUILD_ARGS=--host-arch=armhf
+	$(MAKE) _package-deb ARCH=armhf GOARCH=arm SOURCE_IMAGE=golang:1.9-stretch BUILD_ARGS=--host-arch=armhf
 
 
 _package-deb:

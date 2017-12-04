@@ -1,7 +1,3 @@
-// +build cgo
-
-// ^- user.Current() doesn't work wenn cross compiling, so don't build this if cgo is missing (which should cause the build to fail)
-
 package config
 
 import (

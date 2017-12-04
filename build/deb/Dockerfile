@@ -6,8 +6,8 @@
 ARG SOURCE_IMAGE
 FROM ${SOURCE_IMAGE}
 
-ARG ARCH
-RUN test "${ARCH}" = "$(dpkg --print-architecture)"
+#ARG ARCH
+#RUN test "${ARCH}" = "$(dpkg --print-architecture)"
 
 RUN apt-get update && apt-get -y install devscripts git curl wget
 
@@ -37,7 +37,8 @@ USER user
 WORKDIR /go/src/github.com/ondevice/ondevice/
 
 RUN glide install
-RUN dpkg-buildpackage -us -uc
+ARG BUILD_ARGS
+RUN dpkg-buildpackage -us -uc ${BUILD_ARGS}
 RUN cp -a ../ondevice*.* /target/
 
 #

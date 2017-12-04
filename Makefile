@@ -25,12 +25,12 @@ package-deb-i386:
 
 package-deb-armv7l: package-deb-armhf
 package-deb-armhf:
-	$(MAKE) _package-deb ARCH=armhf GOARCH=armv6l SOURCE_IMAGE=golang:1.9-stretch
+	$(MAKE) _package-deb ARCH=armhf GOARCH=armv6l SOURCE_IMAGE=golang:1.9-stretch BUILD_ARGS=--host-arch=armhf
 
 
 _package-deb:
 	# builds and packages the i386+amd64 ondevice debian packages (as well as ondevice-daemon)
-	docker build -f build/deb/Dockerfile '--build-arg=ARCH=$(ARCH)' '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' -t ondevice/package-deb-$(ARCH) .
+	docker build -f build/deb/Dockerfile '--build-arg=ARCH=$(ARCH)' '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' -t ondevice/package-deb-$(ARCH) .
 
 	# extract artefacts
 	rm -rf 'target/deb/$(ARCH)'; mkdir -p target/deb/

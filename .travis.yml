@@ -1,0 +1,13 @@
+# config file for travis-ci.org
+# -- currently disabled --
+sudo: required
+services:
+  - docker
+
+script:
+  - make package-deb-i386 package-deb-amd64 build-docker
+
+before_install:
+# update docker
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce

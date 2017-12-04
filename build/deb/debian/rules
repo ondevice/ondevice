@@ -6,3 +6,7 @@
 override_dh_builddeb:
 	# improve compatibility with older debian-compatible releases
 	dh_builddeb -- -Zgzip
+
+override_dh_strip:
+	# see https://github.com/golang/go/issues/5855#issuecomment-66082174
+	echo "not stripping golang binaries" >&2

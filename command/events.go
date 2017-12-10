@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -59,6 +60,9 @@ func (e eventCommand) run(args []string) int {
 		e.timeoutWdog = util.NewWatchdog(time.Duration(*e.Timeout)*time.Second, e.onTimeout)
 	}
 
+	// default timeout (set in ondevice.go) is 30sec.
+	// this can be long-running by design -> reset timeout
+	http.DefaultClient.Timeout = 0
 	if err := listener.Listen(e.onEvent); err != nil {
 		if err == errAwaitMatch {
 			// return 0

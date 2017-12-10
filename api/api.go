@@ -51,8 +51,7 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 		req.Header.Add("Content-type", bodyType)
 	}
 
-	client := http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

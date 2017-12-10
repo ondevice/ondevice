@@ -33,7 +33,7 @@ func daemonRun(args []string) int {
 
 	c := control.StartServer(url)
 
-	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT and maybe a unix socket call)
+	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
 	retryDelay := 10 * time.Second
 	for true {
 		d, err := daemon.Connect()
@@ -43,18 +43,25 @@ func daemonRun(args []string) int {
 				logg.Fatal(err)
 			}
 
-			// sleep for a bit to avoid spamming the servers
+			// keep retryDelay between 10 and 120sec
 			if retryDelay > 120*time.Second {
 				retryDelay = 120 * time.Second
 			}
 			if retryDelay < 10*time.Second {
 				retryDelay = 10 * time.Second
 			}
+			// ... unless we've been rate-limited
+			if err.Code() == util.TooManyRequestsError {
+				retryDelay = 600 * time.Second
+			}
 
 			logg.Debug("device error: ", err)
 			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
+
+			// sleep to avoid flooding the servers
 			time.Sleep(retryDelay)
 
+			// slowly increase retryDelay with each failed attempt
 			retryDelay = time.Duration(float32(retryDelay) * 1.5)
 			continue
 		}

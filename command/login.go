@@ -55,13 +55,35 @@ func loginRun(args []string) int {
 		logg.Fatal(err)
 	}
 
-	if info.Role == "client" || info.Role == "manager" || info.Role == "custom" {
+	if info.Key != "" {
+		// the API server wants us to use a different auth key
+		// (most likely because the user has used their account password)
+		auth = info.Key
+	}
+
+	// display any messages the server might have for us
+	for _, msg := range info.Messages {
+		var parts = strings.SplitN(msg, ":", 2)
+		switch parts[0] {
+		case "info":
+			logg.Info(parts[1])
+		case "warn":
+			logg.Warning(parts[1])
+		case "err":
+			logg.Error(parts[1])
+		default:
+			logg.Info("Got message: ", msg)
+		}
+	}
+
+	// update auth
+	if info.IsType("client") {
 		logg.Info("updating client auth")
 		if err := config.SetAuth("client", user, string(auth)); err != nil {
 			logg.Fatal("Failed to set client auth: ", err)
 		}
 	}
-	if info.HasPermission("device") {
+	if info.IsType("device") {
 		logg.Info("updating device auth")
 		if err := config.SetAuth("device", user, string(auth)); err != nil {
 			logg.Fatal("Failed to set device auth: ", err)

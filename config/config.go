@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strconv"
 
 	"path"
 
@@ -39,6 +40,22 @@ func GetConfigPath(filename string) string {
 	}
 
 	return path.Join(u.HomeDir, ".config/ondevice", filename)
+}
+
+// GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
+func GetInt(section string, key string, defaultValue int) int {
+	var val, err = GetValue(section, key)
+	if err != nil {
+		return defaultValue
+	}
+
+	rc, err := strconv.ParseInt(val, 10, 32)
+	if err != nil {
+		logg.Warningf("Error parsing '%s.%s': %s", section, key, err)
+		return defaultValue
+	}
+
+	return int(rc)
 }
 
 // GetVersion -- Returns the app version

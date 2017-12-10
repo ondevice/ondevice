@@ -1,18 +1,23 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
 const (
 	// OtherError -- Other (maybe non HTTP-related) error
 	OtherError = 0
-	// BadRequestError -- Indicates an invalid request
-	BadRequestError = 400
-	// AuthenticationError -- Indicates invalid authentication credentials
-	AuthenticationError = 401
-	// ForbiddenError -- You're not allowed to access that resource
-	ForbiddenError = 403
-	// NotFoundError -- The resource that's been requested doesn't exist
-	NotFoundError = 404
+	// BadRequestError -- Indicates an invalid request (400)
+	BadRequestError = http.StatusBadRequest
+	// AuthenticationError -- Indicates invalid authentication credentials (401)
+	AuthenticationError = http.StatusUnauthorized
+	// ForbiddenError -- You're not allowed to access that resource (403)
+	ForbiddenError = http.StatusForbidden
+	// NotFoundError -- The resource that's been requested doesn't exist (404)
+	NotFoundError = http.StatusNotFound
+	// TooManyRequestsError -- You have been rate limited (429)
+	TooManyRequestsError = http.StatusTooManyRequests
 )
 
 // APIError -- Custom error interface

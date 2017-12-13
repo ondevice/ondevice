@@ -1,7 +1,9 @@
 package command
 
 import (
+	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/ondevice/ondevice/api"
@@ -48,13 +50,30 @@ func deviceSetProperties(devID string, args []string) {
 	_printProperties(api.SetProperties(devID, props))
 }
 
-func _printProperties(props map[string]string, err error) {
+func _printProperties(props map[string]interface{}, err error) {
 	if err != nil {
 		logg.Fatal(err)
 	}
 
-	for k, v := range props {
-		fmt.Printf("%s=%s\n", k, v)
+	// get list of keys and sort them
+	var keys = make([]string, 0, len(props))
+	for k, _ := range props {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		var v = props[k]
+		var repr string
+
+		if s, ok := v.(string); ok {
+			repr = s
+		} else {
+			var reprBytes, _ = json.Marshal(v)
+			repr = string(reprBytes)
+		}
+
+		fmt.Printf("%s=%s\n", k, repr)
 	}
 }
 

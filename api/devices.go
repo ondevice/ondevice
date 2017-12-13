@@ -28,7 +28,7 @@ type deviceResponse struct {
 }
 
 type propertyListResponse struct {
-	Props map[string]map[string]string
+	Props map[string]map[string]interface{}
 }
 
 // ListDevices -- list your devices and their state
@@ -58,14 +58,14 @@ func ListDevices(state string, props bool, auths ...Authentication) ([]Device, e
 }
 
 // ListProperties -- Query device properties
-func ListProperties(devID string, auths ...Authentication) (map[string]string, error) {
+func ListProperties(devID string, auths ...Authentication) (map[string]interface{}, error) {
 	var rc propertyListResponse
 	err := getObject(&rc, "/device/"+devID+"/props", nil, auths...)
 	return _propertyList(rc, err)
 }
 
 // RemoveProperties -- remove one or more device properties
-func RemoveProperties(devID string, props []string, auths ...Authentication) (map[string]string, error) {
+func RemoveProperties(devID string, props []string, auths ...Authentication) (map[string]interface{}, error) {
 	var rc propertyListResponse
 	values := url.Values{}
 
@@ -85,7 +85,7 @@ func RemoveProperties(devID string, props []string, auths ...Authentication) (ma
 }
 
 // SetProperties -- Set device property values
-func SetProperties(devID string, props map[string]string, auths ...Authentication) (map[string]string, error) {
+func SetProperties(devID string, props map[string]string, auths ...Authentication) (map[string]interface{}, error) {
 	var rc propertyListResponse
 	values := url.Values{}
 
@@ -102,7 +102,7 @@ func SetProperties(devID string, props map[string]string, auths ...Authenticatio
 	return _propertyList(rc, err)
 }
 
-func _propertyList(data propertyListResponse, err error) (map[string]string, error) {
+func _propertyList(data propertyListResponse, err error) (map[string]interface{}, error) {
 	if err != nil {
 		logg.Fatal("Couldn't get device properties: ", err)
 	}

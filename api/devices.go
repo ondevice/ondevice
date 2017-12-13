@@ -10,14 +10,17 @@ import (
 
 // Device -- state info for a specific device
 type Device struct {
-	ID        string                 `json:"id"`
-	CreatedAt int64                  `json:"createdAt"`
-	IP        string                 `json:"ip,omitempty"`
-	State     string                 `json:"state"`
-	StateTs   int64                  `json:"stateTs,omitempty"`
-	Name      string                 `json:"name,omitempty"`
-	Version   string                 `json:"version,omitempty"`
-	Props     map[string]interface{} `json:"props,omitempty"`
+	ID        string `json:"id"`
+	CreatedAt int64  `json:"createdAt"`
+	IP        string `json:"ip,omitempty"`
+	State     string `json:"state"`
+	StateTs   int64  `json:"stateTs,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Version   string `json:"version,omitempty"`
+
+	Active *bool                  `json:"active,omitempty"`
+	Parent string                 `json:"parent,omitempty"`
+	Props  map[string]interface{} `json:"props,omitempty"`
 }
 
 type deviceResponse struct {
@@ -101,7 +104,7 @@ func SetProperties(devID string, props map[string]string, auths ...Authenticatio
 
 func _propertyList(data propertyListResponse, err error) (map[string]string, error) {
 	if err != nil {
-		logg.Fatal("Couldn't get device properties", err)
+		logg.Fatal("Couldn't get device properties: ", err)
 	}
 
 	// simply return the first element

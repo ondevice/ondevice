@@ -6,7 +6,7 @@
 
 ARCH=$(shell uname -m)
 GO_IMAGE=golang:1.9-stretch
-VERSION=0.5.3
+VERSION=0.5.2
 
 all:
 	@mkdir -p target/

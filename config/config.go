@@ -17,6 +17,8 @@ var _configPathOverride *string
 
 var _fileOverrides = map[string]string{}
 
+var version = "0.0.1-local"
+
 func setConfigPath(path string) {
 	_configPathOverride = &path
 }
@@ -60,7 +62,7 @@ func GetInt(section string, key string, defaultValue int) int {
 
 // GetVersion -- Returns the app version
 func GetVersion() string {
-	return "0.5.1"
+	return version
 }
 
 // GetValue -- Get a configuration value (as string)

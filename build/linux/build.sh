@@ -28,4 +28,4 @@ go build -ldflags "-X github.com/ondevice/ondevice/config.version=$VERSION" -o /
 install build/linux/ondevice.service /tmp/build/usr/lib/systemd/system/
 
 cd /tmp/build
-tar cfz $BASEDIR/target/ondevice_linux_${VERSION}_${GOARCH}.tgz ./usr
+tar cfz $BASEDIR/target/ondevice-linux_${VERSION}_${GOARCH}.tgz ./usr

@@ -1,6 +1,9 @@
 ondevice.io command line client
 ===============================
 
+[![Build Status](https://travis-ci.org/ondevice/ondevice.svg?branch=master)](https://travis-ci.org/ondevice/ondevice)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ondevice/ondevice)](https://goreportcard.com/report/github.com/ondevice/ondevice)
+
 This is the official [ondevice.io][ondevice.io] commandline client, written in [Go][go].
 
 ondevice.io is a service that simplifies access to your SSH-enabled devices.

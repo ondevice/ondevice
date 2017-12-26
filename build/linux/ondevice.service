@@ -1,0 +1,9 @@
+[Unit]
+Description = ondevice daemon
+
+[Service]
+User = ondevice
+ExecStart = source /etc/default/ondevice-daemon /usr/bin/ondevice daemon -f
+
+RestartSec = 5
+Restart = on-failure

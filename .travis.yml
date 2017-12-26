@@ -5,7 +5,8 @@ services:
 - docker
 
 script:
-- make package-deb build-docker
+- make package
+# list the files that have been created by the build process
 - find target/ -type f
 
 before_install:
@@ -20,6 +21,7 @@ deploy:
     secure: xt3JfSxbTRaqZQ1ESCrr0E1+WiTVgiCECgit57Bw0yFqO1ur6hrsrbjsRuWdqnytzgbHjWorzX3Ro6BCoCtiJIS+J4zgbiDmdVZNCOql767+Ipy/d8N0IgodQXS7ajotGLnuEe+ON3It0P2qMpPQ0jKkTjB90/AZyAnn1DLLvU1Tv1FMWSEgs0Ks31HU52lvBdxz0z7rbv6DU04wNSfhhcpd/Q9CAwHmgfFInGQdTZJJjOSJXcq9SNdPftMRsNPqVsxFCeZHNNg/3XB2l9q7LSlRgkkgLbfFkUbJF5pj516pCg1RIAnRq4hD/J/dUM1agd84hwv0qb5QLslIOOPAG6dweGzdxZ9ApBZysv2CkkAInSHdX5PwbZJijg7jYD8RorDoSU8E4SsPstiaF0S6MGWb3gh3ra91Jaa8KO1+71XZ3a1+N+r1hEkk5Ro2J8UQo/M0CIBxfNUlrkaMKG2k0LxiiLCMEvU/F3JAO2kjyT5pQXX4JQy/7jRPst7VxyD+timoAx0S3cy6KbcNOtmNwiCsYhUMlryIfGV6sTft/kT9mUY09zAtr1CniXJvHACmKUvwm0TDAxu7llryadUDSRp+p9fdBIv8pnQJrZTtFinCKqdpriOc8xcZQ0u28j1Laf+Etl2ilqRHaXTii3E3g90PGpsvQx2MsCvXaljNQqE=
   file_glob: true
   file:
+  - target/ondevice_*_linux_*.tgz
   - target/deb/*/ondevice_*.deb
   - target/deb/amd64/ondevice-daemon_*.deb
   on:

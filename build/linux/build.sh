@@ -21,11 +21,17 @@ if [ -d /tmp/build/ ]; then
 	false
 fi
 
-cd "$BASEDIR"
+# install glide
+curl https://glide.sh/get | sh
 
+
+# build ondevice + prepare target dir
+cd "$BASEDIR"
+glide update
 mkdir -p /tmp/build/usr/lib/systemd/system/ /tmp/build/usr/bin/ "$BASEDIR/target/"
 go build -ldflags "-X github.com/ondevice/ondevice/config.version=$VERSION" -o /tmp/build/usr/bin/ondevice ondevice.go
 install build/linux/ondevice.service /tmp/build/usr/lib/systemd/system/
 
+# create .tgz
 cd /tmp/build
 tar cfz $BASEDIR/target/ondevice-linux_${VERSION}_${GOARCH}.tgz ./usr

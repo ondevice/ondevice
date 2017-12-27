@@ -6,7 +6,7 @@ services:
 
 script:
 - make package
-- make test
+- go test ./...
 # list the files that have been created by the build process
 - find target/ -type f
 

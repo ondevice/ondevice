@@ -21,8 +21,6 @@ deps:
 # builds all the release artifacts
 package: package-deb package-linux build-docker
 
-test:
-	go test ./...
 
 #
 # ondevice/ondevice docker image

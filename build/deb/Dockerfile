@@ -6,9 +6,6 @@
 ARG SOURCE_IMAGE
 FROM ${SOURCE_IMAGE}
 
-#ARG ARCH
-#RUN test "${ARCH}" = "$(dpkg --print-architecture)"
-
 RUN apt-get update && apt-get -y install devscripts git curl wget
 
 RUN adduser --gecos builduser,,, --disabled-password user
@@ -36,6 +33,10 @@ RUN chown -R user:user /go/ /target/
 USER user
 
 WORKDIR /go/src/github.com/ondevice/ondevice/
+
+# check package version
+ARG VERSION
+RUN test "$(dpkg-parsechangelog --show-field Version)" = "${VERSION}"
 
 RUN glide install
 ARG BUILD_ARGS

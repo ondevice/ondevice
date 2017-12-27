@@ -6,7 +6,7 @@
 
 ARCH=$(shell uname -m)
 GO_IMAGE=golang:1.9-stretch
-VERSION=0.5.2
+VERSION=0.5.1
 
 all:
 	@mkdir -p target/
@@ -47,7 +47,7 @@ package-deb-armhf:
 _package-deb:
 	@echo "\n============\nPackaging: debian $(ARCH)\n============\n" >&2
 	# builds and packages the i386,amd64 and armhf ondevice debian packages (as well as ondevice-daemon)
-	docker build -f build/deb/Dockerfile '--build-arg=ARCH=$(ARCH)' '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' -t ondevice/package-deb-$(ARCH) .
+	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' '--build-arg=VERSION=$(VERSION)' -t ondevice/package-deb-$(ARCH) .
 
 	# extract artefacts
 	rm -rf 'target/deb/$(ARCH)'; mkdir -p target/deb/

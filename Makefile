@@ -19,7 +19,7 @@ deps:
 	glide install
 
 # builds all the release artifacts
-package: package-linux package-deb build-docker
+package: package-deb package-linux build-docker
 
 test:
 	go test ./...
@@ -58,6 +58,7 @@ _package-deb:
 #
 # Linux .tgz
 #
+# TODO this build runs as root (and might create the target as root breaking package-deb running later)
 package-linux: package-linux-amd64 package-linux-i386 package-linux-armhf
 package-linux-amd64:
 	$(MAKE) _package-linux GOARCH=amd64

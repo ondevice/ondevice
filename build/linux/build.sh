@@ -21,6 +21,9 @@ if [ -d /tmp/build/ ]; then
 	false
 fi
 
+# debian-style architecture, derived from $GOARCH (used in the resulting .tgz filename)
+ARCH="$(echo "$GOARCH"| sed 's/^386$/i386/;s/^arm$/armhf/')"
+
 # install glide
 curl https://glide.sh/get | sh
 
@@ -34,4 +37,4 @@ install build/linux/ondevice.service /tmp/build/usr/lib/systemd/system/
 
 # create .tgz
 cd /tmp/build
-tar cfz $BASEDIR/target/ondevice-linux_${VERSION}_${GOARCH}.tgz ./usr
+tar cfz $BASEDIR/target/ondevice-linux_${VERSION}_${ARCH}.tgz ./usr

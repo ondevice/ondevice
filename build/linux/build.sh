@@ -21,6 +21,11 @@ if [ -d /tmp/build/ ]; then
 	false
 fi
 
+# append $VERSION_SUFFIX if set
+if [ -n "$VERSION_SUFFIX" ]; then
+	VERSION="${VERSION}${VERSION_SUFFIX}"
+fi
+
 # debian-style architecture, derived from $GOARCH (used in the resulting .tgz filename)
 ARCH="$(echo "$GOARCH"| sed 's/^386$/i386/;s/^arm$/armhf/')"
 

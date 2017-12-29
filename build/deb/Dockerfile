@@ -38,7 +38,10 @@ WORKDIR /go/src/github.com/ondevice/ondevice/
 
 # check package version
 ARG VERSION
+ARG VERSION_SUFFIX
 RUN test "$(dpkg-parsechangelog --show-field Version)" = "${VERSION}"
+
+RUN if [ -n "$VERSION_SUFFIX" ]; then dch --newversion "${VERSION}${VERSION_SUFFIX}" 'automated build'; fi
 
 RUN glide install
 ARG BUILD_ARGS

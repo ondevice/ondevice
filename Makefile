@@ -3,10 +3,17 @@
 #
 # contains targets for building and packaging the ondevice CLI
 #
+# travis-ci.org will run `make package` (after
 
 ARCH=$(shell uname -m)
 GO_IMAGE=golang:1.9-stretch
 VERSION=0.5.1
+
+# Version suffix:
+# - empty if TRAVIS_TAG is set
+# - +build$n if TRAVIS_BUILD_NUMBER is set
+# - "-local" otherwise
+VERSION_SUFFIX:=$(if $(TRAVIS_TAG),,$(if $(TRAVIS_BUILD_NUMBER),+build$(TRAVIS_BUILD_NUMBER),-local))
 
 all:
 	@mkdir -p target/
@@ -14,6 +21,12 @@ all:
 
 clean:
 	rm -rf target/
+
+# prints variables and their values
+vars:
+	@echo 'Arch: "$(ARCH)"'
+	@echo 'Version: "$(VERSION)"'
+	@echo 'Suffix: "$(VERSION_SUFFIX)"'
 
 deps:
 	glide install
@@ -47,7 +60,7 @@ package-deb-armhf:
 _package-deb:
 	@echo "\n============\nPackaging: debian $(ARCH)\n============\n" >&2
 	# builds and packages the i386,amd64 and armhf ondevice debian packages (as well as ondevice-daemon)
-	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' '--build-arg=VERSION=$(VERSION)' -t ondevice/package-deb-$(ARCH) .
+	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' '--build-arg=VERSION=$(VERSION)' '--build-arg=VERSION_SUFFIX=$(VERSION_SUFFIX)' -t ondevice/package-deb-$(ARCH) .
 
 	# extract artefacts
 	rm -rf 'target/deb/$(ARCH)'; mkdir -p target/deb/
@@ -67,4 +80,4 @@ package-linux-i386:
 
 _package-linux:
 	@echo "\n============\nPackaging: linux $(GOARCH)\n============\n" >&2
-	docker run --rm -ti -v "$(PWD):/go/src/github.com/ondevice/ondevice/" "$(GO_IMAGE)" env GOARCH="$(GOARCH)" VERSION="$(VERSION)" /go/src/github.com/ondevice/ondevice/build/linux/build.sh
+	docker run --rm -ti -v "$(PWD):/go/src/github.com/ondevice/ondevice/" "$(GO_IMAGE)" env GOARCH="$(GOARCH)" VERSION="$(VERSION)" VERSION_SUFFIX="$(VERSION_SUFFIX)" /go/src/github.com/ondevice/ondevice/build/linux/build.sh

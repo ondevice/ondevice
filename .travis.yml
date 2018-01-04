@@ -1,5 +1,6 @@
 # config file for travis-ci.org
 sudo: required
+language: go
 services:
 - docker
 
@@ -10,7 +11,7 @@ script:
 # list the files that have been created by the build process
 - find target/ -type f -exec ls -ld {} ';'
 # upload artifacts (if $UPLOAD_HOST is defined)
-- [ -n "$UPLOAD_HOST" ] && rsync -av target/ "$UPLOAD_HOST:/srv/repo/builds/${TRAVIS_BUILD_NUMBER}/"
+- '[ -n "$UPLOAD_HOST" ] && rsync -av target/ "$UPLOAD_HOST:/srv/repo/builds/${TRAVIS_BUILD_NUMBER}/"'
 
 before_install:
 # update docker

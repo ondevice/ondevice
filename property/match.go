@@ -3,6 +3,7 @@ package property
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/logg"
@@ -28,7 +29,7 @@ var matchOperators = map[string]func(string, string) bool{
 // - property name
 // - operator (optional)
 // - value (optional)
-var re = regexp.MustCompile("^([a-zA-Z0-9_.\\-]+)(?:([=!<>]{1,2})(.*))?$")
+var re = regexp.MustCompile("^([a-zA-Z0-9_.\\-:]+)(?:([=!<>]{1,2})(.*))?$")
 
 // Matches -- Returns true if the given expression is true for the device (and its properties)
 //
@@ -56,6 +57,26 @@ func Matches(dev api.Device, expr string) (bool, error) {
 	}
 
 	var value, ok = dev.Props[key]
+
+	// handle special properties (unless they've been defined by the server)
+	if !ok && strings.HasPrefix(key, "on:") {
+		ok = true
+		switch key {
+		case "on:id":
+			value = dev.ID
+		case "on:name":
+			value = dev.Name
+		case "on:state":
+			value = dev.State
+		case "on:ip":
+			value = dev.IP
+		case "on:version":
+			value = dev.Version
+		default:
+			return false, fmt.Errorf("Unknown special property: '%s'", key)
+		}
+	}
+
 	if op == nil {
 		// "exists"-query
 		return ok && value != nil, nil

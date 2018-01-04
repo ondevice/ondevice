@@ -59,5 +59,47 @@ func TestMatches(t *testing.T) {
 	// unsupported operator
 	_, err = Matches(dev, "empty=>")
 	assert.Error(t, err)
+}
 
+func TestSpecial(t *testing.T) {
+	var dev = api.Device{
+		ID:      "demo.foo",
+		Name:    "Some device",
+		State:   "online",
+		Version: "ondevice v0.1.2",
+		Props: map[string]interface{}{
+			"hello":     "world",
+			"answer":    "42",
+			"nullValue": nil, // shouldn't happen (the server's supposed to interpret 'null' as delete), but this code should treat it as the empty string
+			"empty":     "",  // should be treated the same as nonexisting
+			"on:foo":    "server-defined special property",
+		},
+	}
+
+	// TODO test matching unqualified IDs
+	assert.True(t, MustMatch(dev, "on:id=demo.foo"))
+	assert.True(t, MustMatch(dev, "on:id>=demo.foo"))
+	assert.True(t, MustMatch(dev, "on:id>demo.fo"))
+	assert.False(t, MustMatch(dev, "on:id>demo.foo"))
+
+	// state
+	assert.True(t, MustMatch(dev, "on:state=online"))
+	assert.False(t, MustMatch(dev, "on:state=offline"))
+
+	// IP
+	assert.True(t, MustMatch(dev, "on:ip="))
+	dev.IP = "0.1.2.3"
+	assert.False(t, MustMatch(dev, "on:ip="))
+	assert.True(t, MustMatch(dev, "on:ip!="))
+	assert.True(t, MustMatch(dev, "on:ip=0.1.2.3"))
+	assert.True(t, MustMatch(dev, "on:ip>0.1.") && MustMatch(dev, "on:ip<0.2.")) // find devices in specific IP range
+
+	// other special properties
+	assert.True(t, MustMatch(dev, "on:name!="))
+	assert.True(t, MustMatch(dev, "on:version>=0.1"))
+	assert.True(t, MustMatch(dev, "on:foo=server-defined special property"))
+
+	// unknown special property
+	_, err := Matches(dev, "on:hello=foo")
+	assert.Error(t, err)
 }

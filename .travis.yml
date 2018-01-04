@@ -18,7 +18,7 @@ before_install:
 - sudo apt-get update
 - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 # set up ssh key (to push artifacts to //repo.ondevice.io)
-- openssl aes-256-cbc -K $encrypted_f8fe05bf06db_key -iv $encrypted_f8fe05bf06db_iv -in id_rsa.enc -out ~/.ssh/id_rsa -d
+- openssl aes-256-cbc -K $encrypted_f8fe05bf06db_key -iv $encrypted_f8fe05bf06db_iv -in .travis/id_rsa.enc -out ~/.ssh/id_rsa -d
 - chmod go-rwx ~/.ssh/id_rsa
 
 deploy:

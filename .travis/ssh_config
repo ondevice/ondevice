@@ -1,0 +1,4 @@
+StrictHostKeyChecking no
+ConnectTimeout 60
+UserKnownHostsFile /dev/null
+BatchMode yes

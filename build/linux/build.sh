@@ -43,4 +43,4 @@ install -m 0755 build/linux/ondevice-daemon.init.d /tmp/build/etc/init.d/ondevic
 
 # create .tgz
 cd /tmp/build
-tar cfz $BASEDIR/target/ondevice-linux_${VERSION}_${ARCH}.tgz ./
+tar cfz $BASEDIR/target/ondevice_${VERSION}_linux-${ARCH}.tgz ./

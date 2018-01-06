@@ -1,24 +1,25 @@
 hash: de01ec7c812187d9c0b80d48fbc7bb6031893a500a29a603400dca000819b3f7
-updated: 2017-06-25T20:26:05.610722842+02:00
+updated: 2017-12-29T14:00:24.10036603Z
 imports:
 - name: github.com/gorilla/websocket
   version: ea4d1f681babbce9545c9c5f3d5194a789c89f5b
 - name: github.com/howeyc/gopass
   version: bf9dde6d0d2c004a008c27aaee91170c786f6db8
 - name: github.com/jessevdk/go-flags
-  version: 48cf8722c3375517aba351d1f7577c40663a4407
+  version: 96dc06278ce32a0e9d957d590bb987c81ee66407
 - name: github.com/looplab/fsm
   version: bcc3636384ce80a109a6039432b30ff5b82476ee
 - name: golang.org/x/crypto
-  version: 3cb07270c9455e8ad27956a70891c962d121a228
+  version: 95a4943f35d008beabde8c11e5075a1b714e6419
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: 9a7256cb28ed514b4e1e5f68959914c4c28a92e0
+  version: 83801418e1b59fb1880e363299581ee543af32ca
   subpackages:
   - unix
+  - windows
 - name: gopkg.in/ini.v1
-  version: d3de07a94d22b4a0972deb4b96d790c2c0ce8333
+  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

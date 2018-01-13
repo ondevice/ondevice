@@ -64,7 +64,11 @@ _package-deb:
 
 	# extract artefacts
 	rm -rf 'target/deb/$(ARCH)'; mkdir -p target/deb/
-	CONTAINER="$$(docker run --rm -d ondevice/package-deb-$(ARCH) sleep 60)"; docker cp "$$CONTAINER:/target" 'target/deb/$(ARCH)'
+	CONTAINER="$$(docker run --rm -d ondevice/package-deb-$(ARCH) sleep 60)"; docker cp "$$CONTAINER:/target/" 'target/deb/'
+
+	# docker cp seems to always create a subdir in target/deb/... move files from there to where we want them
+	mv 'target/deb/target/'* target/deb/
+	rmdir 'target/deb/target/'
 
 #
 # Linux .tgz

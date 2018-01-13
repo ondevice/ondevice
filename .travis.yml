@@ -30,8 +30,8 @@ deploy:
   file_glob: true
   file:
   - target/ondevice_*_linux-*.tgz
-  - target/deb/*/ondevice_*.deb
-  - target/deb/amd64/ondevice-daemon_*.deb
+  - target/deb/ondevice_*.deb
+  - target/deb/ondevice-daemon_*.deb
   on:
 #   branch: stable
     repo: ondevice/ondevice

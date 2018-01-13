@@ -47,7 +47,7 @@ RUN glide install
 ARG BUILD_ARGS
 ARG GOARCH
 RUN GOARCH=${GOARCH} dpkg-buildpackage -us -uc ${BUILD_ARGS}
-RUN cp -a ../ondevice*.* /target/
+RUN cp -a ../ondevice*.deb /target/
 
 #
 # test stage (doesn't support cross-compiling)

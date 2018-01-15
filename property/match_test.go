@@ -63,10 +63,11 @@ func TestMatches(t *testing.T) {
 
 func TestSpecial(t *testing.T) {
 	var dev = api.Device{
-		ID:      "demo.foo",
-		Name:    "Some device",
-		State:   "online",
-		Version: "ondevice v0.1.2",
+		ID:        "demo.foo",
+		Name:      "Some device",
+		State:     "online",
+		Version:   "ondevice v0.1.2",
+		CreatedAt: 1516035331000, // 2018-01-15T16:55:31Z
 		Props: map[string]interface{}{
 			"hello":     "world",
 			"answer":    "42",
@@ -93,6 +94,11 @@ func TestSpecial(t *testing.T) {
 	assert.True(t, MustMatch(dev, "on:ip!="))
 	assert.True(t, MustMatch(dev, "on:ip=0.1.2.3"))
 	assert.True(t, MustMatch(dev, "on:ip>0.1.") && MustMatch(dev, "on:ip<0.2.")) // find devices in specific IP range
+
+	// CreatedAt:
+	assert.True(t, MustMatch(dev, "on:createdAt=2018-01-15T16:55:31Z"))
+	assert.True(t, MustMatch(dev, "on:createdAt>=2018")) // created this year
+	assert.True(t, MustMatch(dev, "on:createdAt>2018"))  // we're still doing simple string comparison
 
 	// other special properties
 	assert.True(t, MustMatch(dev, "on:name!="))

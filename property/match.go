@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/logg"
+	"github.com/ondevice/ondevice/util"
 )
 
 // operator examples
@@ -72,6 +74,9 @@ func Matches(dev api.Device, expr string) (bool, error) {
 			value = dev.IP
 		case "on:version":
 			value = dev.Version
+		case "on:createdAt":
+			// uses UTC ISO 8601 dates (like "2018-01-15T17:01:33Z")
+			value = util.MsecToTs(dev.CreatedAt).UTC().Format(time.RFC3339)
 		default:
 			return false, fmt.Errorf("Unknown special property: '%s'", key)
 		}

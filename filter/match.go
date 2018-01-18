@@ -1,4 +1,4 @@
-package property
+package filter
 
 import (
 	"fmt"

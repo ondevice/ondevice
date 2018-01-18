@@ -7,8 +7,8 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/filter"
 	"github.com/ondevice/ondevice/logg"
-	"github.com/ondevice/ondevice/property"
 )
 
 type listCommand struct {
@@ -123,7 +123,7 @@ func _getColumns(dev api.Device) []string {
 // returns true if the device matches the given --with(out) flags
 func _matches(dev api.Device, filters []string) (bool, error) {
 	for _, f := range filters {
-		if ok, err := property.Matches(dev, f); err != nil {
+		if ok, err := filter.Matches(dev, f); err != nil {
 			return false, err
 		} else if !ok {
 			return false, nil

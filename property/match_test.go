@@ -56,8 +56,10 @@ func TestMatches(t *testing.T) {
 	assert.False(t, MustMatch(dev, "answer>42"))
 	assert.False(t, MustMatch(dev, "answer>43"))
 
-	// unsupported operator
+	// invalid filter expressions
 	_, err = Matches(dev, "empty=>")
+	assert.Error(t, err)
+	_, err = Matches(dev, "=>foo")
 	assert.Error(t, err)
 }
 
@@ -106,6 +108,5 @@ func TestSpecial(t *testing.T) {
 	assert.True(t, MustMatch(dev, "on:foo=server-defined special property"))
 
 	// unknown special property
-	_, err := Matches(dev, "on:hello=foo")
-	assert.Error(t, err)
+	assert.False(t, MustMatch(dev, "on:hello=foo"))
 }

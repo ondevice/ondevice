@@ -60,7 +60,7 @@ func Matches(dev api.Device, expr string) (bool, error) {
 
 	var value, ok = dev.Props[key]
 
-	// handle special properties (unless they've been defined by the server)
+	// handle special properties ('!ok' allows the server to override them explicitly)
 	if !ok && strings.HasPrefix(key, "on:") {
 		ok = true
 		switch key {
@@ -78,7 +78,10 @@ func Matches(dev api.Device, expr string) (bool, error) {
 			// uses UTC ISO 8601 dates (like "2018-01-15T17:01:33Z")
 			value = util.MsecToTs(dev.CreatedAt).UTC().Format(time.RFC3339)
 		default:
-			return false, fmt.Errorf("Unknown special property: '%s'", key)
+			ok = false
+			// we can't raise an error here because otherwise server-defined special
+			// properties would have to be set on ALL devices (the first one lacking it would cause this error)
+			//return false, fmt.Errorf("Unknown special property: '%s'", key)
 		}
 	}
 

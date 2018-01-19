@@ -25,14 +25,21 @@ func TestMatches(t *testing.T) {
 	assert.True(t, MustMatch(dev, "hello"))
 	assert.True(t, MustMatch(dev, "answer"))
 	assert.False(t, MustMatch(dev, "nullValue"))
+	assert.False(t, MustMatch(dev, "empty"))
 	assert.True(t, MustMatch(dev, "answer!="))
 
 	// doesn't exist / empty (comparing them with the empty string)
+	assert.False(t, MustMatch(dev, "doesntExist"))
 	assert.True(t, MustMatch(dev, "doesntExist="))
 	assert.False(t, MustMatch(dev, "doesntExist!="))
-	assert.True(t, MustMatch(dev, "empty"))
+
+	assert.False(t, MustMatch(dev, "empty"))
+	assert.True(t, MustMatch(dev, "empty="))
 	assert.False(t, MustMatch(dev, "empty!="))
+
+	assert.False(t, MustMatch(dev, "nullValue"))
 	assert.True(t, MustMatch(dev, "nullValue="))
+	assert.False(t, MustMatch(dev, "nullValue!="))
 
 	// equality tests
 	assert.True(t, MustMatch(dev, "answer==42"))

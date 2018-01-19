@@ -87,7 +87,7 @@ func Matches(dev api.Device, expr string) (bool, error) {
 
 	if op == nil {
 		// "exists"-query
-		return ok && value != nil, nil
+		return ok && value != nil && value != "", nil
 	}
 
 	// For now we'll simply treat nil/nonexisting as the empty string, e.g.:

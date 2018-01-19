@@ -65,18 +65,18 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 }
 
 func deleteBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
-	return _getBody(delete(endpoint, params, bodyType, body, auths...))
+	return _getResponse(delete(endpoint, params, bodyType, body, auths...))
 }
 
 func getBody(endpoint string, params map[string]string, auths ...Authentication) ([]byte, error) {
-	return _getBody(get(endpoint, params, auths...))
+	return _getResponse(get(endpoint, params, auths...))
 }
 
 func postBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
-	return _getBody(post(endpoint, params, bodyType, body, auths...))
+	return _getResponse(post(endpoint, params, bodyType, body, auths...))
 }
 
-func _getBody(resp *http.Response, err error) ([]byte, error) {
+func _getResponse(resp *http.Response, err error) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}

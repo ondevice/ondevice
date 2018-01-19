@@ -31,6 +31,12 @@ type propertyListResponse struct {
 	Props map[string]map[string]interface{}
 }
 
+// DeleteDevice -- remove a device (will fail if the device has recently been online)
+func DeleteDevice(devID string, auths ...Authentication) error {
+	var _, err = deleteBody("/device/"+devID, nil, "", nil, auths...)
+	return err
+}
+
 // ListDevices -- list your devices and their state
 func ListDevices(state string, props bool, auths ...Authentication) ([]Device, error) {
 	var resp deviceResponse

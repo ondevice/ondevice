@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +11,12 @@ import (
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 )
+
+type ErrorMessage struct {
+	Status string `json:"status"`
+	Code   int    `json:"code"`
+	Msg    string `json:"msg"`
+}
 
 func delete(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
 	return _request("DELETE", endpoint, params, bodyType, body, auths...)
@@ -56,12 +61,6 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		var errMsg = getErrorMessage(resp)
-
-		return nil, fmt.Errorf("Authentication failed: %s", errMsg)
-	}
-
 	return resp, err
 }
 
@@ -82,13 +81,19 @@ func _getBody(resp *http.Response, err error) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, errors.New("authentication failed")
-	} else if resp.StatusCode == http.StatusTooManyRequests {
-		var delayStr = resp.Header.Get("X-Ratelimit-Delay")
-		return nil, fmt.Errorf("Error: Too many requests (try again in %ss)", delayStr)
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP error: %s", resp.Status)
+	var errMsg ErrorMessage
+	if resp.StatusCode != http.StatusOK {
+		errMsg = getErrorMessage(resp)
+
+		if resp.StatusCode == http.StatusUnauthorized {
+			return nil, fmt.Errorf("Authentication failed: %s", errMsg.Msg)
+		} else if resp.StatusCode == http.StatusTooManyRequests {
+			var delayStr = resp.Header.Get("X-Ratelimit-Delay")
+			return nil, fmt.Errorf("Error: Too many requests (try again in %ss)", delayStr)
+		}
+
+		// else
+		return nil, fmt.Errorf("Request error (code %d): %s", errMsg.Code, errMsg.Msg)
 	}
 
 	defer resp.Body.Close()
@@ -128,19 +133,33 @@ func _getObject(tgtValue interface{}, body []byte, err error) error {
 	return nil
 }
 
-func getErrorMessage(resp *http.Response) string {
+func getErrorMessage(resp *http.Response) ErrorMessage {
 	var contentType = strings.SplitN(resp.Header.Get("Content-type"), ";", 2)
+	var body []byte
+	var err error
+	var rc ErrorMessage
+
 	if len(contentType) < 2 {
 		logg.Fatal("missing/malformed response content type: ", resp.Header.Get("Content-type"))
 	}
 
-	if contentType[0] == "text/plain" {
-		var body, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			logg.Fatal("Failed to read response body: ", err)
-		}
-		return string(body)
+	if body, err = ioutil.ReadAll(resp.Body); err != nil {
+		logg.Fatal("Failed to read response body: ", err)
 	}
 
-	return ""
+	switch contentType[0] {
+	case "text/plain":
+		rc.Code = resp.StatusCode
+		rc.Status = "error"
+		rc.Msg = string(body)
+	case "application/json":
+		if err = json.Unmarshal(body, &rc); err != nil {
+			logg.Infof("response body: '%s'", string(body))
+			logg.Fatalf("Failed to parse response message (response: %s): %s", resp.Status, err)
+		}
+	default:
+		logg.Fatal("Unexpected error response format: ", resp.Header.Get("Content-type"))
+	}
+
+	return rc
 }

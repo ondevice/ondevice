@@ -6,7 +6,6 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/filter"
 	"github.com/ondevice/ondevice/logg"
 )
@@ -39,13 +38,15 @@ func (l listCommand) run(args []string) int {
 	}
 
 	// --user
-	var auths []api.Authentication
+	var auth api.Authentication
 	if opts.User != "" {
-		var user, pwd string
-		if user, pwd, err = config.GetClientUserAuth(opts.User); err == nil {
-			auths = append(auths, api.CreateAuth(user, pwd))
-		} else {
-			logg.Errorf("Can't find client auth for user '%s'", opts.User)
+		if auth, err = api.GetClientAuthForUser(opts.User); err != nil {
+			logg.Fatalf("Can't find client auth for user '%s'", opts.User)
+			return 1
+		}
+	} else {
+		if auth, err = api.CreateClientAuth(); err != nil {
+			logg.Fatal("Missing client auth, have you run 'ondevice login'?")
 			return 1
 		}
 	}
@@ -55,14 +56,15 @@ func (l listCommand) run(args []string) int {
 		opts.Properties = true
 	}
 
-	allDevices, err := api.ListDevices(opts.State, opts.Properties, auths...)
+	allDevices, err := api.ListDevices(opts.State, opts.Properties, auth)
 	if err != nil {
 		logg.Fatal(err)
 	}
 
 	var devices = make([]api.Device, 0, len(allDevices))
 	for _, dev := range allDevices {
-		if ok, err := _matches(dev, filters); err != nil {
+		var ok bool
+		if ok, err = _matches(dev, filters); err != nil {
 			logg.Fatal(err)
 		} else if ok {
 			devices = append(devices, dev)

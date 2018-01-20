@@ -99,6 +99,33 @@ func CreateDeviceAuth() (Authentication, error) {
 	return CreateAuth(user, auth), nil
 }
 
+// GetClientAuthForDevice -- Returns an Authentication struct for the given devID
+//
+// with unqualified devIDs, this will do the same as CreateClientAuth().
+// But if the devID has a user prefix (and we have extra credentials for that user), it'll return those instead
+func GetClientAuthForDevice(devID string) (Authentication, error) {
+	if strings.Contains(devID, ".") {
+		parts := strings.SplitN(devID, ".", 2)
+		if user, pwd, err := config.GetClientUserAuth(parts[0]); err == nil {
+			return CreateAuth(user, pwd), nil
+		}
+	}
+
+	return CreateClientAuth()
+}
+
+// GetClientAuthForUser -- Returns the client Authentication for the given user name (if available)
+func GetClientAuthForUser(username string) (Authentication, error) {
+	var user, key, err = config.GetClientUserAuth(username)
+	var rc Authentication
+
+	if err != nil {
+		return rc, err
+	}
+	rc = CreateAuth(user, key)
+	return rc, nil
+}
+
 func init() {
 	if os.Getenv("ONDEVICE_SERVER") != "" {
 		_apiServer = os.Getenv("ONDEVICE_SERVER")

@@ -4,10 +4,8 @@ import (
 	"bufio"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
@@ -36,18 +34,9 @@ func (p pipeCommand) run(args []string) int {
 	devID := args[0]
 	service := args[1]
 
-	auth, err := api.CreateClientAuth()
+	auth, err := api.GetClientAuthForDevice(devID)
 	if err != nil {
 		logg.Fatal("Missing client credentials")
-	}
-
-	if strings.Contains(devID, ".") {
-		parts := strings.SplitN(devID, ".", 2)
-		var user, pwd string
-		if user, pwd, err = config.GetClientUserAuth(parts[0]); err == nil {
-			devID = parts[1]
-			auth = api.CreateAuth(user, pwd)
-		}
 	}
 
 	p.writer = bufio.NewWriter(os.Stdout)

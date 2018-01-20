@@ -5,14 +5,14 @@ import "github.com/stretchr/testify/assert"
 
 func TestKeyInfo(t *testing.T) {
 	// check the 'demo' user's device key
-	auth := CreateAuth("demo", "ehb8f971h1")
+	auth := NewAuth("demo", "ehb8f971h1")
 	info, err := GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "device", info.Role)
 	assert.Equal(t, []string{"device"}, info.Permissions)
 
 	// and the 'demo' user's client key
-	auth = CreateAuth("demo", "caxuaph5th")
+	auth = NewAuth("demo", "caxuaph5th")
 	info, err = GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "client", info.Role)
@@ -24,12 +24,12 @@ func TestKeyInfo(t *testing.T) {
 
 	if false {
 		// nonexisting user
-		auth = CreateAuth("xxx", "blablabla")
+		auth = NewAuth("xxx", "blablabla")
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 
 		// wrong auth key
-		auth = CreateAuth("demo", "blablabla")
+		auth = NewAuth("demo", "blablabla")
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 	}

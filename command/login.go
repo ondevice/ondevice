@@ -15,6 +15,7 @@ import (
 
 type loginOpts struct {
 	BatchUser string `long:"batch" description:"If set, use that user to login and read the auth key from stdin"`
+	Type      string `long:"type" description:"If set, only update credentials of that type (one of 'client', 'device', 'extra')"`
 }
 
 func loginRun(args []string) int {
@@ -50,7 +51,7 @@ func loginRun(args []string) int {
 		auth = string(authBytes)
 	}
 
-	info, err := api.GetKeyInfo(api.CreateAuth(user, auth))
+	info, err := api.GetKeyInfo(api.NewAuth(user, auth))
 	if err != nil {
 		logg.Fatal(err)
 	}

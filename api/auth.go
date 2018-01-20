@@ -73,21 +73,21 @@ func (a *Authentication) SetServerURL(apiServer string) {
 	a.apiServer = apiServer
 }
 
-// CreateAuth -- Create Authentication object
-func CreateAuth(user string, auth string) Authentication {
+// NewAuth -- Create Authentication object
+func NewAuth(user string, auth string) Authentication {
 	return Authentication{
 		user: user,
 		auth: auth,
 	}
 }
 
-// CreateClientAuth -- Create default authentication
+// CreateClientAuth -- Get default client authentication
 func CreateClientAuth() (Authentication, error) {
 	user, auth, err := config.GetClientAuth()
 	if err != nil {
 		return Authentication{}, err
 	}
-	return CreateAuth(user, auth), nil
+	return NewAuth(user, auth), nil
 }
 
 // CreateDeviceAuth -- Create default device authentication
@@ -96,7 +96,7 @@ func CreateDeviceAuth() (Authentication, error) {
 	if err != nil {
 		return Authentication{}, err
 	}
-	return CreateAuth(user, auth), nil
+	return NewAuth(user, auth), nil
 }
 
 // GetClientAuthForDevice -- Returns an Authentication struct for the given devID
@@ -107,7 +107,7 @@ func GetClientAuthForDevice(devID string) (Authentication, error) {
 	if strings.Contains(devID, ".") {
 		parts := strings.SplitN(devID, ".", 2)
 		if user, pwd, err := config.GetClientUserAuth(parts[0]); err == nil {
-			return CreateAuth(user, pwd), nil
+			return NewAuth(user, pwd), nil
 		}
 	}
 
@@ -122,7 +122,7 @@ func GetClientAuthForUser(username string) (Authentication, error) {
 	if err != nil {
 		return rc, err
 	}
-	rc = CreateAuth(user, key)
+	rc = NewAuth(user, key)
 	return rc, nil
 }
 

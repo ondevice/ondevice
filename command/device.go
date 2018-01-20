@@ -30,14 +30,25 @@ func deviceRun(args []string) int {
 		err = errors.New("missing deviceId")
 	} else if len(args) < 2 {
 		err = errors.New("missing device command")
-	} else if args[1] == "set" {
-		err = deviceSetProperties(args[0], args[2:])
-	} else if args[1] == "rm" {
-		err = deviceRemoveProperties(args[0], args[2:], opts)
-	} else if args[1] == "props" || args[1] == "properties" || args[1] == "list" {
-		err = deviceListProperties(args[0])
-	} else {
-		err = fmt.Errorf("Unknown device command: '%s'", args[1])
+	}
+
+	if err != nil {
+		logg.Fatal("Error: ", err)
+		return 1
+	}
+
+	var devID = args[0]
+	var cmd = args[1]
+
+	switch cmd {
+	case "set":
+		err = deviceSetProperties(devID, args[2:])
+	case "rm":
+		err = deviceRemoveProperties(devID, args[2:], opts)
+	case "props", "properties", "list":
+		err = deviceListProperties(devID)
+	default:
+		err = fmt.Errorf("Unknown device command: '%s'", cmd)
 	}
 
 	if err != nil {

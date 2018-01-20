@@ -17,7 +17,7 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 	params := map[string]string{"key": deviceKey, "tunnel": tunnelID}
 
 	// get authentication
-	auth, err := api.CreateDeviceAuth()
+	auth, err := api.GetDeviceAuth()
 	if len(auths) > 0 {
 		auth = auths[0]
 	} else if err != nil {

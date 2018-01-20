@@ -90,15 +90,6 @@ func CreateClientAuth() (Authentication, error) {
 	return NewAuth(user, auth), nil
 }
 
-// CreateDeviceAuth -- Create default device authentication
-func CreateDeviceAuth() (Authentication, error) {
-	user, auth, err := config.GetDeviceAuth()
-	if err != nil {
-		return Authentication{}, err
-	}
-	return NewAuth(user, auth), nil
-}
-
 // GetClientAuthForDevice -- Returns an Authentication struct for the given devID
 //
 // with unqualified devIDs, this will do the same as CreateClientAuth().
@@ -124,6 +115,15 @@ func GetClientAuthForUser(username string) (Authentication, error) {
 	}
 	rc = NewAuth(user, key)
 	return rc, nil
+}
+
+// GetDeviceAuth -- Create default device authentication
+func GetDeviceAuth() (Authentication, error) {
+	user, auth, err := config.GetDeviceAuth()
+	if err != nil {
+		return Authentication{}, err
+	}
+	return NewAuth(user, auth), nil
 }
 
 func init() {

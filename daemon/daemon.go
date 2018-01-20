@@ -37,7 +37,7 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, util.APIError) {
 	rc := DeviceSocket{}
 
 	if len(auths) == 0 {
-		auth, err := api.CreateDeviceAuth()
+		auth, err := api.GetDeviceAuth()
 		if err != nil {
 			logg.Fatal("Couldn't get device auth: ", err)
 		}

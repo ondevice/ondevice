@@ -39,14 +39,15 @@ func deviceRun(args []string) int {
 
 	var devID = args[0]
 	var cmd = args[1]
+	args = args[2:]
 
 	switch cmd {
 	case "set":
-		err = deviceSetProperties(devID, args[2:])
+		err = deviceSetProperties(devID, args)
 	case "rm":
-		err = deviceRemoveProperties(devID, args[2:], opts)
+		err = deviceRemoveProperties(devID, args, opts)
 	case "props", "properties", "list":
-		err = deviceListProperties(devID)
+		err = deviceListProperties(devID, args)
 	default:
 		err = fmt.Errorf("Unknown device command: '%s'", cmd)
 	}
@@ -58,7 +59,10 @@ func deviceRun(args []string) int {
 	return 0
 }
 
-func deviceListProperties(devID string) error {
+func deviceListProperties(devID string, extraArgs []string) error {
+	if len(extraArgs) > 0 {
+		return errors.New("Too many arguments")
+	}
 	return _printProperties(api.ListProperties(devID))
 }
 

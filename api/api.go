@@ -34,7 +34,7 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	var auth *Authentication
 
 	if auths == nil {
-		a, _ := CreateClientAuth()
+		a, _ := GetClientAuth()
 		auth = &a
 	} else {
 		auth = &auths[0]

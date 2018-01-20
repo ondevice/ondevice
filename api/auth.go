@@ -81,8 +81,8 @@ func NewAuth(user string, auth string) Authentication {
 	}
 }
 
-// CreateClientAuth -- Get default client authentication
-func CreateClientAuth() (Authentication, error) {
+// GetClientAuth -- Get default client authentication
+func GetClientAuth() (Authentication, error) {
 	user, auth, err := config.GetClientAuth()
 	if err != nil {
 		return Authentication{}, err
@@ -92,7 +92,7 @@ func CreateClientAuth() (Authentication, error) {
 
 // GetClientAuthForDevice -- Returns an Authentication struct for the given devID
 //
-// with unqualified devIDs, this will do the same as CreateClientAuth().
+// with unqualified devIDs, this will do the same as GetClientAuth().
 // But if the devID has a user prefix (and we have extra credentials for that user), it'll return those instead
 func GetClientAuthForDevice(devID string) (Authentication, error) {
 	if strings.Contains(devID, ".") {
@@ -102,7 +102,7 @@ func GetClientAuthForDevice(devID string) (Authentication, error) {
 		}
 	}
 
-	return CreateClientAuth()
+	return GetClientAuth()
 }
 
 // GetClientAuthForUser -- Returns the client Authentication for the given user name (if available)

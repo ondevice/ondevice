@@ -45,7 +45,7 @@ func (l listCommand) run(args []string) int {
 			return 1
 		}
 	} else {
-		if auth, err = api.CreateClientAuth(); err != nil {
+		if auth, err = api.GetClientAuth(); err != nil {
 			logg.Fatal("Missing client auth, have you run 'ondevice login'?")
 			return 1
 		}

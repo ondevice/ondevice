@@ -41,13 +41,18 @@ func deviceRun(args []string) int {
 	var cmd = args[1]
 	args = args[2:]
 
+	var auth api.Authentication
+	if auth, err = api.GetClientAuthForDevice(devID); err != nil {
+		logg.Fatal("Missing client auth!")
+	}
+
 	switch cmd {
 	case "set":
-		err = deviceSetProperties(devID, args)
+		err = deviceSetProperties(devID, args, auth)
 	case "rm":
-		err = deviceRemoveProperties(devID, args, opts)
+		err = deviceRemoveProperties(devID, args, opts, auth)
 	case "props", "properties", "list":
-		err = deviceListProperties(devID, args)
+		err = deviceListProperties(devID, args, auth)
 	default:
 		err = fmt.Errorf("Unknown device command: '%s'", cmd)
 	}
@@ -59,14 +64,14 @@ func deviceRun(args []string) int {
 	return 0
 }
 
-func deviceListProperties(devID string, extraArgs []string) error {
+func deviceListProperties(devID string, extraArgs []string, auth api.Authentication) error {
 	if len(extraArgs) > 0 {
 		return errors.New("Too many arguments")
 	}
-	return _printProperties(api.ListProperties(devID))
+	return _printProperties(api.ListProperties(devID, auth))
 }
 
-func deviceRemoveProperties(devID string, args []string, opts DeviceOpts) error {
+func deviceRemoveProperties(devID string, args []string, opts DeviceOpts, auth api.Authentication) error {
 	if len(args) == 0 {
 		logg.Error("Too few arguments")
 	}
@@ -111,7 +116,7 @@ func deviceRemoveProperties(devID string, args []string, opts DeviceOpts) error 
 		}
 
 		if confirmed {
-			if err := api.DeleteDevice(devID); err != nil {
+			if err := api.DeleteDevice(devID, auth); err != nil {
 				return err
 			}
 		} else {
@@ -120,10 +125,10 @@ func deviceRemoveProperties(devID string, args []string, opts DeviceOpts) error 
 		return nil
 	}
 
-	return _printProperties(api.RemoveProperties(devID, args))
+	return _printProperties(api.RemoveProperties(devID, args, auth))
 }
 
-func deviceSetProperties(devID string, args []string) error {
+func deviceSetProperties(devID string, args []string, auth api.Authentication) error {
 	var props = make(map[string]string)
 
 	for _, arg := range args {
@@ -134,7 +139,7 @@ func deviceSetProperties(devID string, args []string) error {
 		props[s[0]] = s[1]
 	}
 
-	return _printProperties(api.SetProperties(devID, props))
+	return _printProperties(api.SetProperties(devID, props, auth))
 }
 
 func _printProperties(props map[string]interface{}, err error) error {

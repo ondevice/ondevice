@@ -147,25 +147,42 @@ func _printProperties(props map[string]interface{}, err error) error {
 		return err
 	}
 
-	// get list of keys and sort them
-	var keys = make([]string, 0, len(props))
+	// get list of keys and sort them (by scope)
+	var sortedKeys = map[string][]string{}
 	for k := range props {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		var v = props[k]
-		var repr string
-
-		if s, ok := v.(string); ok {
-			repr = s
-		} else {
-			var reprBytes, _ = json.Marshal(v)
-			repr = string(reprBytes)
+		var scope = ""
+		if parts := strings.SplitN(k, ":", 2); len(parts) == 2 {
+			scope = parts[0]
+			//k = parts[1] -- we'll keep the qualified key names
 		}
+		sortedKeys[scope] = append(sortedKeys[scope], k)
+	}
 
-		fmt.Printf("%s=%s\n", k, repr)
+	// sort scopes and the keys of each
+	var sortedScopes = make([]string, 0, len(sortedKeys))
+	for s := range sortedKeys {
+		sort.Strings(sortedKeys[s])
+		if s != "" {
+			sortedScopes = append(sortedScopes, s)
+		}
+	}
+	sort.Strings(sortedScopes)
+	sortedScopes = append(sortedScopes, "") // unscoped properties go last
+
+	for _, s := range sortedScopes {
+		for _, k := range sortedKeys[s] {
+			var v = props[k]
+			var repr string
+
+			if s, ok := v.(string); ok {
+				repr = s
+			} else {
+				var reprBytes, _ = json.Marshal(v)
+				repr = string(reprBytes)
+			}
+
+			fmt.Printf("%s=%s\n", k, repr)
+		}
 	}
 
 	return nil

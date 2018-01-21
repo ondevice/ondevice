@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/ondevice/ondevice/api"
@@ -116,4 +117,55 @@ func TestSpecial(t *testing.T) {
 
 	// unknown special property
 	assert.False(t, MustMatch(dev, "on:hello=foo"))
+}
+
+func TestTypes(t *testing.T) {
+	// we get the device properties as JSON object.
+	// this test makes sure the JSON deserializer works as expected (i.e. doesn't
+	// unmarshal to any types we don't expect)
+	var dev = api.Device{}
+	assert.NoError(t, json.Unmarshal([]byte(`
+		{
+			"null": null,
+			"bool": true,
+			"smallInt": 123,
+			"bigInt": 119879128371981,
+			"float1": 192.0,
+			"float2": 192.1,
+			"intArray": [1,3,2],
+			"dict": {"answer": 42}
+		}
+	`), &dev.Props))
+
+	assert.True(t, MustMatch(dev, "null="))
+	assert.False(t, MustMatch(dev, "null"))
+	assert.True(t, MustMatch(dev, "smallInt=123"))
+	assert.True(t, MustMatch(dev, "smallInt<23")) // string comparison
+	assert.True(t, MustMatch(dev, "bigInt=119879128371981"))
+	assert.True(t, MustMatch(dev, "bigInt<2"))
+	assert.True(t, MustMatch(dev, "float1=192"))
+	assert.True(t, MustMatch(dev, "float2=192.1"))
+
+	// we can't handle arrays though
+	assert.True(t, MustMatch(dev, "intArray")) // simple 'exists' expression should work
+
+	var _, err = Matches(dev, "intArray=123")
+	assert.Error(t, err)
+	_, err = Matches(dev, "intArray!=")
+	assert.Error(t, err)
+	_, err = Matches(dev, "intArray=")
+	assert.Error(t, err)
+
+	// same goes for dicts
+	assert.True(t, MustMatch(dev, "dict")) // simple 'exists' expression should work
+
+	_, err = Matches(dev, "dict=123")
+	assert.Error(t, err)
+	_, err = Matches(dev, "dict!=")
+	assert.Error(t, err)
+	_, err = Matches(dev, "dict=")
+	assert.Error(t, err)
+
+	// TODO: object traversal
+	//assert.True(t, MustMatch(dev, "dict.answer=42"))
 }

@@ -2,7 +2,9 @@ package filter
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -98,12 +100,20 @@ func Matches(dev api.Device, expr string) (bool, error) {
 	if value == nil {
 		value = ""
 	}
-	if s, ok := value.(string); ok {
-		return op(s, expectedValue), nil
+
+	// convert non-string values to string (to make sure we won't choke on them)
+	var strVal string
+	if strVal, ok = value.(string); ok {
+	} else if val, ok := value.(bool); ok {
+		strVal = strconv.FormatBool(val)
+	} else if val, ok := value.(float64); ok {
+		strVal = strconv.FormatFloat(val, 'f', -1, 64)
+	} else {
+		// TODO add support for extra types
+		return false, fmt.Errorf("Unsupported property type: key=%s, type=%s)", key, reflect.TypeOf(value))
 	}
 
-	// TODO add support for non-string types
-	return false, fmt.Errorf("Expected string property: '%s'", value)
+	return op(strVal, expectedValue), nil
 }
 
 // MustMatch -- Wrapper around Matches() panicking on error

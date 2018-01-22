@@ -1,5 +1,6 @@
 [Unit]
 Description = ondevice daemon
+After = network.target auditd.service
 
 [Service]
 User = ondevice
@@ -7,7 +8,15 @@ Environment = CONFFILE=/var/lib/ondevice/ondevice.conf
 Environment = PIDFILE=/var/run/ondevice/ondevice.pid
 Environment = SOCKFILE=/var/run/ondevice/ondevice.sock
 EnvironmentFile = /etc/default/ondevice-daemon
+
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/run/ondevice/
+ExecStartPre=/bin/chown -R ondevice:ondevice /var/run/ondevice/
+
 ExecStart = /usr/bin/ondevice daemon --conf="${CONFFILE}" --pidfile="${PIDFILE}" --sock="${SOCKFILE}"
 
 RestartSec = 5
 Restart = on-failure
+
+[Install]
+WantedBy = multi-user.target

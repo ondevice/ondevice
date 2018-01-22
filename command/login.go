@@ -36,6 +36,14 @@ func loginRun(args []string) int {
 		}
 		auth = strings.TrimSpace(auth)
 	} else {
+		fmt.Print("Please login using one of your ondevice.io Auth Keys.\n\n")
+
+		fmt.Println("-----")
+		fmt.Println("DO NOT use your account password - it won't work.")
+		fmt.Println("If you haven't set one up yet, visit https://my.ondevice.io/me/keys")
+		fmt.Println("(see https://docs.ondevice.io/basics/auth-keys/ for details)")
+		fmt.Print("-----\n\n")
+
 		fmt.Print("User: ")
 		user, err = reader.ReadString('\n')
 		if err != nil {
@@ -43,7 +51,7 @@ func loginRun(args []string) int {
 		}
 		user = strings.TrimSpace(user)
 
-		fmt.Printf("Auth: ")
+		fmt.Printf("Auth key: ")
 		var authBytes []byte
 		if authBytes, err = gopass.GetPasswd(); err != nil {
 			logg.Fatal(err)

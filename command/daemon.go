@@ -1,6 +1,7 @@
 package command
 
 import (
+	"log"
 	"net/url"
 	"os"
 	"time"
@@ -21,6 +22,8 @@ type DaemonOpts struct {
 }
 
 func daemonRun(args []string) int {
+	log.SetFlags(log.LstdFlags)
+
 	if os.Getuid() == 0 {
 		logg.Fatal("`ondevice daemon` should not be run as root")
 	}

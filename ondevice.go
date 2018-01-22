@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	// disable date/time logging (there's an override for `ondevice daemon`)
+	log.SetFlags(0)
+
 	if len(os.Args) < 2 {
 		logg.Fatal("Missing command! try 'ondevice help'")
 	}

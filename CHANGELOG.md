@@ -1,3 +1,13 @@
+### v0.5.3 (2018-01-??)
+
+- added ondevice list filter expressions (see https://docs.ondevice.io/commands/list/ )
+- you can now delete devices using `ondevice device $devId rm on:id`
+- added systemd support
+- setting request timeouts (preventing the tool to wait indefinitely)
+- improved error handline and logging
+- improved build pipeline (automatically rsyncing pushes to https://repo.ondevice.io/builds/ )
+- making it clear that you can't use your account password (for `ondevice login` and `dpkg-reconfigure ondevice-dameon`)
+
 ### v0.5.2 (2017-11-27)
 
 - Added `ondevice scp` and `ondevice sftp`

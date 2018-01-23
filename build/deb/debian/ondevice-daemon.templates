@@ -18,8 +18,9 @@ Description: Please enter your ondevice.io user name
 Template: ondevice-daemon/auth
 Type: password
 Description: Please enter your ondevice.io device key
- To run ondevice-daemon, you'll need an account at https://ondevice.io/
- You need to use a key with 'device' permissions. 'client' keys won't work here.
+ To run ondevice-daemon, you'll need an ondevice.io account
+ If you haven't created an auth key yet, do so at https://my.ondevice.io/me/keys
+ DO NOT enter your account password, it won't work.
  .
  You can skip configuration for now though by leaving either (or both of) the user/key prompts empty.
  You'll have to manually edit /etc/ondevice/ondevice.conf in that case.

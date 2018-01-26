@@ -2,7 +2,7 @@ Source: ondevice
 Section: python
 Priority: extra
 Maintainer: ondevice.io team <info@ondevice.io>
-Build-Depends: debhelper (>= 6)
+Build-Depends: debhelper (>= 6), dh-systemd (>= 1.5)
 Standards-Version: 3.9.5
 
 Package: ondevice

@@ -30,10 +30,11 @@ type Daemon struct {
 	PIDFile    string
 	ConfigFile string
 
-	lastPing   time.Time
-	wdog       *util.Watchdog
-	signalChan chan os.Signal
-	lock       lockFile
+	lastPing     time.Time
+	wdog         *util.Watchdog
+	signalChan   chan os.Signal
+	firstSIGTERM time.Time
+	lock         lockFile
 
 	IsOnline bool // TODO replace by state enum
 
@@ -68,32 +69,38 @@ func (d *Daemon) Run() int {
 		defer d.Control.Stop()
 	}
 
-	signal.Notify(d.signalChan, syscall.SIGTERM)
+	go d.signalHandler()
+	signal.Notify(d.signalChan, syscall.SIGTERM, syscall.SIGINT)
 
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
 	retryDelay := 10 * time.Second
 	for true {
-		d, err := Connect()
-		if err != nil {
+		if err := d.connect(); err != nil {
 			retryDelay = d.waitBeforeRetry(retryDelay, err)
-			continue
+		} else {
+			d.Wait()
+
+			// connection was successful -> restart after 10sec
+			logg.Warning("lost device connection, reconnecting in 10s")
+			retryDelay = 10
+			time.Sleep(retryDelay * time.Second)
 		}
-
-		d.Wait()
-
-		// connection was successful -> restart after 10sec
-		logg.Warning("lost device connection, reconnecting in 10s")
-		retryDelay = 10
-		time.Sleep(retryDelay * time.Second)
 	}
 
 	return 0
 }
 
-// Connect -- Go online
-func Connect(auths ...api.Authentication) (*Daemon, util.APIError) {
+// Close -- Gracefully stopping this ondevice daemon instance
+func (d *Daemon) Close() {
+	if d.Control != nil {
+		d.Control.Stop()
+	}
+	d.Connection.Close()
+}
+
+// connect -- Go online
+func (d *Daemon) connect(auths ...api.Authentication) util.APIError {
 	params := map[string]string{"key": config.GetDeviceKey()}
-	rc := Daemon{}
 
 	if len(auths) == 0 {
 		auth, err := api.GetDeviceAuth()
@@ -103,12 +110,12 @@ func Connect(auths ...api.Authentication) (*Daemon, util.APIError) {
 		auths = []api.Authentication{auth}
 	}
 
-	if err := tunnel.OpenWebsocket(&rc.Connection, "/serve", params, rc.onMessage, auths...); err != nil {
-		return nil, err
+	if err := tunnel.OpenWebsocket(&d.Connection, "/serve", params, d.onMessage, auths...); err != nil {
+		return err
 	}
 
-	rc.wdog = util.NewWatchdog(180*time.Second, rc.onTimeout)
-	return &rc, nil
+	d.wdog = util.NewWatchdog(180*time.Second, d.onTimeout)
+	return nil
 }
 
 // SendConnectionError -- Send an connection error message to the API server)
@@ -234,6 +241,27 @@ func (d *Daemon) onTimeout() {
 	d.IsOnline = false
 	d.Close()
 	d.wdog.Stop()
+}
+
+func (d *Daemon) signalHandler() {
+	for true {
+		var sig, ok = <-d.signalChan
+		if !ok {
+			break
+		}
+		switch sig {
+		case syscall.SIGTERM:
+			logg.Info("Got SIGTERM, gracefully shutting down...")
+		case syscall.SIGINT:
+			logg.Info("Got SIGINT, gracefully shutting down...")
+		default:
+			logg.Warning("Caught unexpected signal: ", sig)
+		}
+
+		d.Close()
+	}
+
+	logg.Info("Stopping to handle signals")
 }
 
 func (d *Daemon) waitBeforeRetry(retryDelay time.Duration, err util.APIError) time.Duration {

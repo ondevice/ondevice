@@ -29,6 +29,7 @@ COPY / /go/src/github.com/ondevice/ondevice/
 COPY /build/deb/debian/ /go/src/github.com/ondevice/ondevice/debian
 COPY /build/linux/ondevice-daemon.init.d /go/src/github.com/ondevice/ondevice/debian
 COPY /build/linux/ondevice-daemon.service /go/src/github.com/ondevice/ondevice/debian
+COPY /build/linux/ondevice-daemon.tmpfile /go/src/github.com/ondevice/ondevice/debian
 
 # fix permissions (TODO this is unusually slow)
 RUN chown -R user:user /go/ /target/

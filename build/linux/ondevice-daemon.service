@@ -1,22 +1,22 @@
+# Warning: Don't add spaces around the '=', or ubuntu's `deb-systemd-helper` will fail to enable the service
+# (they're parsing this file line by line using regex - guess what just cost me four hours of my life)
 [Unit]
-Description = ondevice daemon
-After = network.target auditd.service
+Description=ondevice daemon
+After=network.target auditd.service
 
 [Service]
-User = ondevice
-Environment = CONFFILE=/var/lib/ondevice/ondevice.conf
-Environment = PIDFILE=/var/run/ondevice/ondevice.pid
-Environment = SOCKFILE=/var/run/ondevice/ondevice.sock
-EnvironmentFile = /etc/default/ondevice-daemon
+User=ondevice
+Environment=CONFFILE=/var/lib/ondevice/ondevice.conf
+Environment=PIDFILE=/var/run/ondevice/ondevice.pid
+Environment=SOCKFILE=/var/run/ondevice/ondevice.sock
+EnvironmentFile=/etc/default/ondevice-daemon
 
 PermissionsStartOnly=true
-ExecStartPre=/bin/mkdir -p /var/run/ondevice/
-ExecStartPre=/bin/chown -R ondevice:ondevice /var/run/ondevice/
 
-ExecStart = /usr/bin/ondevice daemon --conf="${CONFFILE}" --pidfile="${PIDFILE}" --sock="${SOCKFILE}"
+ExecStart=/usr/bin/ondevice daemon --conf="${CONFFILE}" --pidfile="${PIDFILE}" --sock="${SOCKFILE}"
 
-RestartSec = 5
-Restart = on-failure
+RestartSec=5
+Restart=on-failure
 
 [Install]
-WantedBy = multi-user.target
+WantedBy=multi-user.target

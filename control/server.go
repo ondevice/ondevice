@@ -16,7 +16,7 @@ import (
 
 // ControlSocket instance
 type ControlSocket struct {
-	Daemon *daemon.DeviceSocket
+	Daemon *daemon.Daemon
 }
 
 // StartServer -- Start the unix domain socket server (probably won't work on Windows)

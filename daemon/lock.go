@@ -19,7 +19,6 @@ import (
 // This issue would be repeated (e.g. the next time the system is restarted)
 // and therefore cause a lot of garbage data.
 //
-//
 func TryLock() bool {
 	pidFile := config.GetConfigPath("ondevice.pid")
 
@@ -32,7 +31,7 @@ func TryLock() bool {
 	if err = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		logg.Fatalf("ondevice daemon seems to be running already (%s)", err)
 	}
-	logg.Debug("Ackquired daemon lock file")
+	logg.Debug("acquired daemon lock file")
 
 	// only do this if we've got the
 	logg.Debug("Writing to PID file: ", os.Getpid())

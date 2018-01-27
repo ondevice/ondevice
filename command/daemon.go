@@ -22,6 +22,7 @@ type DaemonOpts struct {
 }
 
 func daemonRun(args []string) int {
+	// main.go disables timestamps in log messages. re-enable them
 	log.SetFlags(log.LstdFlags)
 
 	if os.Getuid() == 0 {

@@ -14,8 +14,8 @@ import (
 	"github.com/ondevice/ondevice/util"
 )
 
-// DeviceSocket -- represents a device's connection to the ondevice.io API server
-type DeviceSocket struct {
+// Daemon -- represents a device's connection to the ondevice.io API server
+type Daemon struct {
 	tunnel.Connection
 
 	lastPing time.Time
@@ -32,9 +32,9 @@ type pingMsg struct {
 }
 
 // Connect -- Go online
-func Connect(auths ...api.Authentication) (*DeviceSocket, util.APIError) {
+func Connect(auths ...api.Authentication) (*Daemon, util.APIError) {
 	params := map[string]string{"key": config.GetDeviceKey()}
-	rc := DeviceSocket{}
+	rc := Daemon{}
 
 	if len(auths) == 0 {
 		auth, err := api.GetDeviceAuth()
@@ -53,7 +53,7 @@ func Connect(auths ...api.Authentication) (*DeviceSocket, util.APIError) {
 }
 
 // SendConnectionError -- Send an connection error message to the API server)
-func (d *DeviceSocket) SendConnectionError(code int, msg string, tunnelID string) {
+func (d *Daemon) SendConnectionError(code int, msg string, tunnelID string) {
 	logg.Debugf("Sending connection error: %s (code %d)", msg, code)
 	data := make(map[string]interface{})
 	data["_type"] = "connectError"
@@ -63,12 +63,12 @@ func (d *DeviceSocket) SendConnectionError(code int, msg string, tunnelID string
 	d.SendJSON(data)
 }
 
-func (d *DeviceSocket) announce(service string, protocol string) {
+func (d *Daemon) announce(service string, protocol string) {
 	var data = map[string]string{"_type": "announce", "name": service, "protocol": protocol}
 	d.SendJSON(data)
 }
 
-func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
+func (d *Daemon) onConnect(msg *map[string]interface{}) {
 	clientIP := _getString(msg, "clientIp")
 	clientUser := _getString(msg, "clientUser")
 	protocol := _getString(msg, "protocol")
@@ -88,7 +88,7 @@ func (d *DeviceSocket) onConnect(msg *map[string]interface{}) {
 	service.Start(handler, tunnelID, brokerURL)
 }
 
-func (d *DeviceSocket) onError(msg *map[string]interface{}) {
+func (d *Daemon) onError(msg *map[string]interface{}) {
 	code := _getInt(msg, "code")
 	message := _getString(msg, "msg")
 	var codeName = tunnel.GetErrorCodeName(int(code))
@@ -97,7 +97,7 @@ func (d *DeviceSocket) onError(msg *map[string]interface{}) {
 	logg.Errorf("Device ERROR: %s - %s ", codeName, message)
 }
 
-func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
+func (d *Daemon) onHello(msg *map[string]interface{}) {
 	logg.Debug("Got hello message: ", msg)
 	var devID, key string
 	if _contains(msg, "name") {
@@ -125,7 +125,7 @@ func (d *DeviceSocket) onHello(msg *map[string]interface{}) {
 	d.announce("ssh", "ssh")
 }
 
-func (d *DeviceSocket) onMessage(_type int, data []byte) {
+func (d *Daemon) onMessage(_type int, data []byte) {
 	// got message from the API server -> reset watchdog
 	d.wdog.Kick()
 
@@ -160,7 +160,7 @@ func (d *DeviceSocket) onMessage(_type int, data []byte) {
 	}
 }
 
-func (d *DeviceSocket) onPing(msg pingMsg) {
+func (d *Daemon) onPing(msg pingMsg) {
 	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
 	logg.Debugf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
@@ -170,7 +170,7 @@ func (d *DeviceSocket) onPing(msg pingMsg) {
 	d.SendJSON(resp)
 }
 
-func (d *DeviceSocket) onTimeout() {
+func (d *Daemon) onTimeout() {
 	logg.Warning("Haven't heard from the API server in a while, closing connection...")
 	d.IsOnline = false
 	d.Close()
@@ -188,13 +188,12 @@ func _getInt(m *map[string]interface{}, key string) int64 {
 
 func _getString(m *map[string]interface{}, key string) string {
 	if val, ok := (*m)[key]; ok {
-		if rc, ok := val.(string); ok {
-			return rc
-		} else {
+		var rc, ok = val.(string)
+		if !ok {
 			logg.Warningf("Not a string (key %s): %s", key, val)
 			return ""
 		}
-	} else {
-		return ""
+		return rc
 	}
+	return ""
 }

@@ -4,9 +4,12 @@
 - you can now delete devices using `ondevice device $devId rm on:id`
 - added systemd support
 - setting request timeouts (preventing the tool to wait indefinitely)
+- improved support for AuthKey roles
 - improved error handline and logging
 - improved build pipeline (automatically rsyncing pushes to https://repo.ondevice.io/builds/ )
 - making it clear that you can't use your account password (for `ondevice login` and `dpkg-reconfigure ondevice-dameon`)
+- explicitly handling HTTP 429 Too Many Requests when reconnecting in `ondevice daemon`
+
 
 ### v0.5.2 (2017-11-27)
 

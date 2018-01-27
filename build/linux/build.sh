@@ -36,9 +36,10 @@ curl https://glide.sh/get | sh
 # build ondevice + prepare target dir
 cd "$BASEDIR"
 glide update
-mkdir -p /tmp/build/usr/lib/systemd/system/ /tmp/build/usr/bin/ /tmp/build/etc/init.d/ "$BASEDIR/target/"
+mkdir -p /tmp/build/lib/systemd/system/ /tmp/build/usr/lib/tmpfiles.d/ /tmp/build/usr/bin/ /tmp/build/etc/init.d/ "$BASEDIR/target/"
 go build -ldflags "-X github.com/ondevice/ondevice/config.version=$VERSION" -o /tmp/build/usr/bin/ondevice ondevice.go
-install -m 0644 build/linux/ondevice-daemon.service /tmp/build/usr/lib/systemd/system/
+install -m 0644 build/linux/ondevice-daemon.service /tmp/build/lib/systemd/system/
+install -m 0644 build/linux/ondevice-daemon.tmpfile /tmp/build/usr/lib/tmpfiles.d/ondevice-daemon.conf
 install -m 0755 build/linux/ondevice-daemon.init.d /tmp/build/etc/init.d/ondevice-daemon
 
 # create .tgz

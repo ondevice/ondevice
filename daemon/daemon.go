@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"encoding/json"
+	"os"
 	"runtime"
 	"time"
 
@@ -14,14 +15,27 @@ import (
 	"github.com/ondevice/ondevice/util"
 )
 
+// ControlSocket -- REST API to control the ondevice daemon (the implementation's in the control package)
+type ControlSocket interface {
+	Start()
+	Stop() error
+}
+
 // Daemon -- represents a device's connection to the ondevice.io API server
 type Daemon struct {
 	tunnel.Connection
 
-	lastPing time.Time
-	wdog     *util.Watchdog
-	IsOnline bool
+	PIDFile    string
+	ConfigFile string
 
+	lastPing   time.Time
+	wdog       *util.Watchdog
+	signalChan chan os.Signal
+	lock       lockFile
+
+	IsOnline bool // TODO replace by state enum
+
+	Control      ControlSocket
 	OnConnection func(tunnelID string, service string, protocol string)
 	OnError      func(error)
 }
@@ -29,6 +43,73 @@ type Daemon struct {
 type pingMsg struct {
 	Type string `json:"_type"`
 	Ts   int    `json:"ts"`
+}
+
+// NewDaemon -- Create a new Daemon instance
+func NewDaemon() *Daemon {
+	return &Daemon{
+	//		signalChan: make(chan os.Signal, 1),
+	}
+}
+
+// Run -- run ondevice daemon (and return with the exit code of the command)
+func (d *Daemon) Run() int {
+	d.lock.Path = d.PIDFile
+	if !d.lock.TryLock() {
+		logg.Fatal("Couldn't acquire lock file")
+		return -1
+	}
+	defer d.lock.Unlock()
+
+	if d.Control != nil {
+		d.Control.Start()
+		defer d.Control.Stop()
+	}
+
+	//	signal.Notify(d.signalChan, syscall.SIGTERM)
+
+	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
+	retryDelay := 10 * time.Second
+	for true {
+		d, err := Connect()
+		if err != nil {
+			// only abort here if it's an authentication issue
+			if err.Code() == util.AuthenticationError {
+				logg.Fatal(err)
+			}
+
+			// keep retryDelay between 10 and 120sec
+			if retryDelay > 120*time.Second {
+				retryDelay = 120 * time.Second
+			}
+			if retryDelay < 10*time.Second {
+				retryDelay = 10 * time.Second
+			}
+			// ... unless we've been rate-limited
+			if err.Code() == util.TooManyRequestsError {
+				retryDelay = 600 * time.Second
+			}
+
+			logg.Debug("device error: ", err)
+			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
+
+			// sleep to avoid flooding the servers
+			time.Sleep(retryDelay)
+
+			// slowly increase retryDelay with each failed attempt
+			retryDelay = time.Duration(float32(retryDelay) * 1.5)
+			continue
+		}
+
+		d.Wait()
+
+		// connection was successful -> restart after 10sec
+		logg.Warning("lost device connection, reconnecting in 10s")
+		retryDelay = 10
+		time.Sleep(retryDelay * time.Second)
+	}
+
+	return 0
 }
 
 // Connect -- Go online

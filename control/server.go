@@ -1,6 +1,7 @@
 package control
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/daemon"
@@ -17,22 +19,56 @@ import (
 // ControlSocket instance
 type ControlSocket struct {
 	Daemon *daemon.Daemon
+
+	URL    url.URL
+	server http.Server
 }
 
-// StartServer -- Start the unix domain socket server (probably won't work on Windows)
-func StartServer(u url.URL) *ControlSocket {
+// NewSocket -- Creates a new ControlSocket instance
+func NewSocket(d *daemon.Daemon, u url.URL) *ControlSocket {
+	var rc = ControlSocket{
+		Daemon: d,
+		URL:    u,
+	}
+
+	var mux = new(http.ServeMux)
+	mux.HandleFunc("/state", rc.getState)
+	rc.server.Handler = mux
+
+	return &rc
+}
+
+// Start -- Starts the ControlSocket (parses the URL )
+func (c *ControlSocket) Start() {
 	var proto, path string
+	var u = c.URL
+
+	// TODO move me to NewSocket()
 	if u.Scheme == "unix" || u.Scheme == "" {
 		proto = "unix"
 		path = u.Path
 	} else if u.Scheme == "http" {
 		proto = "tcp"
 		path = u.Host
+	} else {
+		logg.Fatal("Failed to parse control socket URL: ", u.String())
 	}
 
-	rc := ControlSocket{}
-	go rc.run(proto, path)
-	return &rc
+	go c.run(proto, path)
+}
+
+// Stop -- Stops the ControlSocket
+func (c *ControlSocket) Stop() error {
+	var ctx, cancelFn = context.WithTimeout(context.Background(), 5*time.Second)
+	var err = c.server.Shutdown(ctx)
+	if err != nil {
+		logg.Error("Failed to stop ControlSocket: ", err)
+	} else {
+		logg.Info("Stopped ControlSocket")
+	}
+
+	cancelFn()
+	return err
 }
 
 func (c *ControlSocket) run(protocol string, path string) {
@@ -50,9 +86,7 @@ func (c *ControlSocket) run(protocol string, path string) {
 		os.Chmod(path, 0664)
 	}
 
-	http.HandleFunc("/state", c.getState)
-
-	err = http.Serve(l, nil)
+	err = c.server.Serve(l)
 	log.Fatal(err)
 }
 

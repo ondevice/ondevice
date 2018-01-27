@@ -1,17 +1,16 @@
 package command
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"os"
-	"time"
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
 	"github.com/ondevice/ondevice/logg"
-	"github.com/ondevice/ondevice/util"
 )
 
 // DaemonOpts -- commandline arguments for `ondevice daemon`
@@ -29,80 +28,54 @@ func daemonRun(args []string) int {
 		logg.Fatal("`ondevice daemon` should not be run as root")
 	}
 
-	url := daemonParseArgs(args)
+	var d = daemon.NewDaemon()
+	var controlURL url.URL
+	var err error
 
-	if !daemon.TryLock() {
-		logg.Fatal("Couldn't acquire lock file")
+	if controlURL, err = daemonParseArgs(args, d); err != nil {
+		logg.Fatal(err)
+		return 1
 	}
 
-	c := control.StartServer(url)
+	c := control.NewSocket(d, controlURL)
+	d.Control = c
 
-	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
-	retryDelay := 10 * time.Second
-	for true {
-		d, err := daemon.Connect()
-		if err != nil {
-			// only abort here if it's an authentication issue
-			if err.Code() == util.AuthenticationError {
-				logg.Fatal(err)
-			}
-
-			// keep retryDelay between 10 and 120sec
-			if retryDelay > 120*time.Second {
-				retryDelay = 120 * time.Second
-			}
-			if retryDelay < 10*time.Second {
-				retryDelay = 10 * time.Second
-			}
-			// ... unless we've been rate-limited
-			if err.Code() == util.TooManyRequestsError {
-				retryDelay = 600 * time.Second
-			}
-
-			logg.Debug("device error: ", err)
-			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
-
-			// sleep to avoid flooding the servers
-			time.Sleep(retryDelay)
-
-			// slowly increase retryDelay with each failed attempt
-			retryDelay = time.Duration(float32(retryDelay) * 1.5)
-			continue
-		}
-
-		c.Daemon = d
-		d.Wait()
-
-		// connection was successful -> restart after 10sec
-		logg.Warning("lost device connection, reconnecting in 10s")
-		retryDelay = 10
-		time.Sleep(retryDelay * time.Second)
-	}
-
-	return 0
+	return d.Run()
 }
 
-func daemonParseArgs(args []string) url.URL {
+// Parses the commandline arguments, returns the ControlSocket URL
+func daemonParseArgs(args []string, d *daemon.Daemon) (url.URL, error) {
 	var opts DaemonOpts
-	if _, err := flags.ParseArgs(&opts, args); err != nil {
-		logg.Fatal(err)
+	var rc url.URL
+	var err error
+
+	if args, err = flags.ParseArgs(&opts, args); err != nil {
+		return rc, err
 	}
 
-	if opts.Configfile != "" {
-		config.SetFilePath("ondevice.conf", opts.Configfile)
+	if len(args) > 0 {
+		return rc, fmt.Errorf("Too many arguments: %s", args)
 	}
-	if opts.Pidfile != "" {
-		config.SetFilePath("ondevice.pid", opts.Pidfile)
+
+	d.ConfigFile = opts.Configfile
+	d.PIDFile = opts.Pidfile
+
+	if opts.Configfile == "" {
+		d.ConfigFile = config.GetConfigPath("ondevice.conf")
 	}
+
+	if opts.Pidfile == "" {
+		d.PIDFile = config.GetConfigPath("ondevice.pid")
+	}
+
 	if opts.SocketURL != "" {
 		if rc, err := url.Parse(opts.SocketURL); err != nil {
 			logg.Fatal("Couldn't parse socket URL: ", err)
 		} else {
-			return *rc
+			return *rc, nil
 		}
 	}
-
-	return url.URL{Scheme: "unix", Path: config.GetConfigPath("ondevice.sock")}
+	return url.URL{Scheme: "unix", Path: config.GetConfigPath("ondevice.sock")}, nil
 }
 
 // DaemonCommand -- implements `ondevice daemon`

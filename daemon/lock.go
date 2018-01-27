@@ -5,9 +5,13 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
 )
+
+type lockFile struct {
+	Path string
+	fd   int
+}
 
 // TryLock -- Try to acquire the daemon's lock file (and write to PID file)
 //
@@ -19,24 +23,38 @@ import (
 // This issue would be repeated (e.g. the next time the system is restarted)
 // and therefore cause a lot of garbage data.
 //
-func TryLock() bool {
-	pidFile := config.GetConfigPath("ondevice.pid")
-
-	fd, err := syscall.Open(pidFile, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		logg.Info("pidfile: ", pidFile)
-		logg.Fatal("Couldn't open ondevice.pid: ", err)
+func (l *lockFile) TryLock() bool {
+	var err error
+	if l.fd, err = syscall.Open(l.Path, os.O_CREATE|os.O_WRONLY, 0644); err != nil {
+		logg.Fatalf("Couldn't open '%s' for locking: %s", l.Path, err)
 	}
 
-	if err = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	if err = syscall.Flock(l.fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		logg.Fatalf("ondevice daemon seems to be running already (%s)", err)
 	}
 	logg.Debug("acquired daemon lock file")
 
-	// only do this if we've got the
+	// only do this if we've got the lock
 	logg.Debug("Writing to PID file: ", os.Getpid())
 	pidstr := fmt.Sprintf("%d\n", os.Getpid())
-	syscall.Write(fd, []byte(pidstr))
+	syscall.Write(l.fd, []byte(pidstr))
 
 	return true
+}
+
+func (l *lockFile) Unlock() {
+	var err error
+
+	if l.fd < 0 {
+		logg.Warning("Lock file already closed")
+		return
+	}
+
+	if err = syscall.Flock(l.fd, syscall.LOCK_UN); err != nil {
+		logg.Fatal("Failed to unlock lock file: ", err)
+	}
+	if err = syscall.Close(l.fd); err != nil {
+		logg.Fatal("Failed to close lock file: ", err)
+	}
+	l.fd = -1
 }

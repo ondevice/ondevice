@@ -3,7 +3,9 @@ package daemon
 import (
 	"encoding/json"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -48,7 +50,7 @@ type pingMsg struct {
 // NewDaemon -- Create a new Daemon instance
 func NewDaemon() *Daemon {
 	return &Daemon{
-	//		signalChan: make(chan os.Signal, 1),
+		signalChan: make(chan os.Signal, 1),
 	}
 }
 
@@ -66,38 +68,14 @@ func (d *Daemon) Run() int {
 		defer d.Control.Stop()
 	}
 
-	//	signal.Notify(d.signalChan, syscall.SIGTERM)
+	signal.Notify(d.signalChan, syscall.SIGTERM)
 
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
 	retryDelay := 10 * time.Second
 	for true {
 		d, err := Connect()
 		if err != nil {
-			// only abort here if it's an authentication issue
-			if err.Code() == util.AuthenticationError {
-				logg.Fatal(err)
-			}
-
-			// keep retryDelay between 10 and 120sec
-			if retryDelay > 120*time.Second {
-				retryDelay = 120 * time.Second
-			}
-			if retryDelay < 10*time.Second {
-				retryDelay = 10 * time.Second
-			}
-			// ... unless we've been rate-limited
-			if err.Code() == util.TooManyRequestsError {
-				retryDelay = 600 * time.Second
-			}
-
-			logg.Debug("device error: ", err)
-			logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
-
-			// sleep to avoid flooding the servers
-			time.Sleep(retryDelay)
-
-			// slowly increase retryDelay with each failed attempt
-			retryDelay = time.Duration(float32(retryDelay) * 1.5)
+			retryDelay = d.waitBeforeRetry(retryDelay, err)
 			continue
 		}
 
@@ -256,6 +234,34 @@ func (d *Daemon) onTimeout() {
 	d.IsOnline = false
 	d.Close()
 	d.wdog.Stop()
+}
+
+func (d *Daemon) waitBeforeRetry(retryDelay time.Duration, err util.APIError) time.Duration {
+	// only abort here if it's an authentication issue
+	if err.Code() == util.AuthenticationError {
+		logg.Fatal(err)
+	}
+
+	// keep retryDelay between 10 and 120sec
+	if retryDelay > 120*time.Second {
+		retryDelay = 120 * time.Second
+	}
+	if retryDelay < 10*time.Second {
+		retryDelay = 10 * time.Second
+	}
+	// ... unless we've been rate-limited
+	if err.Code() == util.TooManyRequestsError {
+		retryDelay = 600 * time.Second
+	}
+
+	logg.Debug("device error: ", err)
+	logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
+
+	// sleep to avoid flooding the servers
+	time.Sleep(retryDelay)
+
+	// slowly increase retryDelay with each failed attempt
+	return time.Duration(float32(retryDelay) * 1.5)
 }
 
 func _contains(m *map[string]interface{}, key string) bool {

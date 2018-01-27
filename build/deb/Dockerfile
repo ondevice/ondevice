@@ -32,9 +32,10 @@ COPY /build/linux/ondevice-daemon.service /go/src/github.com/ondevice/ondevice/d
 
 # fix permissions (TODO this is unusually slow)
 RUN chown -R user:user /go/ /target/
-USER user
 
 WORKDIR /go/src/github.com/ondevice/ondevice/
+RUN mk-build-deps -ir -t 'apt-get -y'
+USER user
 
 # check package version
 ARG VERSION

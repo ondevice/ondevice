@@ -87,7 +87,9 @@ func (c *ControlSocket) run(protocol string, path string) {
 	}
 
 	err = c.server.Serve(l)
-	log.Fatal(err)
+	if err != nil {
+		logg.Fatal("Couldn't set up control socket: ", err)
+	}
 }
 
 func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {

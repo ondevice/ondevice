@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"sync"
 	"syscall"
 	"time"
 
@@ -30,11 +31,13 @@ type Daemon struct {
 	PIDFile    string
 	ConfigFile string
 
-	lastPing     time.Time
-	wdog         *util.Watchdog
-	signalChan   chan os.Signal
-	firstSIGTERM time.Time
-	lock         lockFile
+	lastPing      time.Time
+	wdog          *util.Watchdog
+	signalChan    chan os.Signal
+	firstSIGTERM  time.Time
+	lock          lockFile
+	activeTunnels sync.WaitGroup
+	shutdown      bool
 
 	IsOnline bool // TODO replace by state enum
 
@@ -74,24 +77,30 @@ func (d *Daemon) Run() int {
 
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
 	retryDelay := 10 * time.Second
-	for true {
+	for !d.shutdown {
 		if err := d.connect(); err != nil {
 			retryDelay = d.waitBeforeRetry(retryDelay, err)
 		} else {
 			d.Wait()
 
-			// connection was successful -> restart after 10sec
-			logg.Warning("lost device connection, reconnecting in 10s")
-			retryDelay = 10
-			time.Sleep(retryDelay * time.Second)
+			if !d.shutdown {
+				// connection was successful -> restart after 10sec
+				logg.Warning("lost device connection, reconnecting in 10s")
+				retryDelay = 10
+				time.Sleep(retryDelay * time.Second)
+			}
 		}
 	}
+
+	logg.Info("Stopped ondevice daemon, waiting for remaining tunnels to close (if any...)")
+	d.activeTunnels.Wait()
 
 	return 0
 }
 
 // Close -- Gracefully stopping this ondevice daemon instance
 func (d *Daemon) Close() {
+	d.shutdown = true
 	if d.Control != nil {
 		d.Control.Stop()
 	}
@@ -151,7 +160,9 @@ func (d *Daemon) onConnect(msg *map[string]interface{}) {
 		return
 	}
 
-	service.Start(handler, tunnelID, brokerURL)
+	d.activeTunnels.Add(1)
+	service.Run(handler, tunnelID, brokerURL)
+	d.activeTunnels.Done()
 }
 
 func (d *Daemon) onError(msg *map[string]interface{}) {
@@ -217,7 +228,7 @@ func (d *Daemon) onMessage(_type int, data []byte) {
 		d.onPing(ping)
 		break
 	case "connect":
-		d.onConnect(msg)
+		go d.onConnect(msg)
 	case "error":
 		d.onError(msg)
 	default:

@@ -70,18 +70,14 @@ func GetServiceHandler(svc string, protocol string) ProtocolHandler {
 	return GetProtocolHandler(protocol)
 }
 
-// Start -- Start the tunnel handler
-func Start(p ProtocolHandler, tunnelID string, brokerURL string) {
-	go run(p, tunnelID, brokerURL)
-}
-
-func run(p ProtocolHandler, tunnelID string, brokerURL string) {
+// Run -- Start the tunnel handler (synchronously)
+func Run(p ProtocolHandler, tunnelID string, brokerURL string) {
 	data := p.self()
 
 	err := tunnel.Accept(data.tunnel, tunnelID, brokerURL)
 	if err != nil {
 		logg.Error("Accepting tunnel failed: ", err)
 	} else {
-		go p.receive()
+		p.receive()
 	}
 }

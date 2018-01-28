@@ -171,9 +171,11 @@ func (c *Connection) _onClose(ev *fsm.Event) {
 	}
 
 	close(c.done)
-	for _, cb := range c.CloseListeners {
-		cb()
-	}
+	go func() { // do this asynchronously (we could end up in a deadlock (if one of the callbacks calls Close() again))
+		for _, cb := range c.CloseListeners {
+			cb()
+		}
+	}()
 }
 
 func (c *Connection) _onError(ev *fsm.Event) {

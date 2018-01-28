@@ -15,9 +15,13 @@ VERSION=0.5.1
 # - "-devel" otherwise
 VERSION_SUFFIX:=$(if $(TRAVIS_TAG),,$(if $(TRAVIS_BUILD_NUMBER),+build$(TRAVIS_BUILD_NUMBER),-devel))
 
-all:
+all: build
+
+build: target/ondevice
+
+target/ondevice:
 	@mkdir -p target/
-	go build -ldflags '-X github.com/ondevice/ondevice/config.version=$(VERSION)' -o target/ondevice ondevice.go
+	go build -ldflags '-X github.com/ondevice/ondevice/config.version=$(VERSION)$(VERSION_SUFFIX)' -o target/ondevice ondevice.go
 
 clean:
 	rm -rf target/

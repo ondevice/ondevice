@@ -87,7 +87,7 @@ func (c *ControlSocket) run(protocol string, path string) {
 	}
 
 	err = c.server.Serve(l)
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		logg.Fatal("Couldn't set up control socket: ", err)
 	}
 }

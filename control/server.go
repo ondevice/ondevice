@@ -94,7 +94,7 @@ func (c *ControlSocket) run(protocol string, path string) {
 
 func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
 	devState := "offline"
-	if c.Daemon != nil && c.Daemon.IsOnline {
+	if c.Daemon != nil && c.Daemon.IsOnline() {
 		devState = "online"
 	}
 

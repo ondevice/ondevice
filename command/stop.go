@@ -9,25 +9,25 @@ import (
 )
 
 func runStop(args []string) int {
-	p, err := daemon.GetDaemonProcess()
-	if err != nil {
-		logg.Debug("GetDaemonProcess error: ", err)
-		logg.Fatal("Couldn't find daemon process")
-	}
-	logg.Infof("Stopping ondevice daemon... (pid: %d)", p.Pid)
-
-	found := false
+	var found = false
 	for i := 0; i < 5; i++ {
-		if daemon.IsRunning(p) != nil {
-			if found {
-				// we seem to have stopped it
-				return 0
+		// fetch the PID every time (the daemon might go inactive - still running until the remaining tunnels close)
+		p, err := daemon.GetDaemonProcess()
+		if err != nil {
+			if !found {
+				logg.Debug("GetDaemonProcess error: ", err)
+				logg.Fatal("Couldn't find daemon process")
+				return 1
 			}
-			logg.Debug(err)
-			logg.Info("Not running")
-			return 1
+			// we seem to have stopped it
+			return 0
 		}
-		found = true
+
+		if !found {
+			logg.Infof("Stopping ondevice daemon... (pid: %d)", p.Pid)
+			found = true
+		}
+
 		p.Signal(syscall.SIGTERM)
 		time.Sleep(1000 * time.Millisecond)
 	}

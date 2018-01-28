@@ -1,1 +1,1 @@
-build/deb/ondevice-daemon.sh usr/lib/ondevice/
+build/linux/ondevice-daemon.sh usr/lib/ondevice/

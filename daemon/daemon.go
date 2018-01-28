@@ -61,7 +61,7 @@ func NewDaemon() *Daemon {
 // Run -- run ondevice daemon (and return with the exit code of the command)
 func (d *Daemon) Run() int {
 	d.lock.Path = d.PIDFile
-	if !d.lock.TryLock() {
+	if err := d.lock.TryLock(); err != nil {
 		logg.Fatal("Couldn't acquire lock file")
 		return -1
 	}
@@ -105,6 +105,7 @@ func (d *Daemon) Close() {
 		d.Control.Stop()
 	}
 	d.Connection.Close()
+	d.lock.Unlock()
 }
 
 // connect -- Go online

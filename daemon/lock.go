@@ -9,8 +9,9 @@ import (
 )
 
 type lockFile struct {
-	Path string
-	fd   int
+	Path   string
+	fd     int
+	closed bool
 }
 
 // TryLock -- Try to acquire the daemon's lock file (and write to PID file)
@@ -23,14 +24,15 @@ type lockFile struct {
 // This issue would be repeated (e.g. the next time the system is restarted)
 // and therefore cause a lot of garbage data.
 //
-func (l *lockFile) TryLock() bool {
+func (l *lockFile) TryLock() error {
 	var err error
 	if l.fd, err = syscall.Open(l.Path, os.O_CREATE|os.O_WRONLY, 0644); err != nil {
 		logg.Fatalf("Couldn't open '%s' for locking: %s", l.Path, err)
 	}
+	l.closed = false
 
 	if err = syscall.Flock(l.fd, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
-		logg.Fatalf("ondevice daemon seems to be running already (%s)", err)
+		return fmt.Errorf("ondevice daemon seems to be running already (%s)", err)
 	}
 	logg.Debug("acquired daemon lock file")
 
@@ -39,14 +41,13 @@ func (l *lockFile) TryLock() bool {
 	pidstr := fmt.Sprintf("%d\n", os.Getpid())
 	syscall.Write(l.fd, []byte(pidstr))
 
-	return true
+	return nil
 }
 
 func (l *lockFile) Unlock() {
 	var err error
 
-	if l.fd < 0 {
-		logg.Warning("Lock file already closed")
+	if l.closed {
 		return
 	}
 
@@ -56,5 +57,5 @@ func (l *lockFile) Unlock() {
 	if err = syscall.Close(l.fd); err != nil {
 		logg.Fatal("Failed to close lock file: ", err)
 	}
-	l.fd = -1
+	l.closed = true
 }

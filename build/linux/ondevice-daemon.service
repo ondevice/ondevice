@@ -1,5 +1,5 @@
 # Warning: Don't add spaces around the '=', or ubuntu's `deb-systemd-helper` will fail to enable the service
-# (they're parsing this file line by line using regex - guess what just cost me four hours of my life)
+# (oddly enought debian's seems to be fine with that even though they're using the same regex to parse this file)
 [Unit]
 Description=ondevice daemon
 After=network.target auditd.service
@@ -11,9 +11,14 @@ Environment=PIDFILE=/var/run/ondevice/ondevice.pid
 Environment=SOCKFILE=/var/run/ondevice/ondevice.sock
 EnvironmentFile=/etc/default/ondevice-daemon
 
-PermissionsStartOnly=true
-
 ExecStart=/usr/bin/ondevice daemon --conf="${CONFFILE}" --pidfile="${PIDFILE}" --sock="${SOCKFILE}"
+
+# the ondevice daemon will stay around after receiving SIGINT/SIGTERM until the last tunnel is closed
+# (so you can restart ondevice-daemon over SSH)
+# This means we can't use the default 'control-group' KillMode (as it would send SIGKILL if the daemon ignores the SIGTERM)
+# Note: ondevice stop will wait for the daemon to actually stop (or a timeout to occur)
+KillMode=none
+ExecStop=/usr/bin/ondevice stop
 
 RestartSec=5
 Restart=on-failure

@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -34,16 +35,22 @@ func IsRunning(p *os.Process) error {
 }
 
 func getDaemonPID() (int, error) {
-	path := config.GetConfigPath("ondevice.pid")
-	f, err := os.Open(path)
-	if err != nil {
-		return -1, err
-	}
+	var paths = []string{config.GetConfigPath("ondevice.pid"), "/var/run/ondevice/ondevice.pid"}
+	var file *os.File
 
-	defer f.Close()
+	for _, path := range paths {
+		if f, err := os.Open(path); err == nil {
+			file = f
+			break
+		}
+	}
+	if file == nil {
+		return -1, errors.New("Couldn't open PID file")
+	}
+	defer file.Close()
 
 	buff := make([]byte, 100)
-	count, err := f.Read(buff)
+	count, err := file.Read(buff)
 	if err != nil {
 		return -1, err
 	}

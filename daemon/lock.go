@@ -27,7 +27,7 @@ type lockFile struct {
 func (l *lockFile) TryLock() error {
 	var err error
 	if l.fd, err = syscall.Open(l.Path, os.O_CREATE|os.O_WRONLY, 0644); err != nil {
-		logg.Fatalf("Couldn't open '%s' for locking: %s", l.Path, err)
+		return fmt.Errorf("Couldn't open '%s' for locking: %s", l.Path, err)
 	}
 	l.closed = false
 
@@ -44,18 +44,25 @@ func (l *lockFile) TryLock() error {
 	return nil
 }
 
-func (l *lockFile) Unlock() {
+func (l *lockFile) Unlock() error {
 	var err error
 
 	if l.closed {
-		return
+		return nil
 	}
 
 	if err = syscall.Flock(l.fd, syscall.LOCK_UN); err != nil {
-		logg.Fatal("Failed to unlock lock file: ", err)
+		return fmt.Errorf("Failed to unlock lock file: %s", err)
 	}
 	if err = syscall.Close(l.fd); err != nil {
-		logg.Fatal("Failed to close lock file: ", err)
+		return fmt.Errorf("Failed to close lock file: %s", err)
 	}
+
+	// remove PID file
+	if err = os.Remove(l.Path); err != nil {
+		return fmt.Errorf("Failed to remove PID file: %s", err)
+	}
+
 	l.closed = true
+	return nil
 }

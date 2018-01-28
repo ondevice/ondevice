@@ -66,12 +66,14 @@ func (d *Daemon) Run() int {
 	// TODO implement a sane way to stop this infinite loop (at least SIGTERM, SIGINT or maybe a unix socket call)
 	retryDelay := 10 * time.Second
 	for !d.shutdown {
-		d.ws = new(deviceSocket)
-		d.ws.activeTunnels = &d.activeTunnels
-		if err := d.ws.connect(); err != nil {
+		var ws = new(deviceSocket)
+		ws.activeTunnels = &d.activeTunnels
+
+		if err := ws.connect(); err != nil {
 			retryDelay = d.waitBeforeRetry(retryDelay, err)
 		} else {
-			d.ws.Wait()
+			d.ws = ws
+			ws.Wait()
 
 			if !d.shutdown {
 				// connection was successful -> restart after 10sec
@@ -109,6 +111,13 @@ func (d *Daemon) signalHandler() {
 		if !ok {
 			break
 		}
+
+		if d.ws == nil {
+			// caught the signal before the connection was established -> exit immediately
+			logg.Errorf("Caught '%s' signal, exiting", sig)
+			os.Exit(1)
+		}
+
 		switch sig {
 		case syscall.SIGTERM:
 			logg.Info("Got SIGTERM, gracefully shutting down...")

@@ -50,6 +50,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 		"enter_closed": c._onClose,
 		"enter_state":  c._onStateChange,
 	})
+	c.done = make(chan struct{})
 
 	hdr := http.Header{}
 
@@ -84,7 +85,6 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 
 	c.ws = ws
 	c.MessageListerners = append(c.MessageListerners, onMessage)
-	c.done = make(chan struct{})
 
 	go c.receive()
 

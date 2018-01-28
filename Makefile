@@ -12,8 +12,8 @@ VERSION=0.5.1
 # Version suffix:
 # - empty if TRAVIS_TAG is set
 # - +build$n if TRAVIS_BUILD_NUMBER is set
-# - "-local" otherwise
-VERSION_SUFFIX:=$(if $(TRAVIS_TAG),,$(if $(TRAVIS_BUILD_NUMBER),+build$(TRAVIS_BUILD_NUMBER),-local))
+# - "-devel" otherwise
+VERSION_SUFFIX:=$(if $(TRAVIS_TAG),,$(if $(TRAVIS_BUILD_NUMBER),+build$(TRAVIS_BUILD_NUMBER),-devel))
 
 all:
 	@mkdir -p target/

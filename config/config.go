@@ -17,7 +17,7 @@ var _configPathOverride *string
 
 var _fileOverrides = map[string]string{}
 
-var version = "0.0.1-local"
+var version = "0.0.1-devel"
 
 func setConfigPath(path string) {
 	_configPathOverride = &path

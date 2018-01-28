@@ -10,4 +10,4 @@ LOGFILE=/var/log/ondevice/ondevice.log
 export ONDEVICE_USER
 export ONDEVICE_AUTH
 
-exec nohup ondevice daemon --conf="$CONFFILE" --pidfile="$PIDFILE" --sock="$SOCKFILE" &>> "$LOGFILE"
+exec nohup ondevice daemon --conf="$CONFFILE" --pidfile="$PIDFILE" --sock="$SOCKFILE" >> "$LOGFILE" 2>&1

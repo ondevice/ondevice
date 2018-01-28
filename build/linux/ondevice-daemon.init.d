@@ -41,8 +41,8 @@ USERID=ondevice
 #
 do_start()
 {
-	mkdir -p /var/run/ondevice/
-	chown ondevice:ondevice /var/run/ondevice/
+	mkdir -p /var/run/ondevice/ /var/log/ondevice/
+	chown ondevice:ondevice /var/run/ondevice/ /var/log/ondevice
 
 	# Return
 	#   0 if daemon has been started
@@ -50,7 +50,7 @@ do_start()
 	#   2 if daemon could not be started
 
 	# using nohup here as start-stop-daemon is debian-specific
-	su ondevice -c "/usr/lib/ondevice/ondevice-daemon.sh &'"
+	su ondevice -s /bin/sh -c "/usr/lib/ondevice/ondevice-daemon.sh &"
 
 	# TODO wait for daemon to start
 

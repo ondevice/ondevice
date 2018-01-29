@@ -10,10 +10,20 @@ GO_IMAGE=golang:1.9-stretch
 VERSION=0.5.1
 
 # Version suffix:
+# - unmodified if already specified
 # - empty if TRAVIS_TAG is set
 # - +build$n if TRAVIS_BUILD_NUMBER is set
 # - "-devel" otherwise
+ifndef VERSION_SUFFIX
 VERSION_SUFFIX:=$(if $(TRAVIS_TAG),,$(if $(TRAVIS_BUILD_NUMBER),+build$(TRAVIS_BUILD_NUMBER),-devel))
+endif
+
+# make sure the TRAVIS_TAG matches VERSION
+ifdef TRAVIS_TAG
+ifneq ($(TRAVIS_TAG),v$(VERSION))
+$(error "VERSION NUMBER MISMATCH (Makefile specifies 'v$(VERSION)', TRAVIS_TAG='$(TRAVIS_TAG)')")
+endif
+endif
 
 all:
 	@mkdir -p target/
@@ -60,7 +70,7 @@ package-deb-armhf:
 _package-deb:
 	@echo "\n============\nPackaging: debian $(ARCH)\n============\n" >&2
 	# builds and packages the i386,amd64 and armhf ondevice debian packages (as well as ondevice-daemon)
-	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' '--build-arg=VERSION=$(VERSION)' '--build-arg=VERSION_SUFFIX=$(VERSION_SUFFIX)' -t ondevice/package-deb-$(ARCH) .
+	docker build -f build/deb/Dockerfile '--build-arg=SOURCE_IMAGE=$(SOURCE_IMAGE)' '--build-arg=GOARCH=$(GOARCH)' '--build-arg=BUILD_ARGS=$(BUILD_ARGS)' '--build-arg=TRAVIS_TAG=$(TRAVIS_TAG)' '--build-arg=VERSION=$(VERSION)' '--build-arg=VERSION_SUFFIX=$(VERSION_SUFFIX)' -t ondevice/package-deb-$(ARCH) .
 
 	# extract artefacts
 	rm -rf 'target/deb/$(ARCH)'; mkdir -p target/deb/

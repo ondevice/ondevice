@@ -48,7 +48,8 @@ RUN if [ -n "$VERSION_SUFFIX" ]; then dch --newversion "${VERSION}${VERSION_SUFF
 RUN glide install
 ARG BUILD_ARGS
 ARG GOARCH
-RUN GOARCH=${GOARCH} dpkg-buildpackage -us -uc ${BUILD_ARGS}
+ARG TRAVIS_TAG
+RUN GOARCH=${GOARCH} TRAVIS_TAG=${TRAVIS_TAG} dpkg-buildpackage -us -uc ${BUILD_ARGS}
 RUN cp -a ../ondevice*.deb /target/
 
 #

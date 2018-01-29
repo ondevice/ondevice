@@ -57,11 +57,10 @@ func daemonParseArgs(args []string, d *daemon.Daemon) (url.URL, error) {
 		return rc, fmt.Errorf("Too many arguments: %s", args)
 	}
 
-	d.ConfigFile = opts.Configfile
 	d.PIDFile = opts.Pidfile
 
-	if opts.Configfile == "" {
-		d.ConfigFile = config.GetConfigPath("ondevice.conf")
+	if opts.Configfile != "" {
+		config.SetFilePath("ondevice.conf", opts.Configfile)
 	}
 
 	if opts.Pidfile == "" {

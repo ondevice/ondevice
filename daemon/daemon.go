@@ -19,8 +19,7 @@ type ControlSocket interface {
 
 // Daemon -- represents a device's connection to the ondevice.io API server
 type Daemon struct {
-	PIDFile    string
-	ConfigFile string
+	PIDFile string
 
 	ws            *deviceSocket
 	signalChan    chan os.Signal

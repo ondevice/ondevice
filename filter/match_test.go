@@ -119,6 +119,11 @@ func TestSpecial(t *testing.T) {
 	assert.False(t, MustMatch(dev, "on:stateTs<2018"))
 	assert.True(t, MustMatch(dev, "on:stateTs>2018"))
 
+	dev.StateTs = nil
+	assert.False(t, MustMatch(dev, "on:stateTs"))
+	assert.True(t, MustMatch(dev, "on:stateTs="))
+	assert.False(t, MustMatch(dev, "on:stateTs!="))
+
 	// other special properties
 	assert.True(t, MustMatch(dev, "on:name!="))
 	assert.True(t, MustMatch(dev, "on:version>=0.1"))

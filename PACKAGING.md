@@ -24,7 +24,8 @@
 - create `stable` packages:
   - update `CHANGELOG.md` (as well as `build/deb/debian/changelog`)
   - update `$VERSION` in `Makefile`
-  - do `git tag v$VERSION`
+  - `git commit`
+  - `git tag v$VERSION`
   - `git push origin master v$VERSION`
   - wait for travis to build things
 - release process

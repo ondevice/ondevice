@@ -1,5 +1,6 @@
-### v0.5.3 (2018-01-??)
+### v0.6 (2018-02-05)
 
+- `ondevice daemon` can now be restarted over `ondevice ssh`
 - added ondevice list filter expressions (see https://docs.ondevice.io/commands/list/ )
 - you can now delete devices using `ondevice device $devId rm on:id`
 - added systemd support

@@ -1,3 +1,19 @@
+ondevice (0.6.0) stable; urgency=medium
+
+  * `ondevice daemon` can now be restarted over `ondevice ssh`
+  * added ondevice list filter expressions (see https://docs.ondevice.io/commands/list/ )
+  * you can now delete devices using `ondevice device $devId rm on:id`
+  * added systemd support
+  * setting request timeouts (preventing the tool to wait indefinitely)
+  * improved support for AuthKey roles
+  * improved error handline and logging
+  * improved build pipeline (automatically rsyncing pushes to https://repo.ondevice.io/builds/ )
+  * making it clear that you can't use your account password (for `ondevice login` and `dpkg-reconfigure ondevice-dameon`)
+  * explicitly handling HTTP 429 Too Many Requests when reconnecting in `ondevice daemon`
+
+
+ -- ondevice.io debian team <debian@ondevice.io>  Mon, 05 Feb 2018 18:54:42 +0000
+
 ondevice (0.5.1) stable; urgency=low
 
   * Bugfix release:

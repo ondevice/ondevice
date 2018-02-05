@@ -24,6 +24,8 @@
 - create `stable` packages:
   - update `CHANGELOG.md` (as well as `build/deb/debian/changelog`)
   - update `$VERSION` in `Makefile`
+  - update `build/deb/debian/changelog` (using the contents of CHANGELOG.md)
+  - run `make package` and see if things work
   - `git commit`
   - `git tag v$VERSION`
   - `git push origin master v$VERSION`

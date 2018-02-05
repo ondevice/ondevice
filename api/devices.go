@@ -14,7 +14,7 @@ type Device struct {
 	CreatedAt int64  `json:"createdAt"`
 	IP        string `json:"ip,omitempty"`
 	State     string `json:"state"`
-	StateTs   int64  `json:"stateTs,omitempty"`
+	StateTs   *int64 `json:"stateTs,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Version   string `json:"version,omitempty"`
 

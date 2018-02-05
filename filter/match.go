@@ -72,6 +72,10 @@ func Matches(dev api.Device, expr string) (bool, error) {
 			value = dev.Name
 		case "on:state":
 			value = dev.State
+		case "on:stateTs":
+			if dev.StateTs != nil {
+				value = util.MsecToTs(*dev.StateTs).UTC().Format(time.RFC3339)
+			}
 		case "on:ip":
 			value = dev.IP
 		case "on:version":

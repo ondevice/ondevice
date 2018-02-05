@@ -72,10 +72,12 @@ func TestMatches(t *testing.T) {
 }
 
 func TestSpecial(t *testing.T) {
+	var stateTs int64 = 1517852225000 // 2018-02-05T17:37:05Z
 	var dev = api.Device{
 		ID:        "demo.foo",
 		Name:      "Some device",
 		State:     "online",
+		StateTs:   &stateTs,
 		Version:   "ondevice v0.1.2",
 		CreatedAt: 1516035331000, // 2018-01-15T16:55:31Z
 		Props: map[string]interface{}{
@@ -87,17 +89,17 @@ func TestSpecial(t *testing.T) {
 		},
 	}
 
-	// TODO test matching unqualified IDs
+	// on:id
 	assert.True(t, MustMatch(dev, "on:id=demo.foo"))
 	assert.True(t, MustMatch(dev, "on:id>=demo.foo"))
 	assert.True(t, MustMatch(dev, "on:id>demo.fo"))
 	assert.False(t, MustMatch(dev, "on:id>demo.foo"))
 
-	// state
+	// on:state
 	assert.True(t, MustMatch(dev, "on:state=online"))
 	assert.False(t, MustMatch(dev, "on:state=offline"))
 
-	// IP
+	// on:ip
 	assert.True(t, MustMatch(dev, "on:ip="))
 	dev.IP = "0.1.2.3"
 	assert.False(t, MustMatch(dev, "on:ip="))
@@ -105,10 +107,17 @@ func TestSpecial(t *testing.T) {
 	assert.True(t, MustMatch(dev, "on:ip=0.1.2.3"))
 	assert.True(t, MustMatch(dev, "on:ip>0.1.") && MustMatch(dev, "on:ip<0.2.")) // find devices in specific IP range
 
-	// CreatedAt:
+	// on:createdAt:
 	assert.True(t, MustMatch(dev, "on:createdAt=2018-01-15T16:55:31Z"))
 	assert.True(t, MustMatch(dev, "on:createdAt>=2018")) // created this year
 	assert.True(t, MustMatch(dev, "on:createdAt>2018"))  // we're still doing simple string comparison
+
+	// on:stateTs
+	assert.True(t, MustMatch(dev, "on:stateTs=2018-02-05T17:37:05Z"))
+	assert.True(t, MustMatch(dev, "on:stateTs"))
+	assert.True(t, MustMatch(dev, "on:stateTs!="))
+	assert.False(t, MustMatch(dev, "on:stateTs<2018"))
+	assert.True(t, MustMatch(dev, "on:stateTs>2018"))
 
 	// other special properties
 	assert.True(t, MustMatch(dev, "on:name!="))

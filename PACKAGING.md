@@ -8,14 +8,14 @@
 - TODO `ondevice_$version_$arch.rpm`
 
 ### MacOS
-- homebrew tap 
+- [homebrew tap](https://github.com/ondevice/homebrew-tap)
 - TODO binary install (`ondevice_$version_mac-amd64.tgz`)
 
 
 ## Release Checklist
 
-- check github issues and milestones (unless it's a minor release)
-- test your code locally
+- check github issues and milestones (unless it's a bugfix release)
+- test code locally
 - package *nightly* builds:
   - push your changes, wait for the build to succeed on travis-ci.org (and the resulting artifacts to show up on https://repo.ondevice.io/builds/ )  
     alternatively, run `make package` locally (make sure to have a clean working directory)
@@ -30,6 +30,7 @@
 - release process
   - create a github release, copying the info from `CHANGELOG.md` (the build artifacts should already be there)
   - copy the `//repo.ondevice.io/build/$buildNr/` dir to `/client/$version/`
+  - update the `/client/stable` symlink
   - update the debian repos
   - upgrade homebrew tap (by updating `url` as well as `sha256`)
 

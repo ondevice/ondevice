@@ -3,6 +3,7 @@ package command
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/ondevice/ondevice/api"
@@ -101,10 +102,10 @@ func (l listCommand) print(devices []api.Device) {
 		}
 	}
 
-	_printColumns(widths, titles)
+	_printColumns(widths, titles, os.Stderr)
 
 	for _, dev := range devices {
-		_printColumns(widths, _getColumns(dev))
+		_printColumns(widths, _getColumns(dev), os.Stdout)
 	}
 }
 
@@ -135,25 +136,25 @@ func _matches(dev api.Device, filters []string) (bool, error) {
 	return true, nil
 }
 
-func _printColumns(widths []int, cols []string) {
+func _printColumns(widths []int, cols []string, w *os.File) {
 	if len(widths) != len(cols) {
 		logg.Fatal("mismatch between cols and widths count", cols, widths)
 	}
 
 	for i, width := range widths {
-		_printValue(width, cols[i])
-		fmt.Print(" ")
+		_printValue(width, cols[i], w)
+		fmt.Fprint(w, " ")
 	}
-	fmt.Println("")
+	fmt.Fprintln(w, "")
 }
 
-func _printValue(width int, val string) {
+func _printValue(width int, val string, w *os.File) {
 	if len(val) > width {
 		logg.Fatal("width < len(val) !")
 	}
-	fmt.Print(val)
+	fmt.Fprint(w, val)
 	for i := len(val); i < width; i++ {
-		fmt.Print(" ")
+		fmt.Fprint(w, " ")
 	}
 }
 

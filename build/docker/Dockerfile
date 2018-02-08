@@ -7,13 +7,16 @@ FROM golang:alpine
 
 RUN apk add --no-cache git glide
 
-COPY ./ /go/src/github.com/ondevice/ondevice/
+#COPY ./ /go/src/github.com/ondevice/ondevice/
+COPY /.git/ /tmp/src.git/
+RUN git clone /tmp/src.git/ /go/src/github.com/ondevice/ondevice/
 
 WORKDIR /go/src/github.com/ondevice/ondevice/
 
 # trying to pinpoint a docker hub build issue:
 RUN glide update
-RUN go build -o /build/ondevice
+ARG VERSION
+RUN go build -ldflags "-X github.com/ondevice/ondevice/config.version=${VERSION}" -o /build/ondevice
 
 #
 # stage 2

@@ -49,7 +49,7 @@ package: package-deb package-linux build-docker
 # ondevice/ondevice docker image
 #
 build-docker:
-	docker build -f build/docker/Dockerfile -t ondevice/ondevice .
+	docker build -f build/docker/Dockerfile '--build-arg=VERSION=$(VERSION)' -t ondevice/ondevice:latest -t 'ondevice/ondevice:v$(VERSION)' .
 
 
 #

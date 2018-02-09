@@ -7,7 +7,7 @@
 
 ARCH=$(shell uname -m)
 GO_IMAGE=golang:1.9-stretch
-VERSION=0.6.0
+VERSION=0.6.1
 
 # Version suffix:
 # - unmodified if already specified

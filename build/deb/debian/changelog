@@ -1,3 +1,9 @@
+ondevice (0.6.1) stable; urgency=medium
+
+  * fixed cross-compilation issue affecting the ARM Linux .tgz release
+
+ -- ondevice.io debian team <debian@ondevice.io>  Fri, 09 Feb 2018 20:31:58 +0000
+
 ondevice (0.6.0) stable; urgency=medium
 
   * `ondevice daemon` can now be restarted over `ondevice ssh`
@@ -10,7 +16,6 @@ ondevice (0.6.0) stable; urgency=medium
   * improved build pipeline (automatically rsyncing pushes to https://repo.ondevice.io/builds/ )
   * making it clear that you can't use your account password (for `ondevice login` and `dpkg-reconfigure ondevice-dameon`)
   * explicitly handling HTTP 429 Too Many Requests when reconnecting in `ondevice daemon`
-
 
  -- ondevice.io debian team <debian@ondevice.io>  Mon, 05 Feb 2018 18:54:42 +0000
 

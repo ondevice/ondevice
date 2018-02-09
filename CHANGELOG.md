@@ -1,3 +1,7 @@
+### v0.6.1 (2018-02-09)
+
+- fixed cross-compilation issue affecting the ARM Linux .tgz release
+
 ### v0.6 (2018-02-05)
 
 - `ondevice daemon` can now be restarted over `ondevice ssh`

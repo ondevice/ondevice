@@ -37,11 +37,21 @@ func GetConfigPath(filename string) string {
 	}
 
 	var u, err = user.Current()
-	if err != nil {
-		logg.Fatal("Couldn't get current user: ", err)
+	var homeDir string
+
+	if err == nil {
+		homeDir = u.HomeDir
+	} else {
+		// This can happen when cross-compiling (it crept up on build-linux-armhf
+		// even though https://github.com/golang/go/issues/14626 has been closed for quite some time now)
+		//logg.Warning("Failed to get user.Current(), using $HOME instead: ", err)
+		homeDir = os.Getenv("HOME")
+		if homeDir == "" {
+			logg.Fatal("Couldn't get current user (and $HOME is empty): ", err)
+		}
 	}
 
-	return path.Join(u.HomeDir, ".config/ondevice", filename)
+	return path.Join(homeDir, ".config/ondevice", filename)
 }
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)

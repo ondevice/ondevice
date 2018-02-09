@@ -1,5 +1,5 @@
 hash: de01ec7c812187d9c0b80d48fbc7bb6031893a500a29a603400dca000819b3f7
-updated: 2018-02-05T19:04:30.098572991Z
+updated: 2018-02-09T19:28:19.556747287Z
 imports:
 - name: github.com/gorilla/websocket
   version: ea4d1f681babbce9545c9c5f3d5194a789c89f5b
@@ -10,7 +10,7 @@ imports:
 - name: github.com/looplab/fsm
   version: 8def87414f14eaa69e4ee40abd20a7c195cea6f4
 - name: golang.org/x/crypto
-  version: 1875d0a70c90e57f11972aefd42276df65e895b9
+  version: 5119cf507ed5294cc409c092980c7497ee5d6fd2
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys

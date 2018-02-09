@@ -22,7 +22,7 @@
   - install the resulting packages on different test machines (especially if packaging details have changed)
     - use these packages for some days, just to be sure
 - create `stable` packages:
-  - update `CHANGELOG.md` (as well as `build/deb/debian/changelog`)
+  - update `CHANGELOG.md`
   - update `$VERSION` in `Makefile`
   - update `build/deb/debian/changelog` (using the contents of CHANGELOG.md)
   - run `make package` and see if things work

@@ -39,7 +39,6 @@ var _commands = map[string]Command{
 	"device": DeviceCommand,
 	"event":  EventCommand,
 	"list":   ListCommand,
-	"login":  LoginCommand,
 	"rsync":  RsyncCommand,
 	"scp":    SCPCommand,
 	"sftp":   SFTPCommand,

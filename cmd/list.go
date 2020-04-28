@@ -40,13 +40,9 @@ type listCmd struct {
 func init() {
 	var c listCmd
 	c.Command = cobra.Command{
-		Use:   "list",
+		Use:   "list [filters...]",
 		Short: "list your devices",
 		Long: `List your devices
-
-			Options:
-			--state <online/offline>
-				limit to devices that are on/offline
 
 			Filters:
 

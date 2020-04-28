@@ -29,23 +29,6 @@ import (
 // option list copied from debian jessie's openssh source package (from ssh.c, line 509)
 var sshFlags = sshParseFlags("1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:")
 
-// sshParseFlags -- takes a getopt-style argument string and returns a map
-// of flag characters and whether or not they expect an argument
-func sshParseFlags(flags string) map[byte]bool {
-	rc := map[byte]bool{}
-
-	for i := 0; i < len(flags); i++ {
-		flag := flags[i]
-		hasValue := false
-		if flags[i+1] == ':' {
-			hasValue = true
-			i++
-		}
-		rc[flag] = hasValue
-	}
-	return rc
-}
-
 // sshCmd represents the ssh command
 type sshCmd struct {
 	cobra.Command
@@ -97,13 +80,13 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	sshPath := "/usr/bin/ssh"
 
 	// parse args (to detect the ones before 'user@host')
-	args, opts := c.parseArgs(sshFlags, args)
+	args, opts := sshParseArgs(sshFlags, args)
 	if len(args) < 1 {
 		logg.Fatal("missing target host")
 	}
 
 	// first non-option target is the [user@]host.
-	tgtHost, tgtUser := c.parseTarget(args[0])
+	tgtHost, tgtUser := sshParseTarget(args[0])
 	args = args[1:]
 
 	// compose ProxyCommand
@@ -114,7 +97,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
 
-	if c.getConfig(opts, "UserKnownHostsFile") == "" {
+	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
 		// use our own known_hosts file unless the user specified an override
 		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
 	}
@@ -143,7 +126,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 // sshGetConfig -- returns the specified -o SSH option (if present)
 //
 // note that key is case insensitive
-func (c *sshCmd) getConfig(opts []string, key string) string {
+func sshGetConfig(opts []string, key string) string {
 	key = strings.ToLower(key)
 	for _, opt := range opts {
 		if !strings.HasPrefix(opt, "-o") {
@@ -159,7 +142,7 @@ func (c *sshCmd) getConfig(opts []string, key string) string {
 }
 
 // sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)
-func (*sshCmd) parseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
+func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
@@ -198,7 +181,24 @@ func (*sshCmd) parseArgs(flags map[byte]bool, args []string) (outArgs []string, 
 	return
 }
 
-func (c *sshCmd) parseTarget(target string) (tgtHost string, tgtUser string) {
+// sshParseFlags -- takes a getopt-style argument string and returns a map
+// of flag characters and whether or not they expect an argument
+func sshParseFlags(flags string) map[byte]bool {
+	rc := map[byte]bool{}
+
+	for i := 0; i < len(flags); i++ {
+		flag := flags[i]
+		hasValue := false
+		if flags[i+1] == ':' {
+			hasValue = true
+			i++
+		}
+		rc[flag] = hasValue
+	}
+	return rc
+}
+
+func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	parts := strings.SplitN(target, "@", 2)
 	if len(parts) == 1 {
 		tgtUser = ""

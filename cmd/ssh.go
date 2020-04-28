@@ -1,4 +1,19 @@
-package command
+/*
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package cmd
 
 import (
 	"fmt"
@@ -8,22 +23,87 @@ import (
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
+	"github.com/spf13/cobra"
 )
 
 // option list copied from debian jessie's openssh source package (from ssh.c, line 509)
 var sshFlags = sshParseFlags("1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:")
 
-func sshRun(args []string) int {
+// sshParseFlags -- takes a getopt-style argument string and returns a map
+// of flag characters and whether or not they expect an argument
+func sshParseFlags(flags string) map[byte]bool {
+	rc := map[byte]bool{}
+
+	for i := 0; i < len(flags); i++ {
+		flag := flags[i]
+		hasValue := false
+		if flags[i+1] == ':' {
+			hasValue = true
+			i++
+		}
+		rc[flag] = hasValue
+	}
+	return rc
+}
+
+// sshCmd represents the ssh command
+type sshCmd struct {
+	cobra.Command
+}
+
+func init() {
+	var c sshCmd
+
+	c.Command = cobra.Command{
+		Use:   "ssh [ssh-arguments...]",
+		Short: "connect to your devices using the ssh protocol",
+		Long: `Connect to your devices using the 'ssh' command.
+
+		This is a relatively thin wrapper around the 'ssh' command.
+		The main difference to invoking ssh directly is that instead of regular host names you'll have to specify an ondevice deviceId.
+		The connection is routed through the ondevice.io network.
+
+		ondevice ssh will try to parse ssh's arguments, the first non-argument has to be
+		the user@devId combo.
+
+		See ssh's documentation for further details.
+
+		Examples:
+		- ondevice ssh device1
+		  simply connect to device1
+		- ondevice ssh user@device1
+		  open an SSH connection to device1, logging in as 'user'
+		- ondevice ssh device1 echo hello world
+		  run 'echo hello world' on device1
+		- ondevice ssh device1 -N -L 1234:localhost:80
+		  Tunnel the HTTP server on device1 to the local port 1234 without opening
+		  a shell
+		- ondevice ssh device1 -D 1080
+		  Starting a SOCKS5 proxy listening on port 1080. It'll redirect all traffic
+		  to the target host.
+
+		Notes:
+		- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+		  Override with ''-oUserKnownHostsFile=...'
+	`,
+		Run: c.run,
+	}
+	c.DisableFlagParsing = true
+
+	rootCmd.AddCommand(&c.Command)
+}
+
+func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	sshPath := "/usr/bin/ssh"
 
 	// parse args (to detect the ones before 'user@host')
-	args, opts := sshParseArgs(sshFlags, args)
+	args, opts := c.parseArgs(sshFlags, args)
 	if len(args) < 1 {
 		logg.Fatal("missing target host")
 	}
 
 	// first non-option target is the [user@]host.
-	tgtHost, tgtUser := sshParseTarget(args[0])
+	tgtHost, tgtUser := c.parseTarget(args[0])
 	args = args[1:]
 
 	// compose ProxyCommand
@@ -34,7 +114,7 @@ func sshRun(args []string) int {
 	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
 
-	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
+	if c.getConfig(opts, "UserKnownHostsFile") == "" {
 		// use our own known_hosts file unless the user specified an override
 		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
 	}
@@ -58,13 +138,12 @@ func sshRun(args []string) int {
 
 	// nothing here should ever be executed
 	logg.Fatal("This should never happen")
-	return -1
 }
 
 // sshGetConfig -- returns the specified -o SSH option (if present)
 //
 // note that key is case insensitive
-func sshGetConfig(opts []string, key string) string {
+func (c *sshCmd) getConfig(opts []string, key string) string {
 	key = strings.ToLower(key)
 	for _, opt := range opts {
 		if !strings.HasPrefix(opt, "-o") {
@@ -80,7 +159,7 @@ func sshGetConfig(opts []string, key string) string {
 }
 
 // sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)
-func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
+func (*sshCmd) parseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
@@ -119,7 +198,7 @@ func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts
 	return
 }
 
-func sshParseTarget(target string) (tgtHost string, tgtUser string) {
+func (c *sshCmd) parseTarget(target string) (tgtHost string, tgtUser string) {
 	parts := strings.SplitN(target, "@", 2)
 	if len(parts) == 1 {
 		tgtUser = ""
@@ -140,59 +219,4 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	}
 
 	return tgtHost, tgtUser
-}
-
-// sshParseFlags -- takes a getopt-style argument string and returns a map
-// of flag characters and whether or not they expect an argument
-func sshParseFlags(flags string) map[byte]bool {
-	rc := map[byte]bool{}
-
-	for i := 0; i < len(flags); i++ {
-		flag := flags[i]
-		hasValue := false
-		if flags[i+1] == ':' {
-			hasValue = true
-			i++
-		}
-		rc[flag] = hasValue
-	}
-	return rc
-}
-
-// SSHCommand -- implements `ondevice ssh`
-var SSHCommand = BaseCommand{
-	Arguments: "[ssh-arguments...]",
-	ShortHelp: "Connect to your devices using the ssh protocol",
-	RunFn:     sshRun,
-	LongHelp: `$ ondevice ssh [<user>@]<device> [ssh-arguments...]
-
-Connect to your devices using the 'ssh' command.
-
-This is a relatively thin wrapper around the 'ssh' command.
-The main difference to invoking ssh directly is that instead of regular host names you'll have to specify an ondevice deviceId.
-The connection is routed through the ondevice.io network.
-
-ondevice ssh will try to parse ssh's arguments, the first non-argument has to be
-the user@devId combo.
-
-See ssh's documentation for further details.
-
-Examples:
-- ondevice ssh device1
-  simply connect to device1
-- ondevice ssh user@device1
-  open an SSH connection to device1, logging in as 'user'
-- ondevice ssh device1 echo hello world
-  run 'echo hello world' on device1
-- ondevice ssh device1 -N -L 1234:localhost:80
-  Tunnel the HTTP server on device1 to the local port 1234 without opening
-  a shell
-- ondevice ssh device1 -D 1080
-  Starting a SOCKS5 proxy listening on port 1080. It'll redirect all traffic
-  to the target host.
-
-Notes:
-- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
-  Override with ''-oUserKnownHostsFile=...'
-`,
 }

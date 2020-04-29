@@ -1,4 +1,19 @@
-package command
+/*
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package cmd
 
 import (
 	"fmt"
@@ -8,11 +23,33 @@ import (
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/logg"
+	"github.com/spf13/cobra"
 )
 
 var sftpFlags = sshParseFlags("1246aCfpqrvB:b:c:D:F:i:l:o:P:R:S:s:")
 
-func runSFTP(args []string) int {
+// sftpCmd represents the sftp command
+var sftpCmd = &cobra.Command{
+	Use:   "sftp [sftp-flags] [user@]devId",
+	Short: "copy files from/to a device using sftp",
+	Long: `Interactively copy files from/to devices using scp
+
+  Examples:
+  - ondevice sftp user@myDev
+    open an sftp session to 'myDev', logging in as 'user'
+
+  Notes:
+  - We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+  Override with ''-oUserKnownHostsFile=...'`,
+	Run: sftpRun,
+}
+
+func init() {
+	rootCmd.AddCommand(sftpCmd)
+	sftpCmd.DisableFlagParsing = true
+}
+
+func sftpRun(cmd *cobra.Command, args []string) {
 	sftpPath := "/usr/bin/sftp"
 
 	args, opts := sshParseArgs(sftpFlags, args)
@@ -49,25 +86,4 @@ func runSFTP(args []string) int {
 	}
 
 	logg.Fatal("We shouldn't be here")
-	return -1
-}
-
-// SFTPCommand -- implements `ondevice sftp`
-var SFTPCommand = BaseCommand{
-	Arguments: "[sftp-flags] [user@]devId",
-	ShortHelp: "copy files from/to a device using sftp",
-	RunFn:     runSFTP,
-	LongHelp: `
-  $ ondevice sftp [sftp-options...] [user@]devId
-
-  Interactively copy files from/to devices using scp
-
-  Examples:
-  - ondevice sftp user@myDev
-    open an sftp session to 'myDev', logging in as 'user'
-
-  Notes:
-  - We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
-  Override with ''-oUserKnownHostsFile=...'
-`,
 }

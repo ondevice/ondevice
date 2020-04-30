@@ -55,7 +55,8 @@ func init() {
 			Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
 			the data it gets back to the sender. Therefore the above command is equivalent
 			to simply calling 'echo hello world' (as long as your device is online).`,
-		Run: c.run,
+		Run:    c.run,
+		Hidden: true,
 	}
 	rootCmd.AddCommand(&c.Command)
 }

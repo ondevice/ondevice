@@ -27,7 +27,9 @@ endif
 
 all:
 	@mkdir -p target/
-	go build -ldflags '-X github.com/ondevice/ondevice/config.version=$(VERSION)$(VERSION_SUFFIX)' -o target/ondevice ondevice.go
+	go build -ldflags '-X github.com/ondevice/ondevice/config.version=$(VERSION)$(VERSION_SUFFIX)' -o target/ondevice main.go
+
+build: all
 
 clean:
 	rm -rf target/

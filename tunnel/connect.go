@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // Connect to a service on one of your devices
@@ -43,7 +43,7 @@ func (t *Tunnel) _sendPing() {
 	if t.lastPing.IsZero() {
 		// ignored
 	} else if t.lastPing.Add(180 * time.Second).Before(time.Now()) {
-		logg.Error("tunnel timeout, closing connection...")
+		logrus.Error("tunnel timeout, closing connection...")
 		t.wdog.Stop()
 		t.Close()
 		return // prevent restarting the watchdog

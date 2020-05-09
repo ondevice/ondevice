@@ -3,8 +3,8 @@ package service
 import (
 	"os"
 
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
+	"github.com/sirupsen/logrus"
 )
 
 // ProtocolHandlerBase -- ProtocolHandler base struct
@@ -41,13 +41,13 @@ func GetProtocolHandler(name string) ProtocolHandler {
 		}
 		rc = NewTCPHandler(addr)
 	default:
-		logg.Errorf("Unsupported protocol: '%s'", name)
+		logrus.Errorf("unsupported protocol: '%s'", name)
 		return nil
 	}
 
 	err := rc.connect()
 	if err != nil {
-		logg.Error("GetProtocolHandler error: ", err)
+		logrus.Error("GetProtocolHandler error: ", err)
 		return nil
 	}
 
@@ -63,7 +63,7 @@ func GetProtocolHandler(name string) ProtocolHandler {
 func GetServiceHandler(svc string, protocol string) ProtocolHandler {
 	// TODO implement actual services
 	if svc != protocol {
-		logg.Errorf("protocol/service mismatch: svc=%s, protocol=%s", svc, protocol)
+		logrus.Errorf("protocol/service mismatch: svc=%s, protocol=%s", svc, protocol)
 		return nil
 	}
 
@@ -76,7 +76,7 @@ func Run(p ProtocolHandler, tunnelID string, brokerURL string) {
 
 	err := tunnel.Accept(data.tunnel, tunnelID, brokerURL)
 	if err != nil {
-		logg.Error("Accepting tunnel failed: ", err)
+		logrus.WithError(err).Error("accepting tunnel failed: ")
 	} else {
 		p.receive()
 	}

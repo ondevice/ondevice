@@ -31,7 +31,7 @@ import (
 
 var errAwaitMatch = errors.New("Await match")
 
-type eventsCmd struct {
+type eventCmd struct {
 	cobra.Command
 
 	jsonFlag    bool
@@ -48,13 +48,13 @@ type eventsCmd struct {
 	timeoutWdog *util.Watchdog
 }
 
-// eventsCmd represents the events command
+// eventCmd represents the event command
 
 func init() {
-	var c eventsCmd
+	var c eventCmd
 	c.visitedFlags = make(map[string]int)
 	c.Command = cobra.Command{
-		Use:   "events",
+		Use:   "event",
 		Short: "prints past (and listens for live) account events",
 		Long: `Subscribe to your account's event stream.
 		$ ondevice event --until=<eventId> [--count=50]
@@ -120,7 +120,7 @@ func init() {
 	c.Flags().StringVar(&c.awaitFlag, "await", "", "exit after receiving an event of the specified type")
 }
 
-func (c *eventsCmd) run(cmd *cobra.Command, args []string) {
+func (c *eventCmd) run(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		logg.Fatal("Too many arguments")
 	}
@@ -157,7 +157,7 @@ func (c *eventsCmd) run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (c *eventsCmd) onEvent(ev api.Event) error {
+func (c *eventCmd) onEvent(ev api.Event) error {
 	// print event
 	if c.jsonFlag {
 		data, err := json.Marshal(ev)
@@ -180,16 +180,16 @@ func (c *eventsCmd) onEvent(ev api.Event) error {
 	return nil
 }
 
-func (e *eventsCmd) onTimeout() {
+func (e *eventCmd) onTimeout() {
 	// TODO exit gracefully (closing the listener etc.)
 	logg.Info("event stream timeout")
 	os.Exit(2)
 }
 
-func (c *eventsCmd) flagWasSet(name string) bool {
+func (c *eventCmd) flagWasSet(name string) bool {
 	if f := c.Flag(name); f != nil {
 		return f.Changed
 	}
-	logg.Error("eventsCmd: unexpected flag: ", name)
+	logg.Error("eventCmd: unexpected flag: ", name)
 	return false
 }

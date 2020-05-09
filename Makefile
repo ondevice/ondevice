@@ -40,8 +40,9 @@ vars:
 	@echo 'Version: "$(VERSION)"'
 	@echo 'Suffix: "$(VERSION_SUFFIX)"'
 
-deps:
-	glide install
+upgrade-deps:
+	go get -u -t ./...
+	go mod tidy
 
 # builds all the release artifacts
 package: package-deb package-linux build-docker

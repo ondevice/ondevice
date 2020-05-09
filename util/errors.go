@@ -3,6 +3,8 @@ package util
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -42,4 +44,17 @@ func (e *apiErrorImpl) Code() int {
 // NewAPIError -- Create an APIError instance
 func NewAPIError(code int, msg ...interface{}) APIError {
 	return &apiErrorImpl{code: code, msg: fmt.Sprint(msg...)}
+}
+
+// FailWithAPIError -- call Fatal with a nice error message matching the API error we got
+func FailWithAPIError(err APIError) {
+	if err.Code() == NotFoundError {
+		logrus.Fatal("Not found: ", err.Error())
+	} else if err.Code() == AuthenticationError {
+		logrus.Fatal("Authentication failed (try running ondevice login)")
+	} else if err.Code() == ForbiddenError {
+		logrus.Fatal("Access denied (are you sure your API key has the required roles?)")
+	} else {
+		logrus.Fatalf("Unexpected API error (code %d): %s", err.Code(), err.Error())
+	}
 }

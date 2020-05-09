@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
 	"github.com/sirupsen/logrus"
@@ -93,7 +92,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 	t.DataListeners = append(t.DataListeners, c.onData)
 	t.ErrorListeners = append(t.ErrorListeners, c.onError)
 	if e := tunnel.Connect(&t, devID, service, service, auth); e != nil {
-		logg.FailWithAPIError(e)
+		util.FailWithAPIError(e)
 	}
 
 	buff := make([]byte, 8100)
@@ -135,7 +134,7 @@ func (c *pipeCmd) onData(data []byte) {
 
 func (c *pipeCmd) onError(err util.APIError) {
 	if err.Code() != util.OtherError {
-		logg.FailWithAPIError(err)
+		util.FailWithAPIError(err)
 	} else if !c.sentEOF {
 		logrus.WithError(err).Fatal("lost connection")
 	}

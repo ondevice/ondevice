@@ -11,10 +11,10 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/service"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // deviceSocket -- Manages a single connection to the API servers
@@ -40,7 +40,7 @@ func (d *deviceSocket) connect(auths ...api.Authentication) util.APIError {
 	if len(auths) == 0 {
 		auth, err := api.GetDeviceAuth()
 		if err != nil {
-			logg.Fatal("Couldn't get device auth: ", err)
+			logrus.WithError(err).Fatal("couldn't get device auth")
 		}
 		auths = []api.Authentication{auth}
 	}
@@ -61,12 +61,12 @@ func (d *deviceSocket) onConnect(msg *map[string]interface{}) {
 	brokerURL := _getString(msg, "broker")
 	tunnelID := _getString(msg, "tunnelId")
 
-	logg.Infof("Connection request for %s:%s from user %s@%s", protocol, svc, clientUser, clientIP)
+	logrus.Infof("connection request for %s:%s from user %s@%s", protocol, svc, clientUser, clientIP)
 
 	handler := service.GetServiceHandler(svc, protocol)
 	if handler == nil {
 		d.SendConnectionError(http.StatusNotFound, fmt.Sprintf("Couldn't find service: '%s'", svc), tunnelID)
-		logg.Error("Coudln't find protocol handler: ", protocol)
+		logrus.Error("coudln't find protocol handler: ", protocol)
 		return
 	}
 
@@ -81,11 +81,11 @@ func (d *deviceSocket) onError(msg *map[string]interface{}) {
 	var codeName = tunnel.GetErrorCodeName(int(code))
 
 	d.IsOnline = false
-	logg.Errorf("Device ERROR: %s - %s ", codeName, message)
+	logrus.Errorf("device ERROR: %s - %s ", codeName, message)
 }
 
 func (d *deviceSocket) onHello(msg *map[string]interface{}) {
-	logg.Debug("Got hello message: ", msg)
+	logrus.Debug("got hello message: ", msg)
 	var devID, key string
 	if _contains(msg, "name") {
 		// deprecated hello message format (for backwards compatibility) -- 2017-01-19
@@ -96,12 +96,12 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 		key = _getString(msg, "key")
 	}
 
-	logg.Infof("Connection established, online as '%s'", devID)
+	logrus.Infof("connection established, online as '%s'", devID)
 	d.IsOnline = true
 
 	// update the key if changed
 	if config.GetDeviceKey() != key {
-		logg.Debug("Updating device key: ", key)
+		logrus.Debug("updating device key: ", key)
 		config.SetValue("device", "key", key)
 	}
 
@@ -117,14 +117,14 @@ func (d *deviceSocket) onMessage(_type int, data []byte) {
 	d.wdog.Kick()
 
 	if _type == websocket.BinaryMessage {
-		logg.Error("Got a binary message over the device websocket: ", string(data))
+		logrus.Error("got a binary message over the device websocket: ", string(data))
 		return
 	}
 
 	msg := new(map[string]interface{})
 
 	if err := json.Unmarshal(data, msg); err != nil {
-		logg.Fatalf("Malformed device message: %s", data)
+		logrus.Fatalf("malformed device message: %s", data)
 	}
 
 	msgType := _getString(msg, "_type")
@@ -142,14 +142,14 @@ func (d *deviceSocket) onMessage(_type int, data []byte) {
 	case "error":
 		d.onError(msg)
 	default:
-		logg.Error("Unsupported WS message: ", data)
+		logrus.Error("unsupported WebSocket message: ", data)
 		break
 	}
 }
 
 func (d *deviceSocket) onPing(msg pingMsg) {
 	// quick'n'dirty way to see if we're leaking goroutines (e.g. with stray bloking reads)
-	logg.Debugf("Got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
+	logrus.Debugf("got ping message: %+v (active goroutines: %d)", msg, runtime.NumGoroutine())
 	d.lastPing = time.Now()
 	resp := make(map[string]interface{}, 1)
 	resp["_type"] = "pong"
@@ -158,7 +158,7 @@ func (d *deviceSocket) onPing(msg pingMsg) {
 }
 
 func (d *deviceSocket) onTimeout() {
-	logg.Warning("Haven't heard from the API server in a while, closing connection...")
+	logrus.Warning("haven't heard from the API server in a while, closing connection...")
 	d.IsOnline = false
 	d.Close()
 	d.wdog.Stop()
@@ -166,7 +166,7 @@ func (d *deviceSocket) onTimeout() {
 
 // SendConnectionError -- Send an connection error message to the API server)
 func (d *deviceSocket) SendConnectionError(code int, msg string, tunnelID string) {
-	logg.Debugf("Sending connection error: %s (code %d)", msg, code)
+	logrus.Debugf("sending connection error: %s (code %d)", msg, code)
 	data := make(map[string]interface{})
 	data["_type"] = "connectError"
 	data["tunnelId"] = tunnelID

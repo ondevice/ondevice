@@ -24,6 +24,7 @@ import (
 	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -64,11 +65,11 @@ func init() {
 func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 	// parse arguments
 	if len(args) < 1 {
-		logg.Fatal("Missing devId")
+		logrus.Fatal("missing devId")
 		return
 	}
 	if len(args) < 2 {
-		logg.Fatal("Missing service name")
+		logrus.Fatal("missing service name")
 		return
 	}
 
@@ -77,7 +78,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 
 	auth, err := api.GetClientAuthForDevice(devID)
 	if err != nil {
-		logg.Fatal("Missing client credentials")
+		logrus.WithError(err).Fatal("missing client credentials")
 		return
 	}
 
@@ -108,7 +109,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 				t.SendEOF()
 				break
 			} else {
-				logg.Fatal("error reading from stdin: ", err)
+				logrus.WithError(err).Fatal("error reading from stdin")
 				return
 			}
 		}
@@ -122,7 +123,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 func (*pipeCmd) onClose() {
 	// odds are run() is currently blocking in the p.reader.Read(). Close stdin to
 	// allow it to return gracefully
-	logg.Debug("tunnel closed")
+	logrus.Debug("tunnel closed")
 	os.Stdin.Close()
 }
 
@@ -136,7 +137,7 @@ func (c *pipeCmd) onError(err util.APIError) {
 	if err.Code() != util.OtherError {
 		logg.FailWithAPIError(err)
 	} else if !c.sentEOF {
-		logg.Fatal("lost connection: ", err)
+		logrus.WithError(err).Fatal("lost connection")
 	}
 	c.tunnel.Close()
 }

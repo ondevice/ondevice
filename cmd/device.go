@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -101,7 +101,7 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 	}
 
 	if err != nil {
-		logg.Fatal("Error: ", err)
+		logrus.WithError(err).Fatal("error")
 		return
 	}
 
@@ -111,7 +111,7 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 
 	var auth api.Authentication
 	if auth, err = api.GetClientAuthForDevice(devID); err != nil {
-		logg.Fatal("Missing client auth!")
+		logrus.WithError(err).Fatal("missing client auth!")
 	}
 
 	switch cmd {
@@ -126,7 +126,7 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 	}
 
 	if err != nil {
-		logg.Fatal("Error: ", err)
+		logrus.WithError(err).Fatal("error")
 		return
 	}
 	return
@@ -141,7 +141,7 @@ func (c *deviceCmd) listProperties(devID string, extraArgs []string, auth api.Au
 
 func (c *deviceCmd) removeProperties(devID string, args []string, auth api.Authentication) error {
 	if len(args) == 0 {
-		logg.Error("Too few arguments")
+		logrus.Error("too few arguments")
 	}
 
 	// check if the user wants to delete the device ("on:id" present)
@@ -155,7 +155,7 @@ func (c *deviceCmd) removeProperties(devID string, args []string, auth api.Authe
 
 	if wantsDelete {
 		if len(args) != 1 {
-			logg.Fatal("To delete a device, remove its 'on:id' property (and nothing else)")
+			logrus.Fatal("to delete a device, remove its 'on:id' property (and nothing else)")
 		}
 
 		var confirmed = c.yesFlag
@@ -168,7 +168,7 @@ func (c *deviceCmd) removeProperties(devID string, args []string, auth api.Authe
 				fmt.Printf("Do you really want to delete the device '%s' (y/N): ", devID)
 				input, err = reader.ReadString('\n')
 				if err != nil {
-					logg.Fatal(err)
+					logrus.WithError(err).Fatal("failed to read your response")
 				}
 
 				switch strings.TrimSpace(strings.ToLower(input)) {

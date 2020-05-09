@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -122,7 +122,7 @@ func init() {
 
 func (c *eventCmd) run(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
-		logg.Fatal("Too many arguments")
+		logrus.Fatal("too many arguments")
 	}
 
 	// init listener
@@ -152,7 +152,7 @@ func (c *eventCmd) run(cmd *cobra.Command, args []string) {
 		if err == errAwaitMatch {
 			// return 0
 		} else {
-			logg.Fatal(err)
+			logrus.WithError(err).Fatal("error")
 		}
 	}
 }
@@ -162,7 +162,7 @@ func (c *eventCmd) onEvent(ev api.Event) error {
 	if c.jsonFlag {
 		data, err := json.Marshal(ev)
 		if err != nil {
-			logg.Fatal(err)
+			logrus.WithError(err).Fatal("failed to marshal event")
 		}
 		fmt.Println(string(data))
 	} else {
@@ -182,7 +182,7 @@ func (c *eventCmd) onEvent(ev api.Event) error {
 
 func (e *eventCmd) onTimeout() {
 	// TODO exit gracefully (closing the listener etc.)
-	logg.Info("event stream timeout")
+	logrus.Info("event stream timeout")
 	os.Exit(2)
 }
 
@@ -190,6 +190,6 @@ func (c *eventCmd) flagWasSet(name string) bool {
 	if f := c.Flag(name); f != nil {
 		return f.Changed
 	}
-	logg.Error("eventCmd: unexpected flag: ", name)
+	logrus.Error("eventCmd: unexpected flag: ", name)
 	return false
 }

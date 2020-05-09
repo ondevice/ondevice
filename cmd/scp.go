@@ -22,7 +22,7 @@ import (
 	"syscall"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -91,8 +91,8 @@ func scpRun(cmd *cobra.Command, args []string) {
 
 	err := syscall.Exec(scpPath, a, os.Environ())
 	if err != nil {
-		logg.Fatal("Failed to run ", scpPath, ": ", err)
+		logrus.WithError(err).Fatalf("failed to run '%s'", scpPath)
 	}
 
-	logg.Fatal("We shouldn't be here")
+	logrus.Fatal("we shouldn't be here")
 }

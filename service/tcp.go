@@ -4,7 +4,7 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 // TCPHandler -- protocol handler connecting to a tcp server
@@ -29,7 +29,7 @@ func (t *TCPHandler) Close() {
 	if t.isClosed {
 		return
 	}
-	logg.Debug("TCPHandler.Close()")
+	logrus.Debug("TCPHandler.Close()")
 	t.sock.Close()
 	t.tunnel.Close()
 	t.isClosed = true
@@ -46,14 +46,14 @@ func (t *TCPHandler) connect() error {
 }
 
 func (t *TCPHandler) onEOF() {
-	logg.Debug("TCPHandler.onEOF()")
+	logrus.Debug("TCPHandler.onEOF()")
 	t.Close()
 }
 
 func (t *TCPHandler) onData(data []byte) {
 	_, err := t.sock.Write(data)
 	if err != nil {
-		logg.Error("TCPHandler error: ", err)
+		logrus.WithError(err).Error("TCPHandler error: ")
 		t.Close()
 	}
 }
@@ -64,17 +64,18 @@ func (t *TCPHandler) receive() {
 	for {
 		count, err := t.sock.Read(buff)
 		if err != nil {
-			logg.Errorf("TCPHandler socket error (%s): %s", reflect.TypeOf(err), err)
+			logrus.WithError(err).Errorf("TCPHandler socket error (%s)", reflect.TypeOf(err))
 			break
 		}
 
 		if t.tunnel == nil {
-			logg.Fatal("ERROR: TCPHandler.tunnel is null!!!")
+			logrus.Fatal("ERROR: TCPHandler.tunnel is null!!!")
+			break
 		}
 		t.tunnel.Write(buff[:count])
 	}
 
-	logg.Debug("TCPHandler: done receiving")
+	logrus.Debug("TCPHandler: done receiving")
 	t.Close()
 }
 

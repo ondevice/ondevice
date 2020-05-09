@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 func getSocketURLs() []url.URL {
@@ -23,7 +23,7 @@ func getSocketURLs() []url.URL {
 
 		u, err := url.Parse(env)
 		if err != nil {
-			logg.Fatal("Failed to parse ONDEVICE_HOST: ", err)
+			logrus.WithError(err).Fatal("failed to parse ONDEVICE_HOST")
 		}
 
 		return []url.URL{*u}

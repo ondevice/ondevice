@@ -22,7 +22,7 @@ import (
 	"syscall"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -82,8 +82,8 @@ func sftpRun(cmd *cobra.Command, args []string) {
 
 	err := syscall.Exec(sftpPath, a, os.Environ())
 	if err != nil {
-		logg.Fatal("Failed to run ", sftpPath, ": ", err)
+		logrus.WithError(err).Fatalf("failed to run '%s'", sftpPath)
 	}
 
-	logg.Fatal("We shouldn't be here")
+	logrus.Fatal("we shouldn't be here")
 }

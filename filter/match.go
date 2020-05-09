@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/ondevice/ondevice/api"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // operator examples
@@ -124,7 +124,7 @@ func Matches(dev api.Device, expr string) (bool, error) {
 func MustMatch(dev api.Device, expr string) bool {
 	var rc, err = Matches(dev, expr)
 	if err != nil {
-		logg.Fatalf("Error matching device properties (expr: '%s'): %s", expr, err)
+		logrus.WithError(err).Fatalf("error matching device properties (expr: '%s')", expr)
 	}
 	return rc
 }

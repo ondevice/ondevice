@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 // Device -- state info for a specific device
@@ -110,7 +110,8 @@ func SetProperties(devID string, props map[string]string, auths ...Authenticatio
 
 func _propertyList(data propertyListResponse, err error) (map[string]interface{}, error) {
 	if err != nil {
-		logg.Fatal("Couldn't get device properties: ", err)
+		logrus.WithError(err).Fatal("couldn't get device properties")
+		return nil, err
 	}
 
 	// simply return the first element

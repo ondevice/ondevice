@@ -22,7 +22,7 @@ import (
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/filter"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -113,19 +113,19 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 
 	// check output flags
 	if c.jsonFlag && c.printIDsFlag {
-		logg.Fatal("Specified conflicting output modes (--json and --print-ids)")
+		logrus.Fatal("specified conflicting output modes (--json and --print-ids)")
 	}
 
 	// --user
 	var auth api.Authentication
 	if c.userFlag != "" {
 		if auth, err = api.GetClientAuthForUser(c.userFlag); err != nil {
-			logg.Fatalf("Can't find client auth for user '%s'", c.userFlag)
+			logrus.Fatalf("can't find client auth for user '%s'", c.userFlag)
 			return
 		}
 	} else {
 		if auth, err = api.GetClientAuth(); err != nil {
-			logg.Fatal("Missing client auth, have you run 'ondevice login'?")
+			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
 			return
 		}
 	}
@@ -137,14 +137,14 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 
 	allDevices, err := api.ListDevices(c.stateFlag, c.propsFlag, auth)
 	if err != nil {
-		logg.Fatal(err)
+		logrus.WithError(err).Fatal("failed to fetch device list")
 	}
 
 	var devices = make([]api.Device, 0, len(allDevices))
 	for _, dev := range allDevices {
 		var ok bool
 		if ok, err = c._matches(dev, filters); err != nil {
-			logg.Fatal(err)
+			logrus.WithError(err).Fatal("failed to filter device list")
 		} else if ok {
 			devices = append(devices, dev)
 		}
@@ -155,7 +155,7 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 	} else if c.printIDsFlag {
 		for _, dev := range devices {
 			if _, err = fmt.Println(dev.ID); err != nil {
-				logg.Error("print failed: ", err)
+				logrus.WithError(err).Error("print failed")
 				break
 			}
 		}
@@ -189,7 +189,7 @@ func (*listCmd) printJSON(devs []api.Device) {
 	for _, dev := range devs {
 		out, err := json.Marshal(dev)
 		if err != nil {
-			logg.Fatal("JSON serialization failed: ", err)
+			logrus.WithError(err).Fatal("JSON serialization failed")
 		}
 		fmt.Println(string(out))
 	}
@@ -214,7 +214,7 @@ func (*listCmd) _matches(dev api.Device, filters []string) (bool, error) {
 
 func (c *listCmd) _printColumns(widths []int, cols []string, w *os.File) {
 	if len(widths) != len(cols) {
-		logg.Fatal("mismatch between cols and widths count", cols, widths)
+		logrus.Fatalf("mismatch between cols and widths count (cols=%d, widths=%d)", cols, widths)
 	}
 
 	for i, width := range widths {
@@ -226,7 +226,7 @@ func (c *listCmd) _printColumns(widths []int, cols []string, w *os.File) {
 
 func (*listCmd) _printValue(width int, val string, w *os.File) {
 	if len(val) > width {
-		logg.Fatal("width < len(val) !")
+		logrus.Fatal("width < len(val) !")
 	}
 	fmt.Fprint(w, val)
 	for i := len(val); i < width; i++ {

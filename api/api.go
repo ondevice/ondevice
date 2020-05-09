@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 type ErrorMessage struct {
@@ -41,11 +41,12 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	}
 
 	url := auth.GetURL(endpoint, params, "https")
-	logg.Debugf("%s request to URL %s\n", method, url)
+	logrus.Debugf("%s request to URL %s\n", method, url)
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		// TODO return err
-		logg.Fatal("Failed to create request", err)
+		logrus.WithError(err).Fatal("failed to create request")
+		return nil, err
 	}
 	req.Header.Add("Authorization", auth.GetAuthHeader())
 	req.Header.Add("User-agent", fmt.Sprintf("ondevice v%s", config.GetVersion()))
@@ -129,7 +130,7 @@ func _getObject(tgtValue interface{}, body []byte, err error) error {
 		return err
 	}
 
-	//logg.Debug("getJSON: ", tgtValue, string(body))
+	//logrus.Debug("getJSON: ", tgtValue, string(body))
 	return nil
 }
 
@@ -140,11 +141,11 @@ func getErrorMessage(resp *http.Response) ErrorMessage {
 	var rc ErrorMessage
 
 	if len(contentType) < 2 {
-		logg.Fatal("missing/malformed response content type: ", resp.Header.Get("Content-type"))
+		logrus.Fatal("missing/malformed response content type: ", resp.Header.Get("Content-type"))
 	}
 
 	if body, err = ioutil.ReadAll(resp.Body); err != nil {
-		logg.Fatal("Failed to read response body: ", err)
+		logrus.WithError(err).Fatal("failed to read response body")
 	}
 
 	switch contentType[0] {
@@ -154,11 +155,11 @@ func getErrorMessage(resp *http.Response) ErrorMessage {
 		rc.Msg = string(body)
 	case "application/json":
 		if err = json.Unmarshal(body, &rc); err != nil {
-			logg.Infof("response body: '%s'", string(body))
-			logg.Fatalf("Failed to parse response message (response: %s): %s", resp.Status, err)
+			logrus.Infof("response body: '%s'", string(body))
+			logrus.WithError(err).Fatalf("failed to parse response message (response: %s)", resp.Status)
 		}
 	default:
-		logg.Fatal("Unexpected error response format: ", resp.Header.Get("Content-type"))
+		logrus.Fatal("unexpected error response format: ", resp.Header.Get("Content-type"))
 	}
 
 	return rc

@@ -22,7 +22,7 @@ import (
 	"syscall"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -82,7 +82,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	// parse args (to detect the ones before 'user@host')
 	args, opts := sshParseArgs(sshFlags, args)
 	if len(args) < 1 {
-		logg.Fatal("missing target host")
+		logrus.Fatal("missing target host")
 	}
 
 	// first non-option target is the [user@]host.
@@ -116,11 +116,11 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	// therefore, unless there's an error, this is the last line of code to be executed
 	err := syscall.Exec(sshPath, a, os.Environ())
 	if err != nil {
-		logg.Fatal("Failed to run ", sshPath, ": ", err)
+		logrus.WithError(err).Fatalf("failed to run '%s'", sshPath)
 	}
 
 	// nothing here should ever be executed
-	logg.Fatal("This should never happen")
+	logrus.Fatalf("this should never happen")
 }
 
 // sshGetConfig -- returns the specified -o SSH option (if present)
@@ -147,13 +147,13 @@ func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts
 		arg := args[i]
 
 		if len(arg) == 0 {
-			logg.Fatal("Failed to parse SSH arguments: got an empty argument while looking for '[user@]host'")
+			logrus.Fatal("failed to parse ssh arguments: got an empty argument while looking for '[user@]host'")
 		} else if arg == "-" {
-			logg.Fatal("Stray '-' SSH argument")
+			logrus.Fatal("stray '-' ssh argument")
 		} else if arg[0] == '-' {
 			hasValue, ok := flags[arg[1]]
 			if !ok {
-				logg.Fatal("Unsupported SSH argument: ", arg)
+				logrus.Fatal("unsupported ssh argument: ", arg)
 			}
 			if hasValue && len(arg) == 2 {
 				// the value's in the next argument, push them as one (simplifying subsequent parsing)
@@ -163,13 +163,13 @@ func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts
 				// the value's part of arg
 				outOpts = append(outOpts, arg)
 			} else if !hasValue && len(arg) > 2 { // && !hasValue
-				logg.Fatal("Got value for flag that doesn't expect one: ", arg)
+				logrus.Fatal("got value for flag that doesn't expect one: ", arg)
 			} else if !hasValue && len(arg) == 2 {
 				// a simple flag
 				outOpts = append(outOpts, arg)
 			} else {
 				// yay to defensive programming
-				logg.Fatal("this should never happen (fifth state of two binary values)")
+				logrus.Fatal("this should never happen (fifth state of two binary values)")
 			}
 		} else {
 			// first non-option argument -> we're done
@@ -207,7 +207,7 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 		tgtUser = parts[0]
 		tgtHost = parts[1]
 	} else {
-		logg.Fatal("SplitN(..., 2) returned odd number of results: ", len(parts))
+		logrus.Fatal("SplitN(..., 2) returned odd number of results: ", len(parts))
 	}
 
 	// always use qualified device names

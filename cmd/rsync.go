@@ -20,7 +20,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -60,8 +60,8 @@ func rsyncRun(cmd *cobra.Command, args []string) {
 
 	err := syscall.Exec(rsyncPath, a, os.Environ())
 	if err != nil {
-		logg.Fatal("Failed to run ", rsyncPath, ": ", err)
+		logrus.WithError(err).Fatalf("failed to run '%s'", rsyncPath)
 	}
 
-	logg.Fatal("We shouldn't be here")
+	logrus.Fatal("we shouldn't be here")
 }

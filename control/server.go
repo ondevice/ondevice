@@ -13,7 +13,7 @@ import (
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/daemon"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 // ControlSocket instance
@@ -51,7 +51,7 @@ func (c *ControlSocket) Start() {
 		proto = "tcp"
 		path = u.Host
 	} else {
-		logg.Fatal("Failed to parse control socket URL: ", u.String())
+		logrus.Fatal("failed to parse control socket URL: ", u.String())
 	}
 
 	go c.run(proto, path)
@@ -62,9 +62,9 @@ func (c *ControlSocket) Stop() error {
 	var ctx, cancelFn = context.WithTimeout(context.Background(), 5*time.Second)
 	var err = c.server.Shutdown(ctx)
 	if err != nil {
-		logg.Error("Failed to stop ControlSocket: ", err)
+		logrus.Error("failed to stop ControlSocket: ", err)
 	} else {
-		logg.Info("Stopped ControlSocket")
+		logrus.Info("stopped ControlSocket")
 	}
 
 	cancelFn()
@@ -88,7 +88,7 @@ func (c *ControlSocket) run(protocol string, path string) {
 
 	err = c.server.Serve(l)
 	if err != nil && err != http.ErrServerClosed {
-		logg.Fatal("Couldn't set up control socket: ", err)
+		logrus.WithError(err).Fatal("couldn't set up control socket")
 	}
 }
 
@@ -112,10 +112,10 @@ func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
 func _sendJSON(w http.ResponseWriter, data interface{}) {
 	d, err := json.Marshal(data)
 	if err != nil {
-		logg.Fatal("JSON encode failed: ", data)
+		logrus.Fatal("JSON encode failed: ", data)
 	}
 	// TODO make sure we're not messing up the encoding
 
-	logg.Debug("Sending JSON response: ", string(d))
+	logrus.Debug("Sending JSON response: ", string(d))
 	io.WriteString(w, string(d))
 }

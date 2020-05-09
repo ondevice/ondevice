@@ -8,7 +8,7 @@ import (
 
 	"path"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 )
 
@@ -44,10 +44,10 @@ func GetConfigPath(filename string) string {
 	} else {
 		// This can happen when cross-compiling (it crept up on build-linux-armhf
 		// even though https://github.com/golang/go/issues/14626 has been closed for quite some time now)
-		//logg.Warning("Failed to get user.Current(), using $HOME instead: ", err)
+		//logrus.WithError(err).Warning("failed to get user.Current(), using $HOME instead")
 		homeDir = os.Getenv("HOME")
 		if homeDir == "" {
-			logg.Fatal("Couldn't get current user (and $HOME is empty): ", err)
+			logrus.Fatal("Couldn't get current user (and $HOME is empty): ", err)
 		}
 	}
 
@@ -63,7 +63,7 @@ func GetInt(section string, key string, defaultValue int) int {
 
 	rc, err := strconv.ParseInt(val, 10, 32)
 	if err != nil {
-		logg.Warningf("Error parsing '%s.%s': %s", section, key, err)
+		logrus.WithError(err).Warningf("error parsing '%s.%s'", section, key)
 		return defaultValue
 	}
 
@@ -101,7 +101,7 @@ func GetValue(section string, key string) (string, error) {
 func SetAuth(scope, user, auth string) error {
 	if scope != "client" && scope != "device" {
 		// panic instead of returning an error (since it pretty much has to be a programming error)
-		logg.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
+		logrus.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
 	}
 
 	if err := SetValue(scope, "user", user); err != nil {
@@ -130,7 +130,7 @@ func SetValue(section string, key string, value string) error {
 
 	cfg, err := ini.InsensitiveLoad(path)
 	if os.IsNotExist(err) {
-		logg.Debug("Creating new ondevice.conf")
+		logrus.Debug("creating new ondevice.conf")
 		cfg = ini.Empty()
 	} else if err != nil {
 		return err

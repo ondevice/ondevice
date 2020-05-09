@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // ControlSocket -- REST API to control the ondevice daemon (the implementation's in the control package)
@@ -49,7 +49,7 @@ func NewDaemon() *Daemon {
 func (d *Daemon) Run() int {
 	d.lock.Path = d.PIDFile
 	if err := d.lock.TryLock(); err != nil {
-		logg.Fatal("Couldn't acquire lock file")
+		logrus.Fatal("couldn't acquire lock file")
 		return -1
 	}
 	defer d.lock.Unlock()
@@ -76,14 +76,14 @@ func (d *Daemon) Run() int {
 
 			if !d.shutdown {
 				// connection was successful -> restart after 10sec
-				logg.Warning("lost device connection, reconnecting in 10s")
+				logrus.Warning("lost device connection, reconnecting in 10s")
 				retryDelay = 10
 				time.Sleep(retryDelay * time.Second)
 			}
 		}
 	}
 
-	logg.Info("Stopped ondevice daemon, waiting for remaining tunnels to close (if any...)")
+	logrus.Info("Stopped ondevice daemon, waiting for remaining tunnels to close (if any...)")
 	d.activeTunnels.Wait()
 
 	return 0
@@ -113,29 +113,29 @@ func (d *Daemon) signalHandler() {
 
 		if d.ws == nil {
 			// caught the signal before the connection was established -> exit immediately
-			logg.Errorf("Caught '%s' signal, exiting", sig)
+			logrus.Errorf("caught '%s' signal, exiting", sig)
 			os.Exit(1)
 		}
 
 		switch sig {
 		case syscall.SIGTERM:
-			logg.Info("Got SIGTERM, gracefully shutting down...")
+			logrus.Info("got SIGTERM, gracefully shutting down...")
 		case syscall.SIGINT:
-			logg.Info("Got SIGINT, gracefully shutting down...")
+			logrus.Info("got SIGINT, gracefully shutting down...")
 		default:
-			logg.Warning("Caught unexpected signal: ", sig)
+			logrus.Warning("Caught unexpected signal: ", sig)
 		}
 
 		d.Close()
 	}
 
-	logg.Info("Stopping to handle signals")
+	logrus.Info("stopping to handle signals")
 }
 
 func (d *Daemon) waitBeforeRetry(retryDelay time.Duration, err util.APIError) time.Duration {
 	// only abort here if it's an authentication issue
 	if err.Code() == util.AuthenticationError {
-		logg.Fatal(err)
+		logrus.WithError(err).Fatal("authentication failed")
 	}
 
 	// keep retryDelay between 10 and 120sec
@@ -150,8 +150,7 @@ func (d *Daemon) waitBeforeRetry(retryDelay time.Duration, err util.APIError) ti
 		retryDelay = 600 * time.Second
 	}
 
-	logg.Debug("device error: ", err)
-	logg.Errorf("device error - retrying in %ds", retryDelay/time.Second)
+	logrus.WithError(err).Errorf("device error - retrying in %ds", retryDelay/time.Second)
 
 	// sleep to avoid flooding the servers
 	time.Sleep(retryDelay)
@@ -173,7 +172,7 @@ func _getString(m *map[string]interface{}, key string) string {
 	if val, ok := (*m)[key]; ok {
 		var rc, ok = val.(string)
 		if !ok {
-			logg.Warningf("Not a string (key %s): %s", key, val)
+			logrus.Warningf("not a string (key %s): %s", key, val)
 			return ""
 		}
 		return rc

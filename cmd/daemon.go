@@ -26,7 +26,7 @@ import (
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func init() {
 	var err error
 
 	if homeDir, err = homedir.Dir(); err != nil {
-		logg.Fatal("failed to fetch home directory: ", err)
+		logrus.WithError(err).Fatal("failed to fetch home directory")
 	}
 	var defaultSocketURL = url.URL{Scheme: "unix", Path: filepath.Join(homeDir, ".config/ondevice/ondevice.pid")}
 
@@ -87,7 +87,7 @@ func daemonRun(cmd *cobra.Command, args []string) {
 	log.SetFlags(log.LstdFlags)
 
 	if os.Getuid() == 0 {
-		logg.Fatal("`ondevice daemon` should not be run as root")
+		logrus.Fatal("`ondevice daemon` should not be run as root")
 	}
 
 	var d = daemon.NewDaemon()
@@ -95,7 +95,7 @@ func daemonRun(cmd *cobra.Command, args []string) {
 	var err error
 
 	if controlURL, err = daemonParseArgs(cmd, args, d); err != nil {
-		logg.Fatal(err)
+		logrus.WithError(err).Fatal("failed to parse daemon args")
 		return
 	}
 
@@ -123,7 +123,7 @@ func daemonParseArgs(cmd *cobra.Command, args []string, d *daemon.Daemon) (*url.
 	}
 
 	if rc, err = url.Parse(cmd.Flag("sock").Value.String()); err != nil {
-		logg.Fatal("Couldn't parse socket URL: ", err)
+		logrus.WithError(err).Fatal("couldn't parse socket URL")
 	}
 	return rc, nil
 }

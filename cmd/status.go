@@ -22,7 +22,7 @@ import (
 
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/control"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func init() {
 func statusRun(cmd *cobra.Command, args []string) {
 	var rc int
 	if len(args) != 0 {
-		logg.Fatal("too many arguments")
+		logrus.Fatal("too many arguments")
 	}
 
 	if jsonFlag {
@@ -130,7 +130,7 @@ func statusGetState() control.DeviceState {
 	rc, err := control.GetState()
 	if err != nil {
 		// can't query device socket -> assume daemon is not running
-		logg.Debug("Couldn't query device state: ", err)
+		logrus.WithError(err).Debug("couldn't query device state")
 		rc = control.DeviceState{}
 	}
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 // Authentication -- authentication and other API options)
@@ -34,7 +34,8 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 
 	u, err := url.Parse(server)
 	if err != nil {
-		logg.Fatal("URL parsing error: ", err)
+		logrus.WithError(err).Fatal("URL parsing error")
+		return ""
 	}
 
 	if strings.HasPrefix(endpoint, "/") {

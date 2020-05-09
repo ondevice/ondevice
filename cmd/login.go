@@ -24,7 +24,7 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -69,7 +69,7 @@ func loginRun(cmd *cobra.Command, args []string) {
 	if user != "" {
 		// run in batch mode
 		if auth, err = reader.ReadString('\n'); err != nil {
-			logg.Fatal("Failed to read auth key from stdin: ", err)
+			logrus.WithError(err).Fatal("failed to read auth key from stdin")
 		}
 		auth = strings.TrimSpace(auth)
 	} else {
@@ -84,21 +84,21 @@ func loginRun(cmd *cobra.Command, args []string) {
 		fmt.Print("User: ")
 		user, err = reader.ReadString('\n')
 		if err != nil {
-			logg.Fatal("Failed to read user name: ", err)
+			logrus.WithError(err).Fatal("failed to read user name")
 		}
 		user = strings.TrimSpace(user)
 
 		fmt.Printf("Auth key: ")
 		var authBytes []byte
 		if authBytes, err = gopass.GetPasswd(); err != nil {
-			logg.Fatal(err)
+			logrus.WithError(err).Fatal("failed to read auth key")
 		}
 		auth = string(authBytes)
 	}
 
 	info, err := api.GetKeyInfo(api.NewAuth(user, auth))
 	if err != nil {
-		logg.Fatal(err)
+		logrus.WithError(err).Fatal("failed to verify login info")
 	}
 
 	if info.Key != "" {
@@ -112,27 +112,27 @@ func loginRun(cmd *cobra.Command, args []string) {
 		var parts = strings.SplitN(msg, ":", 2)
 		switch parts[0] {
 		case "info":
-			logg.Info(parts[1])
+			logrus.Info(parts[1])
 		case "warn":
-			logg.Warning(parts[1])
+			logrus.Warning(parts[1])
 		case "err":
-			logg.Error(parts[1])
+			logrus.Error(parts[1])
 		default:
-			logg.Info("Got message: ", msg)
+			logrus.Info("Got server message: ", msg)
 		}
 	}
 
 	// update auth
 	if info.IsType("client") {
-		logg.Info("updating client auth")
+		logrus.Info("updating client auth")
 		if err := config.SetAuth("client", user, string(auth)); err != nil {
-			logg.Fatal("Failed to set client auth: ", err)
+			logrus.WithError(err).Fatal("failed to set client auth")
 		}
 	}
 	if info.IsType("device") {
-		logg.Info("updating device auth")
+		logrus.Info("updating device auth")
 		if err := config.SetAuth("device", user, string(auth)); err != nil {
-			logg.Fatal("Failed to set device auth: ", err)
+			logrus.WithError(err).Fatal("failed to set device auth")
 		}
 	}
 }

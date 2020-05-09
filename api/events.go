@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 // EventListener -- Listens for account events
@@ -87,7 +87,7 @@ func (e *EventListener) Listen(cb func(Event) error) error {
 		line = append(line, data...)
 		if !isPrefix {
 			// parse line
-			//logg.Info("Got event line: ", string(line))
+			//logrus.Debug("got event line: ", string(line))
 			if len(line) == 0 {
 				if len(eventType) > 0 && len(msg) > 0 {
 					if eventType == "event" {
@@ -95,14 +95,14 @@ func (e *EventListener) Listen(cb func(Event) error) error {
 						if err = json.Unmarshal(msg, &eventData); err != nil {
 							return err
 						}
-						//logg.Info("Got event: ", eventData)
+						//logrus.Debug("got event: ", eventData)
 						if err = cb(eventData); err != nil {
 							return err
 						}
 					} else if eventType == "ping" {
-						logg.Debug("Got event stream ping: ", string(msg))
+						logrus.Debug("got event stream ping: ", string(msg))
 					} else {
-						logg.Warning("unexpected event type: '%s' (msg: '%s')", eventType, msg)
+						logrus.Warningf("unexpected event type: '%s' (msg: '%s')", eventType, msg)
 					}
 				}
 				eventType = ""

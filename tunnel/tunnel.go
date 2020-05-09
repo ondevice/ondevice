@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // Tunnel -- an ondevice.io tunnel ()
@@ -67,11 +67,11 @@ func (t *Tunnel) _initTunnel(side string) {
 // SendEOF -- send an EOF to the remote end of the tunnel (i.e. close the write channel)
 func (t *Tunnel) SendEOF() {
 	if t.writeEOF == true {
-		logg.Debug("Attempted to close already closed write channel")
+		logrus.Debug("Attempted to close already closed write channel")
 		return
 	}
 
-	logg.Debug("sending EOF")
+	logrus.Debug("sending EOF")
 	t.writeEOF = true
 	t.SendBinary([]byte("meta:EOF"))
 	t._checkClose()
@@ -88,11 +88,11 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 	parts := bytes.SplitN(msg, []byte(":"), 2)
 
 	if _type != websocket.BinaryMessage {
-		logg.Error("Got non-binary message over the tunnel")
+		logrus.Error("got non-binary message over the tunnel")
 		return
 	}
 	if len(parts) < 2 {
-		logg.Error("Missing colon in tunnel message")
+		logrus.Error("missing colon in tunnel message")
 		return
 	}
 	msgType := string(parts[0])
@@ -103,7 +103,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		metaType := string(parts[0])
 
 		if metaType == "ping" {
-			//logg.Debug("got tunnel ping")
+			//logrus.Debug("got tunnel ping")
 			pong := []byte("meta:pong")
 			t.lastPing = time.Now()
 			t.wdog.Kick()
@@ -114,12 +114,12 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			}
 			t.SendBinary(pong)
 		} else if metaType == "pong" {
-			logg.Debug("got tunnel pong: ", string(msg))
+			logrus.Debug("got tunnel pong: ", string(msg))
 			t.lastPing = time.Now()
 		} else if metaType == "connected" {
-			logg.Debug("connected")
+			logrus.Debug("connected")
 			if err := t.state.Event("connected"); err != nil {
-				logg.Error("State change failed (ev: 'connected'): ", err)
+				logrus.WithError(err).Error("state change failed (ev: 'connected')")
 			}
 			t.connected <- nil
 		} else if metaType == "EOF" {
@@ -156,7 +156,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 		}
 		t._error(err)
 	} else {
-		logg.Warning("Unsupported tunnel message type: ", msgType)
+		logrus.Warning("unsupported tunnel message type: ", msgType)
 	}
 }
 
@@ -164,7 +164,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 // should be closed
 func (t *Tunnel) _checkClose() {
 	if t.readEOF && t.writeEOF {
-		logg.Debug("EOF on both channels, closing tunnel - side: ", t.Side)
+		logrus.Debug("EOF on both channels, closing tunnel - side: ", t.Side)
 		if t.Side == DeviceSide {
 			// it's the client's job to actually close the tunnel - but if it doesn't
 			// do that in time, we'll do it ourselves
@@ -172,14 +172,14 @@ func (t *Tunnel) _checkClose() {
 		} else if t.Side == ClientSide {
 			t.Close()
 		} else {
-			logg.Warning("Unsupported tunnel side: ", t.Side)
+			logrus.Warning("unsupported tunnel side: ", t.Side)
 		}
 	}
 }
 
 func (t *Tunnel) _error(err util.APIError) {
 	if len(t.ErrorListeners) == 0 {
-		logg.Error(err)
+		logrus.WithError(err).Error("tunnel error")
 	}
 	for _, cb := range t.ErrorListeners {
 		cb(err)
@@ -194,16 +194,16 @@ func (t *Tunnel) _onClose() {
 	duration := time.Now().Sub(t.startTs)
 	msg := fmt.Sprintf("Tunnel closed, bytesRead=%d, bytesWritten=%d, duration=%s", t.bytesRead, t.bytesWritten, duration.String())
 	if t.Side == ClientSide {
-		logg.Debug(msg)
+		logrus.Debug(msg)
 	} else if t.Side == DeviceSide {
-		logg.Info(msg)
+		logrus.Info(msg)
 	}
 
 	// TODO stop timers
 }
 
 func (t *Tunnel) _onEOF() {
-	logg.Debug("Tunnel._onEOF()")
+	logrus.Debug("Tunnel._onEOF()")
 	if t.readEOF == true {
 		return
 	}

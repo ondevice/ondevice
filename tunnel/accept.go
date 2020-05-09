@@ -6,8 +6,8 @@ import (
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // Accept -- Accept an incoming tunnel connection
@@ -57,7 +57,7 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 
 func (t *Tunnel) _pingTimeout() {
 	if !t.IsClosed() {
-		logg.Error("tunnel timeout, closing connection")
+		logrus.Error("tunnel timeout, closing connection")
 		t.Close()
 	}
 }

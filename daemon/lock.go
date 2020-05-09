@@ -5,7 +5,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 )
 
 type lockFile struct {
@@ -36,10 +36,10 @@ func (l *lockFile) TryLock() error {
 	}
 
 	l.closed = false
-	logg.Debug("acquired daemon lock file")
+	logrus.Debug("acquired daemon lock file")
 
 	// only do this once we've got the lock
-	logg.Debug("Writing to PID file: ", os.Getpid())
+	logrus.Debug("writing to PID file: ", os.Getpid())
 	pidstr := fmt.Sprintf("%d\n", os.Getpid())
 	syscall.Write(l.fd, []byte(pidstr))
 

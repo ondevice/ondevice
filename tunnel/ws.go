@@ -11,8 +11,8 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
-	"github.com/ondevice/ondevice/logg"
 	"github.com/ondevice/ondevice/util"
+	"github.com/sirupsen/logrus"
 )
 
 // Connection -- WebSocket connection
@@ -68,7 +68,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	hdr.Add("User-agent", fmt.Sprintf("ondevice v%s", config.GetVersion()))
 
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
-	logg.Debugf("Opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
+	logrus.Debugf("opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
 	c.state.Event("connect")
 	websocket.DefaultDialer.HandshakeTimeout = 60 * time.Second
@@ -113,14 +113,14 @@ func (c *Connection) receive() {
 				if e.Code == 1000 {
 					// normal close
 				} else {
-					logg.Error("Websocket closed abnormally: ", err)
+					logrus.WithError(err).Error("websocket closed abnormally")
 				}
 			} else {
 				if !c.IsClosed() {
-					logg.Errorf("read error (type: %s): %s", reflect.TypeOf(err), err)
+					logrus.WithError(err).Errorf("read error (type: %s)", reflect.TypeOf(err))
 					c._error(util.NewAPIError(util.OtherError, err.Error()))
 				} else {
-					logg.Debug("Connetion.receive() interrupted by error: ", reflect.TypeOf(err), err)
+					logrus.WithError(err).Debug("connetion.receive() interrupted by error: ", reflect.TypeOf(err))
 				}
 			}
 			return
@@ -191,5 +191,5 @@ func (c *Connection) _onError(ev *fsm.Event) {
 }
 
 func (c *Connection) _onStateChange(ev *fsm.Event) {
-	logg.Debug("Connection state changed: ", ev.Src, " -> ", ev.Dst)
+	logrus.Debug("connection state changed: ", ev.Src, " -> ", ev.Dst)
 }

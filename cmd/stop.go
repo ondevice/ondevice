@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/ondevice/ondevice/daemon"
-	"github.com/ondevice/ondevice/logg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -48,8 +48,7 @@ func stopRun(cmd *cobra.Command, args []string) {
 		p, err := daemon.GetDaemonProcess()
 		if err != nil {
 			if !found {
-				logg.Debug("GetDaemonProcess error: ", err)
-				logg.Error("Couldn't find daemon process")
+				logrus.WithError(err).Error("couldn't find daemon process")
 				os.Exit(1)
 			}
 			// we seem to have stopped it
@@ -57,7 +56,7 @@ func stopRun(cmd *cobra.Command, args []string) {
 		}
 
 		if !found {
-			logg.Infof("Stopping ondevice daemon... (pid: %d)", p.Pid)
+			logrus.Infof("stopping ondevice daemon... (pid: %d)", p.Pid)
 			found = true
 		}
 
@@ -65,6 +64,6 @@ func stopRun(cmd *cobra.Command, args []string) {
 		time.Sleep(1000 * time.Millisecond)
 	}
 
-	logg.Error("Timeout trying to stop the ondevice daemon")
+	logrus.Error("timeout trying to stop the ondevice daemon")
 	os.Exit(2)
 }

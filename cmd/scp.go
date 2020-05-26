@@ -33,22 +33,19 @@ var scpCmd = &cobra.Command{
 	Short: "copy files from/to your devices using scp",
 	Long: `copy files from/to devices using scp
 
-	Examples:
+Notes:
+- while it is possible to copy files between two servers, scp will initiate
+  both connections simultaneously causing two concurrent password prompts
+  which won't work (unless of course you've set up ssh_agent properly).
+- uses scp's '-3' flag (allowing files to be copied between two remote devices)
+- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+  Override with ''-oUserKnownHostsFile=...'`,
+	Example: `- copy the local /src/path to myDev's /target/path/ as root
+  (and pass the -p and -v options to scp)
+  $ ondevice scp -pv /source/path/ root@myDev:/target/path/
 
-	- ondevice scp -pv /source/path/ root@myDev:/target/path/
-	    copy the local /src/path to myDev's /target/path/ as root
-	    (and pass the -p and -v options to scp)
-	- ondevice scp me@otherDev:/etc/motd /tmp/other.motd
-	    copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
-
-	Notes:
-	- while it is possible to copy files between two servers, scp will initiate
-	  both connections simultaneously causing two concurrent password prompts
-		which won't work (unless of course you've set up ssh_agent properly).
-	- uses scp's '-3' flag (allowing files to be copied between two remote devices)
-	- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
-	  Override with ''-oUserKnownHostsFile=...'
-`,
+- copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
+  $ ondevice scp me@otherDev:/etc/motd /tmp/other.motd`,
 	Run: scpRun,
 }
 

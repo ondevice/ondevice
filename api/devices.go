@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,6 +22,15 @@ type Device struct {
 	Active *bool                  `json:"active,omitempty"`
 	Parent string                 `json:"parent,omitempty"`
 	Props  map[string]interface{} `json:"props,omitempty"`
+}
+
+// UnqualifiedID -- returns the part after the dot of Device.ID
+func (d Device) UnqualifiedID() string {
+	var dotIndex = strings.Index(d.ID, ".")
+	if dotIndex >= 0 {
+		return d.ID[dotIndex+1:]
+	}
+	return d.ID
 }
 
 type deviceResponse struct {

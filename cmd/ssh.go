@@ -22,6 +22,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -70,7 +71,8 @@ func init() {
 		- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
 		  Override with ''-oUserKnownHostsFile=...'
 	`,
-		Run: c.run,
+		Run:               c.run,
+		ValidArgsFunction: internal.DeviceListCompletion{}.Run,
 	}
 	c.DisableFlagParsing = true
 

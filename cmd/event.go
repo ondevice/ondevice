@@ -57,75 +57,52 @@ func init() {
 	c.Command = cobra.Command{
 		Use:   "event",
 		Short: "prints past (and listens for live) account events",
-		Long: `Subscribe to your account's event stream.
-		$ ondevice event --until=<eventId> [--count=50]
-		  List past events up until the given eventId (useful for paging)
+		Long:  `subscribe to your account's event stream and/or list past events.`,
+		Example: `- list past events up until the given eventId (useful for paging)
+  $ ondevice event --until=<eventId> [--count=50]
 
-		Options:
-		--json
-		  Prints the events as JSON objects, one per line
-		--since=eventId
-		  Specify the last eventId you've seen when invoking 'ondevice event' the last
-		  time.
-		  The event with the given ID will be included in the output (unless there have
-		  been more than --count events since then)
-		--until=eventId
-		  Only list past events, up until the given eventId (exits immediately)
-		  Can't be used in conjunction with --since, --timeout or --await
-		--count=n
-		  Display n existing events for --since or --until.
-		  Defaults to 50
-		--type=eventType[,...]
-		  Filters the output by event type (comma-separated list).
-		  Some types: deviceOnline, deviceOffline, connect, accept, close,
-		  For a full list of event types, have a look at the ondevice.io documentation.
+- list events for 30 seconds (you could run this in a loop and do other stuff every 30sec)
+  $ ondevice event --json --timeout=30 --since=1234
 
-		--device=devId[,...]
-		  Filters the output for one or more devices (comma-separated list)
-		--timeout=n
-		  Stops the event stream after n seconds.
-		  0 means 'exit immediately' (will only print existing events), negative values
-		  disable timeouts.
-		  Exits with code 2.
-		  (To start where you left off, use the --since option)
-		--await=eventType
-		  Waits for an event of type eventType to happen (and exits with code 0 as soon
-		  as such an event was received).
-		  If both --timeout and --await are present, whichever one happens first will
-		  cause the program to exit (check the return code to see what happened first).
-		  If --since was specified, that event will be printed but won't trigger an exit
+- exit as soon as one of the specified devices comes online
+  (have a look at the output to see which one it is)
+  $ ondevice event --json --device=dev1,dev2 --await=deviceOnline
 
-
-		Examples:
-		  ondevice event --json --timeout=30 --since=1234
-		    List events for 30 seconds (you could run this in a loop, )
-		  ondevice event --json --device=dev1,dev2 --await=deviceOnline
-		    Exit as soon as one of the specified devices comes online (have a look at
-		    the output to see which one it is)
-		  ondevice event --count=50 --timeout=0
-		    List the 50 most recent events (and exit immediately)
-		  ondevice event --until=1234 --count=50
-		    List event 1234 and the 50 events before it (and exit immediately)
-		`,
-		Run: c.run,
+- list the 50 most recent events (and exit immediately)
+  $ ondevice event --count=50 --timeout=0
+  
+- list event 1234 and the 50 events before it (and exit immediately)
+  $ ondevice event --until=1234 --count=50`,
+		Run:  c.run,
+		Args: cobra.NoArgs,
 	}
 	rootCmd.AddCommand(&c.Command)
 
 	c.Flags().BoolVar(&c.jsonFlag, "json", false, "print output in JSON format, one event per line")
-	c.Flags().Int64Var(&c.sinceFlag, "since", -1, "list past events newer than the given eventId")
-	c.Flags().Int64Var(&c.untilFlag, "until", -1, "list past events older than the given eventId")
-	c.Flags().IntVar(&c.countFlag, "count", 50, "limit the number of past events")
-	c.Flags().StringVar(&c.typeFlag, "type", "", "filter for events of the given type(s) (comma-separated)")
-	c.Flags().StringVar(&c.deviceFlag, "device", "", "filter for events of the given device(s) (comma-separated)")
-	c.Flags().IntVar(&c.timeoutFlag, "timeout", -1, "exit with code 2 after n seconds (0: exit immediately, default: no timeout)")
-	c.Flags().StringVar(&c.awaitFlag, "await", "", "exit after receiving an event of the specified type")
+	c.Flags().Int64Var(&c.sinceFlag, "since", -1, `if specified, only list events newer than the given eventId.
+specify the last eventId you've seen when invoking 'ondevice event' the last time.
+The event with the given ID will be included in the output unless there have been more than --count events since then`)
+	c.Flags().Int64Var(&c.untilFlag, "until", -1, `If specified, only list events older than the given eventId.
+Only list past events, up until the given eventId (exits immediately)
+Can't be used in conjunction with --since, --timeout or --await`)
+	c.Flags().IntVar(&c.countFlag, "count", 50, `limit the number of past events returned for --since or --until.
+Doesn't affect live events printed after that.`)
+	c.Flags().StringVar(&c.typeFlag, "type", "", `Filters the output by event type (comma-separated list).
+Some types: deviceOnline, deviceOffline, connect, accept, close,
+For a full list of event types, have a look at the ondevice.io documentation.`)
+	c.Flags().StringVar(&c.deviceFlag, "device", "", `only show events for the given device(s) (comma-separated)`)
+	c.Flags().IntVar(&c.timeoutFlag, "timeout", -1, `exit with code 2 after n seconds (0: exit immediately, default: no timeout)
+Stops the event stream after n seconds.
+0 means 'exit immediately' (will only print existing events), negative values
+disable timeouts.
+Exits with code 2, can be used in conjunction with --await.
+To start where you left off, use the --since option`)
+	c.Flags().StringVar(&c.awaitFlag, "await", "", `exit with code 0 after receiving an event of the specified type
+If both --timeout and --await are present, whichever one happens first will
+cause the program to exit (check the return code to see what happened first).`)
 }
 
 func (c *eventCmd) run(cmd *cobra.Command, args []string) {
-	if len(args) > 0 {
-		logrus.Fatal("too many arguments")
-	}
-
 	// init listener
 	listener := api.EventListener{
 		Devices: c.deviceFlag,

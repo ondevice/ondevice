@@ -44,18 +44,16 @@ func init() {
 	c.Command = cobra.Command{
 		Use:   "pipe <devId> <service>",
 		Short: "pipes a device's service to stdout/stdin",
-		Long: `sends data from stdin to the specified service - and prints whatever it gets in
-		return to stdout.
+		Long: `sends data from stdin to the specified service - and prints whatever it gets
+in return to stdout.
 
-		This command is used internally by 'ondevice ssh' to serve as ssh's ProxyCommand.
+This command is used internally by 'ondevice ssh' to serve as ssh's ProxyCommand.`,
+		Example: `  $ echo hello world | ondevice pipe <devId> echo
+  hello world
 
-		Example:
-		  $ echo hello world | ondevice pipe <devId> echo
-		  hello world
-
-			Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
-			the data it gets back to the sender. Therefore the above command is equivalent
-			to simply calling 'echo hello world' (as long as your device is online).`,
+  Sends 'hello world' to q5dkpm's 'echo' service. The echo service simply returns
+  data back to the sender unaltered. Therefore the above command is equivalent
+  to simply calling 'echo hello world' (as long as your device is online).`,
 		Run:    c.run,
 		Hidden: true,
 	}

@@ -64,15 +64,14 @@ Filters:
   The one-character operators ("=,<,>") each have a two-character alias ("==,<<,>>"
   respectively). These are provided to fix ambiguities (if the value to c start with "")
   Note that you might have to escape '>' and '<' to shell redirection`,
-		Example: `
-  $ ondevice list
+		Example: `  $ ondevice list
   ID            State   IP             Version         Name
   demo.7t91ta   offline                ondevice v0.4.3
   demo.fbqh2p   offline 192.168.1.23   ondevice v0.3.9
   demo.q5dkpm   online  127.0.0.1      ondevice v0.4.2
   demo.thm7br   offline 10.0.0.127     ondevice v0.4.3 My Raspberry PI
 
-#Example: using filters
+- using filters
   $ ondevice list 'fooVersion<2.3.4' 'foo=' --print-ids
   demo.7t91ta
   demo.fbqh2p
@@ -82,7 +81,7 @@ Filters:
   #string comparison, so "2.3.4" < "2.34.5") and without the "foo" property
   #(unset is equivalent to "")
 
-#Example: JSON output
+- JSON output
   $ ondevice list --json --props
   {"id":"demo.7t91ta",state":"offline","stateTs":1490197318991,"version":"ondevice v0.4.3"}
   {"id":"demo.fbqh2p","ip":"192.168.1.23","state":"offline","stateTs":1485721709598,"version":"ondevice v0.3.9"}

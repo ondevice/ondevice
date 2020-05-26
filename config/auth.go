@@ -3,6 +3,9 @@ package config
 import (
 	"errors"
 	"os"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
 func _getAuth(section string) (string, string, error) {
@@ -46,4 +49,30 @@ func GetClientUserAuth(username string) (string, string, error) {
 // GetDeviceAuth -- Get the device authentication
 func GetDeviceAuth() (string, string, error) {
 	return _getAuth("device")
+}
+
+// ListAuthenticatedUsers -- returns the names of users we have client auth for
+func ListAuthenticatedUsers() []string {
+	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file
+
+	var rc []string
+	var uniqueUsers = make(map[string]bool)
+
+	if mainUser := viper.GetString("client.user"); mainUser != "" {
+		rc = append(rc, mainUser)
+		uniqueUsers[strings.ToLower(mainUser)] = true
+	}
+
+	for _, k := range viper.AllKeys() {
+		if strings.HasPrefix(k, "client.auth_") {
+			var name = k[12:]
+			var lowerName = strings.ToLower(name)
+			if !uniqueUsers[lowerName] {
+				rc = append(rc, k[12:])
+				uniqueUsers[lowerName] = true
+			}
+		}
+	}
+
+	return rc
 }

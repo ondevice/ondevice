@@ -33,34 +33,31 @@ var statusCmd = &cobra.Command{
 	Short: "prints the client and local device status",
 	Long: `Print status and version information on the local ondevice client/device
 
-	Exit Codes:
-	0: daemon up and running
-	1: on error
-	2: daemon running but not online
-	3: daemon not running (or unreachable)
+Exit Codes:
+  0: daemon up and running
+  1: on error
+  2: daemon running but not online
+  3: daemon not running (or unreachable)`,
+	Example: `  $ ondevice status
+  Device:
+    devID:  demo.q5dkpm
+    state:  online
+    version:  0.4.4
 
-	Examples:
+  Client:
+    version:  0.4.4
 
-	  $ ondevice status
-	  Device:
-	    devID:  demo.q5dkpm
-	    state:  online
-	    version:  0.4.4
-
-	  Client:
-	    version:  0.4.4
-
-	  $ ondevice status --json
-	  {
-	    "version": "0.4.4",
-	    "client": {
-	      "version": "0.4.4"
-	    },
-	    "device": {
-	      "devId": "demo.q5dkpm",
-	      "state": "online"
-	    }
-	  }`,
+  $ ondevice status --json
+  {
+    "version": "0.4.4",
+    "client": {
+      "version": "0.4.4"
+    },
+    "device": {
+      "devId": "demo.q5dkpm",
+      "state": "online"
+    }
+  }`,
 	Run: statusRun,
 }
 

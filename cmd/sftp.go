@@ -22,6 +22,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,7 +41,8 @@ Notes:
   Override with ''-oUserKnownHostsFile=...'`,
 	Example: `- open an sftp session to 'myDev', logging in as 'user'
   $ ondevice sftp user@myDev`,
-	Run: sftpRun,
+	Run:               sftpRun,
+	ValidArgsFunction: internal.DeviceListCompletion{}.Run,
 }
 
 func init() {

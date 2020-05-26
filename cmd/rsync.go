@@ -41,7 +41,8 @@ Have a look at the rsync man page for further details.`,
 
 - copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
   $ ondevice rsync me@otherDev:/etc/motd /tmp/other.motd`,
-	Run: rsyncRun,
+	Run:               rsyncRun,
+	ValidArgsFunction: scpValidate,
 }
 
 func init() {

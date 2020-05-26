@@ -32,14 +32,11 @@ import (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Log in to the ondevice.io service",
-	Long: `Log in to the ondevice.io service using one of your API keys.
-
-Example:
-  $ ondevice login
+	Short: "log in to the ondevice.io service",
+	Long:  `log in to the ondevice.io service using one of your API keys.`,
+	Example: `  $ ondevice login
   User: <enter your user name>
-  Auth: <enter your credentials>
-`,
+  Auth: <enter your credentials>`,
 	Run: loginRun,
 }
 

@@ -17,8 +17,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+	"path"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -29,16 +32,24 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ondevice",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "ssh into your devices even if they don't have a public IP",
+	Long: `ondevice wraps your favourite ssh-based tools (ssh, sftp, rsync, etc.)
+to give you access to all your devices, even if they're in another network.`,
+	Example: `- initially log in to your account
+  $ ondevice login
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+- connect to your NAS (i.e. device named 'nas')
+  $ ondevice ssh nas
+
+- run apt-get on your office pc
+  $ ondevice ssh office apt-get -y install vim
+
+- copy files using rsync (requires rsync to be installed on both hosts)
+  $ ondevice rsync -av office:~/Documents/Project-XY ~/Documents/Work-Stuff/
+
+- set up port forwarding to a psql server that only accepts local connections
+  $ ondevice ssh -L 54320:localhost:5432 -f -N user@webserver
+  $ psql -h localhost -p 54320 -U webapp -W webapp`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -58,10 +69,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ondevice.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "conf", "", "alias for '--config'")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -78,14 +86,21 @@ func initConfig() {
 		}
 
 		// Search config in home directory with name ".ondevice" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".ondevice")
+		viper.AddConfigPath(path.Join(home, ".config/ondevice"))
+		viper.SetConfigFile(path.Join(home, ".config/ondevice/ondevice.conf"))
+		viper.SetConfigType("ini")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		logrus.Info("using config file: ", viper.ConfigFileUsed())
+	} else {
+		logrus.WithError(err).Error("error reading config")
 	}
+
+	/*	for k, v := range viper.AllSettings() {
+		fmt.Printf("- config: %s=%v\n", k, v)
+	}*/
 }

@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -79,7 +80,8 @@ Special properties:
   $ ondevice device q5dkpm set on:id=rpi
   $ ondevice device rpi rm on:id
   Do you really want to delete the device 'rpi' (y/N):`,
-		Run: c.run,
+		Run:               c.run,
+		ValidArgsFunction: c.validateArgs,
 	}
 
 	rootCmd.AddCommand(&c.Command)
@@ -251,4 +253,17 @@ func (c *deviceCmd) printProperties(props map[string]interface{}, err error) err
 	}
 
 	return nil
+}
+
+// validateArgs -- does shell completion
+func (c deviceCmd) validateArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if len(args) == 0 {
+		// first arg -> devId
+		return internal.DeviceListCompletion{
+			DontIgnoreUser: true,
+		}.Run(cmd, args, toComplete)
+	} else if len(args) == 1 {
+		return []string{"props", "set", "rm"}, cobra.ShellCompDirectiveNoFileComp
+	}
+	return nil, cobra.ShellCompDirectiveDefault
 }

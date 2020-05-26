@@ -31,19 +31,16 @@ var rsyncCmd = &cobra.Command{
 	Short: "copy files from/to your devices using rsync",
 	Long: `copy files from/to devices using rsync
 
-	Examples:
+This command is only a thin wrapper around the 'rsync' client (using its '-e'
+argument to make it use 'ondevice ssh' internally).
 
-	- ondevice rsync -av /source/path/ root@myDev:/target/path/
-	    copy the local /src/path to myDev's /target/path/ as root
-	    (and pass the -a and -v options to rsync)
-	- ondevice rsync me@otherDev:/etc/motd /tmp/other.motd
-	    copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
+Have a look at the rsync man page for further details.`,
+	Example: `- copy the local /src/path to myDev's /target/path/ as root
+  (and pass the -a and -v options to rsync)
+  $ ondevice rsync -av /source/path/ root@myDev:/target/path/
 
-	This command is only a thin wrapper around the 'rsync' client (using its '-e'
-	argument to make it use 'ondevice ssh' internally).
-
-	Have a look at the rsync man page for further details.
-`,
+- copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
+  $ ondevice rsync me@otherDev:/etc/motd /tmp/other.motd`,
 	Run: rsyncRun,
 }
 

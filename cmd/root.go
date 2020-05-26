@@ -96,12 +96,8 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		logrus.Info("using config file: ", viper.ConfigFileUsed())
+		logrus.Debug("using config file: ", viper.ConfigFileUsed())
 	} else {
 		logrus.WithError(err).Error("error reading config")
 	}
-
-	/*	for k, v := range viper.AllSettings() {
-		fmt.Printf("- config: %s=%v\n", k, v)
-	}*/
 }

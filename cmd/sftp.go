@@ -33,15 +33,13 @@ var sftpFlags = sshParseFlags("1246aCfpqrvB:b:c:D:F:i:l:o:P:R:S:s:")
 var sftpCmd = &cobra.Command{
 	Use:   "sftp [sftp-flags] [user@]devId",
 	Short: "copy files from/to a device using sftp",
-	Long: `Interactively copy files from/to devices using scp
+	Long: `interactively copy files from/to devices using sftp
 
-  Examples:
-  - ondevice sftp user@myDev
-    open an sftp session to 'myDev', logging in as 'user'
-
-  Notes:
-  - We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
+Notes:
+- We use our own known_hosts file (in ~/.config/ondevice/known_hosts).
   Override with ''-oUserKnownHostsFile=...'`,
+	Example: `- open an sftp session to 'myDev', logging in as 'user'
+  $ ondevice sftp user@myDev`,
 	Run: sftpRun,
 }
 

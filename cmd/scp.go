@@ -22,6 +22,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -46,7 +47,8 @@ Notes:
 
 - copy otherDev's /etc/motd file to /tmp/other.motd (and login as 'me')
   $ ondevice scp me@otherDev:/etc/motd /tmp/other.motd`,
-	Run: scpRun,
+	Run:               scpRun,
+	ValidArgsFunction: scpValidate,
 }
 
 func init() {
@@ -93,4 +95,12 @@ func scpRun(cmd *cobra.Command, args []string) {
 	}
 
 	logrus.Fatal("we shouldn't be here")
+}
+
+func scpValidate(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if strings.Contains(toComplete, ":") {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
+
+	return internal.DeviceListCompletion{}.Run(cmd, args, toComplete)
 }

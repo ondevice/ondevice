@@ -42,54 +42,50 @@ func init() {
 	c.Command = cobra.Command{
 		Use:   "device <devId> <props/set/rm> [key1=val1 ...]",
 		Short: "list/manipulate device properties",
-		Long: `$ ondevice device <devId> props
-	$ ondevice device <devId> set [key1=val1 ...]
-	$ ondevice device <devId> rm [--yes/-y] [--delete] [key1 key2 ...]
+		Long: `manage your devices' properties.
 
-	This command allows you to change all your devices' properties.
-	It requires a client key with the 'manage' authorization.
+Properties can be used to keep track of your devices, to manage their characteristics,
+keep tracks of running maintenance scripts, etc.
 
-	Properties can be used to keep track of your devices, to manage their characteristics,
-	keep tracks of running maintenance scripts, etc.
+- list properties
+  $ ondevice device <devId> props
+- add/update properties
+  $ ondevice device <devId> set [key1=val1 ...]
+- remove properties
+  $ ondevice device <devId> rm [--yes/-y] [key1 key2 ...]
 
-	- ondevice device $devId props
-	  lists that device's properties, one per line, as 'key=value' pairs
-	- ondevice device $devId set [key=val...]
-	  sets one or more device properties, again as 'key=value' pairs
-	- ondevice device $devId rm [key ...]
-	  removes one or more device properties by name
+Each invocation will print the resulting property list.
+This command requires a client key with the 'manage' permission.
 
-	Some special cases are:
-	- ondevice device $devId set on:id=newId
-	  Rename (= change devId of) a device
-	- ondevice device $devId rm on:id
-	  Removing the special property 'on:id' will attempt to delete the device
-	  (will ask for confirmation unless you also specify --yes)
-	  Only devices that have been offline for at least an hour can be deleted.
+Have a look at ondevice list's filters for a simple way to list devices with specific properties.
 
-	Options:
-	--yes -y
-	  Don't ask before deleting a device
 
-	Each invocation will print the resulting property list.
+Special properties:
+- rename (= change devId of) a device
+  $ ondevice device $devId set on:id=$newId
 
-	Examples:
-	  $ ondevice device q5dkpm props
-	  $ ondevice device q5dkpm set test=1234 foo=bar
-	  test=1234
-	  foo=bar
-	  $ ondevice device q5dkpm rm foo
-	  test=1234
+- remove the special property 'on:id' will attempt to delete the device
+  (will ask for confirmation unless you also specify --yes)
+  Only devices that have been offline for at least an hour can be deleted.
+  $ ondevice device $devId rm on:id`,
+		Example: `  $ ondevice device q5dkpm props
+  $ ondevice device q5dkpm set test=1234 foo=bar
+  test=1234
+  foo=bar
+  $ ondevice device q5dkpm rm foo
+  test=1234
 
-	  # rename and then delete the device
-	  $ ondevice device q5dkpm set on:id=rpi
-	  $ ondevice device rpi rm on:id
-	  Do you really want to delete the device 'uyqsn4' (y/N):
-	`,
+  # rename and then delete the device (using the on:id special property)
+  $ ondevice device q5dkpm set on:id=rpi
+  $ ondevice device rpi rm on:id
+  Do you really want to delete the device 'rpi' (y/N):`,
 		Run: c.run,
 	}
 
 	rootCmd.AddCommand(&c.Command)
+
+	c.Flags().BoolVarP(&c.yesFlag, "yes", "y", false, `don't ask before deleting a device (by removing the 'on:id' property).
+Has no effect on other properties.`)
 }
 
 func (c *deviceCmd) run(_ *cobra.Command, args []string) {

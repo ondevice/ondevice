@@ -31,10 +31,10 @@ var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stops the local ondevice daemon (if running)",
 	Long: `Stops a running ondevice daemon (using the ondevice.pid file) and tries to
-	terminate it.
+terminate it.
 
-	Returns 0 if the daemon was stopped, 1 if it wasn't running and 2 on error
-	(e.g. after a 30sec timeout)`,
+Returns 0 if the daemon was stopped, 1 if it wasn't running and 2 on error
+(e.g. after a 30sec timeout)`,
 	Run: stopRun,
 }
 

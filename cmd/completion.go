@@ -36,6 +36,11 @@ To configure your bash shell to load completions for each session add to your ba
 . <(ondevice completion)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+		// if we've been started as 'on', update rootCmd.Use to reflect that (just a little cheat for myself tbh)
+		if len(os.Args) > 0 && os.Args[0] == "on" {
+			rootCmd.Use = "on"
+		}
+
 		rootCmd.GenBashCompletion(os.Stdout)
 	},
 	Hidden: true,

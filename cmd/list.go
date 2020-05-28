@@ -209,7 +209,7 @@ func (*listCmd) _matches(dev api.Device, filters []string) (bool, error) {
 
 func (c *listCmd) _printColumns(widths []int, cols []string, w *os.File) {
 	if len(widths) != len(cols) {
-		logrus.Fatalf("mismatch between cols and widths count (cols=%d, widths=%d)", cols, widths)
+		logrus.Fatalf("mismatch between cols and widths count (cols=%v, widths=%v)", cols, widths)
 	}
 
 	for i, width := range widths {

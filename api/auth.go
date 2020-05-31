@@ -1,14 +1,9 @@
 package api
 
 import (
-	"encoding/base64"
-	"net/url"
-	"os"
-	"path"
 	"strings"
 
 	"github.com/ondevice/ondevice/config"
-	"github.com/sirupsen/logrus"
 )
 
 // Authentication -- authentication and other API options)
@@ -17,54 +12,11 @@ type Authentication struct {
 }
 
 // GetAuthHeader -- Return the value of the HTTP Basic Authentication header
-func (a Authentication) GetAuthHeader() string {
-	token := a.auth.User() + ":" + a.auth.Key()
-	return "Basic " + base64.StdEncoding.EncodeToString([]byte(token))
-}
+func (a Authentication) GetAuthHeader() string { return a.auth.GetAuthHeader() }
 
 // GetURL -- Get the full API server URL for the apiServer we store internally and the params we get
 func (a Authentication) GetURL(endpoint string, params map[string]string, scheme string) string {
-	server := a.auth.APIServer()
-
-	if server == "" {
-		server = _apiServer
-	}
-
-	u, err := url.Parse(server)
-	if err != nil {
-		logrus.WithError(err).Fatal("URL parsing error")
-		return ""
-	}
-
-	if strings.HasPrefix(endpoint, "/") {
-		endpoint = endpoint[1:]
-	}
-	u.Path = path.Join("/v1.1", endpoint)
-
-	// parse query params
-	query := url.Values{}
-	for k, v := range params {
-		query.Add(k, v)
-	}
-	u.RawQuery = query.Encode()
-
-	// use ws:// if the API server URL was http:// (for local testing)
-	if u.Scheme == "http" {
-		// server URL was using http:// (for local testing) -> use http:// and ws:// (instead of their secure counterparts)
-		if scheme == "wss" {
-			u.Scheme = "ws"
-		} else if scheme == "https" {
-			u.Scheme = "http"
-		} else {
-			u.Scheme = scheme
-		}
-	} else if u.Scheme == "ws" && scheme == "wss" {
-		u.Scheme = "ws"
-	} else {
-		u.Scheme = scheme
-	}
-
-	return u.String()
+	return a.auth.GetURL(endpoint, params, scheme)
 }
 
 // SetServerURL -- Set the API server's URL (used by GetURL(), necessary to use the correct API server in tunnel.Accept())
@@ -123,11 +75,3 @@ func GetDeviceAuth() (Authentication, error) {
 	}
 	return NewAuth(auth), nil
 }
-
-func init() {
-	if os.Getenv("ONDEVICE_SERVER") != "" {
-		_apiServer = os.Getenv("ONDEVICE_SERVER")
-	}
-}
-
-var _apiServer = "https://api.ondevice.io/"

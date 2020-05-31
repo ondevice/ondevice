@@ -2,13 +2,16 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/user"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"path"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 )
@@ -174,4 +177,33 @@ func SetValue(section string, key string, value string) error {
 	}
 
 	return nil
+}
+
+// Init -- sets up configuration, called by cobra.OnInitialize()
+func Init(cfgFile string) {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		_configPath = cfgFile
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		// TODO maybe use another path on windows (and other )
+		_configPath = filepath.Join(home, ".config/ondevice/ondevice.conf")
+	}
+
+	// create parent directory
+	if err := os.MkdirAll(filepath.Dir(_configPath), 0o755); err != nil {
+		logrus.WithError(err).Fatalf("failed to create config directory: '%s'", filepath.Dir(_configPath))
+	}
+
+	// set a default timeout of 30sec for REST API calls (will be reset in long-running commands)
+	// TODO use a builder pattern to be able to specify this on a per-request basis
+	// Note: doesn't affect websocket connections
+	var timeout = time.Duration(GetInt("client", "timeout", 30))
+	http.DefaultClient.Timeout = timeout * time.Second
 }

@@ -15,20 +15,8 @@ limitations under the License.
 */
 package main
 
-import "log"
-import "net/http"
-import "time"
 import "github.com/ondevice/ondevice/cmd"
-import "github.com/ondevice/ondevice/config"
 
 func main() {
-	// disable date/time logging (there's an override for `ondevice daemon`)
-	log.SetFlags(0)
-
-	// set a default timeout of 30sec for REST API calls (will be reset in long-running commands)
-	// TODO use a builder pattern to be able to specify this on a per-request basis
-	// Note: doesn't affect websocket connections
-	var timeout = time.Duration(config.GetInt("client", "timeout", 30))
-	http.DefaultClient.Timeout = timeout * time.Second
 	cmd.Execute()
 }

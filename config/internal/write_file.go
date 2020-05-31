@@ -1,4 +1,4 @@
-package config
+package internal
 
 import (
 	"errors"
@@ -7,26 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
-	"gopkg.in/ini.v1"
 )
 
-// Read -- fetches the contents of ondevice.conf
-func Read() (Config, error) {
-	var rc Config
-	var err error
-
-	rc.path = GetConfigPath("ondevice.conf")
-	if rc.cfg, err = ini.InsensitiveLoad(rc.path); err != nil {
-		if !os.IsNotExist(err) {
-			logrus.WithError(err).Error("config.Read(): failed to read ondevice.conf")
-		}
-		rc.cfg = ini.Empty()
-		return rc, err
-	}
-	return rc, nil
-}
-
-// writeFile -- writes the given data to targetPath
+// WriteFile -- writes the given data to targetPath
 //
 // Meticulous care needs to be taken not to end up with corrupted files
 // (worst case: we lose authentication info and a device becomes unreachable)
@@ -48,7 +31,7 @@ func Read() (Config, error) {
 // - after File.Write() (or at least after File.Close()) the contents of the file are accessible by others (i.e. have been flushed to the filesystem layer)
 // - os.Rename() is atomic (i.e. updates the inode of the target file before unlinking the source)
 // we might need to add special implementations for Windows and other systems
-func writeFile(data []byte, path string, filemode os.FileMode) error {
+func WriteFile(data []byte, path string, filemode os.FileMode) error {
 	var file *os.File
 	var err error
 	var dir = filepath.Dir(path)

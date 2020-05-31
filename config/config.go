@@ -12,6 +12,7 @@ import (
 	"path"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/ondevice/ondevice/config/internal"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 )
@@ -27,6 +28,22 @@ type Config struct {
 	path string
 
 	changed bool // set by SetValue()
+}
+
+// Read -- fetches the contents of ondevice.conf
+func Read() (Config, error) {
+	var rc Config
+	var err error
+
+	rc.path = GetConfigPath("ondevice.conf")
+	if rc.cfg, err = ini.InsensitiveLoad(rc.path); err != nil {
+		if !os.IsNotExist(err) {
+			logrus.WithError(err).Error("config.Read(): failed to read ondevice.conf")
+		}
+		rc.cfg = ini.Empty()
+		return rc, err
+	}
+	return rc, nil
 }
 
 // AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
@@ -80,6 +97,7 @@ func (c Config) GetString(section string, key string) (string, error) {
 	return val.String(), nil
 }
 
+// IsChanged -- returns true once SetValue() has been called
 func (c Config) IsChanged() bool { return c.changed }
 
 // SetValue -- create/update a config value - don't forget to call Write() afterwards
@@ -119,7 +137,7 @@ func (c Config) Write() error {
 		logrus.WithError(err).Error("failed to write ondevice.conf")
 		return err
 	}
-	return writeFile(buff.Bytes(), c.path, 0o644)
+	return internal.WriteFile(buff.Bytes(), c.path, 0o644)
 }
 
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)

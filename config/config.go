@@ -12,7 +12,7 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-// if not nil, this will be used instead of `~/.config/ondevice` (mainly used for testing)
+// if not empty, this will be used instead of `~/.config/ondevice/ondevice.conf`
 var _configPath string
 
 var _fileOverrides = map[string]string{}
@@ -29,7 +29,7 @@ func GetConfigPath(filename string) string {
 	// global config path override (used in unit tests)
 	// TODO replace with single file overrides
 	if _configPath != "" {
-		return path.Join(_configPath, filename)
+		return path.Join(filepath.Dir(_configPath), filename)
 	}
 
 	var u, err = user.Current()

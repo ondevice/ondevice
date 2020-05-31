@@ -7,11 +7,11 @@ import (
 )
 
 func setupTests() {
-	_configPath = "../testData"
+	_configPath = "../testData/ondevice.conf"
 }
 
 func TestPathOverride(t *testing.T) {
-	_configPath = "/tmp/ondevice_test/"
+	_configPath = "/tmp/ondevice_test/ondevice.conf"
 	assert.Equal(t, "/tmp/ondevice_test/test.txt", GetConfigPath("test.txt"), "Config path override failed")
 }
 
@@ -38,7 +38,7 @@ func TestGetValue(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// test missing config file
-	_configPath = "/tmp/nonexisting/"
+	_configPath = "/tmp/nonexisting/ondevice.conf"
 	user, err = GetValue("device", "user_")
 	assert.Equal(t, "", user)
 	assert.NotNil(t, err)

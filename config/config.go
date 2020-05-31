@@ -19,8 +19,6 @@ import (
 // if not empty, this will be used instead of `~/.config/ondevice/ondevice.conf`
 var _configPath string
 
-var _fileOverrides = map[string]string{}
-
 var version = "0.0.1-devel"
 
 // Config -- config file's contents, acquired using config.Read()
@@ -58,10 +56,6 @@ func (c Config) AllValues() map[string]string {
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()
 func GetConfigPath(filename string) string {
-	if _, ok := _fileOverrides[filename]; ok {
-		return _fileOverrides[filename]
-	}
-
 	// global config path override (used in unit tests)
 	// TODO replace with single file overrides
 	if _configPath != "" {
@@ -145,11 +139,6 @@ func SetAuth(scope, user, auth string) error {
 	}
 
 	return nil
-}
-
-// SetFilePath -- Override a config file's path (e.g. to satisfy standard OS paths)
-func SetFilePath(filename string, path string) {
-	_fileOverrides[filename] = path
 }
 
 // SetValue -- create/update a config value

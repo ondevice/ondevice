@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"path"
@@ -53,6 +52,27 @@ func (c Config) AllValues() map[string]string {
 	return rc
 }
 
+// GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
+func (c Config) GetInt(section string, key string, defaultValue int) int {
+	var s = c.cfg.Section(section)
+	if s != nil {
+		return defaultValue // missing section
+	}
+
+	var k = s.Key(key)
+	if k != nil {
+		return defaultValue // missing key
+	}
+
+	var rc, err = k.Int()
+	if err != nil {
+		logrus.WithError(err).Errorf("expected integer value for config key '%s.%s'", section, key)
+		return defaultValue
+	}
+
+	return rc
+}
+
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()
 func GetConfigPath(filename string) string {
@@ -78,22 +98,6 @@ func GetConfigPath(filename string) string {
 	}
 
 	return path.Join(homeDir, ".config/ondevice", filename)
-}
-
-// GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
-func GetInt(section string, key string, defaultValue int) int {
-	var val, err = GetString(section, key)
-	if err != nil {
-		return defaultValue
-	}
-
-	rc, err := strconv.ParseInt(val, 10, 32)
-	if err != nil {
-		logrus.WithError(err).Warningf("error parsing '%s.%s'", section, key)
-		return defaultValue
-	}
-
-	return int(rc)
 }
 
 // GetVersion -- Returns the app version
@@ -196,13 +200,20 @@ func Init(cfgFile string) {
 	}
 
 	// create parent directory
-	if err := os.MkdirAll(filepath.Dir(_configPath), 0o755); err != nil {
+	var err error
+	if err = os.MkdirAll(filepath.Dir(_configPath), 0o755); err != nil {
 		logrus.WithError(err).Fatalf("failed to create config directory: '%s'", filepath.Dir(_configPath))
+	}
+
+	var cfg Config
+	if cfg, err = Read(); err != nil {
+		logrus.WithError(err).Error("failed to read ondevice.conf")
+		return
 	}
 
 	// set a default timeout of 30sec for REST API calls (will be reset in long-running commands)
 	// TODO use a builder pattern to be able to specify this on a per-request basis
 	// Note: doesn't affect websocket connections
-	var timeout = time.Duration(GetInt("client", "timeout", 30))
+	var timeout = time.Duration(cfg.GetInt("client", "timeout", 30))
 	http.DefaultClient.Timeout = timeout * time.Second
 }

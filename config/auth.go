@@ -12,6 +12,11 @@ import (
 // Auth -- contains API server credentials
 type Auth = internal.Auth
 
+// NewAuth -- creates new API server credentials
+func NewAuth(user, auth, apiServer string) Auth {
+	return internal.NewAuth(user, auth, apiServer)
+}
+
 func _getAuth(section string) (Auth, error) {
 	if os.Getenv("ONDEVICE_USER") != "" || os.Getenv("ONDEVICE_AUTH") != "" {
 		return internal.NewAuth(os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), ""), nil

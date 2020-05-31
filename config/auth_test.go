@@ -1,48 +1,50 @@
 package config
 
-import "github.com/stretchr/testify/assert"
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestClientAuth(t *testing.T) {
 	setupTests()
 
-	user, auth, err := GetClientAuth()
-	assert.Equal(t, "demo", user)
-	assert.Equal(t, "234567", auth)
-	assert.Nil(t, err)
+	auth, err := GetClientAuth()
+	assert.NoError(t, err)
+	assert.Equal(t, "demo", auth.User())
+	assert.Equal(t, "234567", auth.Key())
 }
 
 func TestClientUserAuth(t *testing.T) {
 	setupTests()
 
-	user, auth, err := GetClientUserAuth("demo")
-	assert.Equal(t, "demo", user)
-	assert.Equal(t, "234567", auth)
-	assert.Nil(t, err)
+	auth, err := GetClientUserAuth("demo")
+	assert.NoError(t, err)
+	assert.Equal(t, "demo", auth.User())
+	assert.Equal(t, "234567", auth.Key())
 
-	user, auth, err = GetClientUserAuth("hello")
-	assert.Equal(t, "hello", user)
-	assert.Equal(t, "345678", auth)
-	assert.Nil(t, err)
+	auth, err = GetClientUserAuth("hello")
+	assert.NoError(t, err)
+	assert.Equal(t, "hello", auth.User())
+	assert.Equal(t, "345678", auth.Key())
 
 	// test case insensitivity
-	user, auth, err = GetClientUserAuth("HeLLO")
-	assert.Equal(t, "HeLLO", user)
-	assert.Equal(t, "345678", auth)
-	assert.Nil(t, err)
+	auth, err = GetClientUserAuth("HeLLO")
+	assert.NoError(t, err)
+	assert.Equal(t, "HeLLO", auth.User())
+	assert.Equal(t, "345678", auth.Key())
 
 	// test missing user
-	user, auth, err = GetClientUserAuth("nonexisting")
-	assert.Equal(t, "", user)
-	assert.Equal(t, "", auth)
-	assert.NotNil(t, err)
+	auth, err = GetClientUserAuth("nonexisting")
+	assert.Error(t, err)
+	assert.Nil(t, auth)
 }
 
 func TestDeviceAuth(t *testing.T) {
 	setupTests()
 
-	user, auth, err := GetDeviceAuth()
-	assert.Equal(t, "hello", user)
-	assert.Equal(t, "123456", auth)
-	assert.Nil(t, err)
+	auth, err := GetDeviceAuth()
+	assert.NoError(t, err)
+	assert.Equal(t, "hello", auth.User())
+	assert.Equal(t, "123456", auth.Key())
 }

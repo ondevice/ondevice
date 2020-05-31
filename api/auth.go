@@ -84,11 +84,11 @@ func NewAuth(user string, auth string) Authentication {
 
 // GetClientAuth -- Get default client authentication
 func GetClientAuth() (Authentication, error) {
-	user, auth, err := config.GetClientAuth()
+	auth, err := config.GetClientAuth()
 	if err != nil {
 		return Authentication{}, err
 	}
-	return NewAuth(user, auth), nil
+	return NewAuth(auth.User(), auth.Key()), nil
 }
 
 // GetClientAuthForDevice -- Returns an Authentication struct for the given devID
@@ -98,8 +98,8 @@ func GetClientAuth() (Authentication, error) {
 func GetClientAuthForDevice(devID string) (Authentication, error) {
 	if strings.Contains(devID, ".") {
 		parts := strings.SplitN(devID, ".", 2)
-		if user, pwd, err := config.GetClientUserAuth(parts[0]); err == nil {
-			return NewAuth(user, pwd), nil
+		if auth, err := config.GetClientUserAuth(parts[0]); err == nil {
+			return NewAuth(auth.User(), auth.Key()), nil
 		}
 	}
 
@@ -108,23 +108,23 @@ func GetClientAuthForDevice(devID string) (Authentication, error) {
 
 // GetClientAuthForUser -- Returns the client Authentication for the given user name (if available)
 func GetClientAuthForUser(username string) (Authentication, error) {
-	var user, key, err = config.GetClientUserAuth(username)
+	var auth, err = config.GetClientUserAuth(username)
 	var rc Authentication
 
 	if err != nil {
 		return rc, err
 	}
-	rc = NewAuth(user, key)
+	rc = NewAuth(auth.User(), auth.Key())
 	return rc, nil
 }
 
 // GetDeviceAuth -- Create default device authentication
 func GetDeviceAuth() (Authentication, error) {
-	user, auth, err := config.GetDeviceAuth()
+	auth, err := config.GetDeviceAuth()
 	if err != nil {
 		return Authentication{}, err
 	}
-	return NewAuth(user, auth), nil
+	return NewAuth(auth.User(), auth.Key()), nil
 }
 
 func init() {

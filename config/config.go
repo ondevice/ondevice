@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -73,6 +74,24 @@ func (c Config) GetInt(section string, key string, defaultValue int) int {
 	return rc
 }
 
+// GetString -- Get a configuration value (as string)
+func (c Config) GetString(section string, key string) (string, error) {
+	if c.cfg == nil {
+		return "", errors.New("trying to read from nil config")
+	}
+	s, err := c.cfg.GetSection(section)
+	if err != nil {
+		return "", err
+	}
+
+	val, err := s.GetKey(key)
+	if err != nil {
+		return "", err
+	}
+
+	return val.String(), nil
+}
+
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()
 func GetConfigPath(filename string) string {
@@ -103,28 +122,6 @@ func GetConfigPath(filename string) string {
 // GetVersion -- Returns the app version
 func GetVersion() string {
 	return version
-}
-
-// GetString -- Get a configuration value (as string)
-func GetString(section string, key string) (string, error) {
-	path := GetConfigPath("ondevice.conf")
-
-	cfg, err := ini.InsensitiveLoad(path)
-	if err != nil {
-		return "", err
-	}
-
-	s, err := cfg.GetSection(section)
-	if err != nil {
-		return "", err
-	}
-
-	val, err := s.GetKey(key)
-	if err != nil {
-		return "", err
-	}
-
-	return val.String(), nil
 }
 
 // SetAuth -- Set client/user authentication details

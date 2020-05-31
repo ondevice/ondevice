@@ -13,14 +13,17 @@ func _getAuth(section string) (string, string, error) {
 		return os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), nil
 	}
 
-	username, uerr := GetString(section, "user")
-	auth, aerr := GetString(section, "auth")
-
-	if uerr != nil {
-		return "", "", uerr
+	var cfg, err = Read()
+	if err != nil {
+		return "", "", err
 	}
-	if aerr != nil {
-		return "", "", aerr
+
+	var username, auth string
+	if username, err = cfg.GetString(section, "user"); err != nil {
+		return "", "", err
+	}
+	if auth, err = cfg.GetString(section, "auth"); err != nil {
+		return "", "", err
 	}
 
 	return username, auth, nil
@@ -38,8 +41,13 @@ func GetClientUserAuth(username string) (string, string, error) {
 		return defaultU, defaultA, nil
 	}
 
-	auth, err := GetString("client", "auth_"+username)
-	if err == nil {
+	var cfg, err = Read()
+	if err != nil {
+		return "", "", errors.New("failed to read ondevice.conf")
+	}
+
+	var auth string
+	if auth, err = cfg.GetString("client", "auth_"+username); err == nil {
 		return username, auth, nil
 	}
 
@@ -58,15 +66,16 @@ func ListAuthenticatedUsers() []string {
 	var rc []string
 	var uniqueUsers = make(map[string]bool)
 
-	if mainUser, err := GetString("client", "user"); err != nil && mainUser != "" {
-		rc = append(rc, mainUser)
-		uniqueUsers[strings.ToLower(mainUser)] = true
-	}
-
 	var cfg, err = Read()
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to fetch configuration")
 	}
+
+	if mainUser, err := cfg.GetString("client", "user"); err != nil && mainUser != "" {
+		rc = append(rc, mainUser)
+		uniqueUsers[strings.ToLower(mainUser)] = true
+	}
+
 	for k := range cfg.AllValues() {
 		if strings.HasPrefix(k, "client.auth_") {
 			var name = k[12:]

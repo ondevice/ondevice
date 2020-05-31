@@ -2,8 +2,13 @@ package config
 
 // GetDeviceID -- Returns the devId if available (otherwise returns an empty string)
 func GetDeviceID() string {
-	rc, err := GetString("device", "dev-id")
+	var cfg, err = Read()
 	if err != nil {
+		return ""
+	}
+
+	var rc string
+	if rc, err = cfg.GetString("device", "dev-id"); err != nil {
 		return ""
 	}
 	return rc
@@ -11,8 +16,13 @@ func GetDeviceID() string {
 
 // GetDeviceKey -- Returns the device's key (or an empty string if not defined)
 func GetDeviceKey() string {
-	rc, err := GetString("device", "key")
+	var cfg, err = Read()
 	if err != nil {
+		return ""
+	}
+
+	var rc string
+	if rc, err = cfg.GetString("device", "key"); err != nil {
 		return ""
 	}
 	return rc

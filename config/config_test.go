@@ -15,31 +15,36 @@ func TestPathOverride(t *testing.T) {
 	assert.Equal(t, "/tmp/ondevice_test/test.txt", GetConfigPath("test.txt"), "Config path override failed")
 }
 
-func TestGetValue(t *testing.T) {
+func TestGetString(t *testing.T) {
 	setupTests()
 
-	user, err := GetValue("device", "user")
+	var cfg, err = Read()
+	assert.NoError(t, err)
+
+	user, err := cfg.GetString("device", "user")
+	assert.NoError(t, err)
 	assert.Equal(t, "hello", user)
-	assert.Nil(t, err)
 
 	// test case insensitivity
-	user, err = GetValue("devIce", "User")
+	user, err = cfg.GetString("devIce", "User")
+	assert.NoError(t, err)
 	assert.Equal(t, "hello", user)
-	assert.Nil(t, err)
 
 	// test missing section
-	user, err = GetValue("device_", "user")
+	user, err = cfg.GetString("device_", "user")
+	assert.Error(t, err)
 	assert.Equal(t, "", user)
-	assert.NotNil(t, err)
 
 	// test missing key
-	user, err = GetValue("device", "user_")
+	user, err = cfg.GetString("device", "user_")
+	assert.Error(t, err)
 	assert.Equal(t, "", user)
-	assert.NotNil(t, err)
 
 	// test missing config file
 	_configPath = "/tmp/nonexisting/ondevice.conf"
-	user, err = GetValue("device", "user_")
+	cfg, err = Read()
+	assert.Error(t, err)
+	user, err = cfg.GetString("device", "user_")
+	assert.Error(t, err)
 	assert.Equal(t, "", user)
-	assert.NotNil(t, err)
 }

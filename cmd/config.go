@@ -81,8 +81,13 @@ when only one key is requested, only the value will be printed`,
 			var section = parts[0]
 			key = parts[1]
 
-			var val, err = config.GetString(section, key)
+			var cfg, err = config.Read()
 			if err != nil {
+				logrus.WithError(err).Fatal("failed to read ondevice.conf")
+			}
+
+			var val string
+			if val, err = cfg.GetString(section, key); err != nil {
 				logrus.WithError(err).Errorf("config key not found: %s.%s", section, key)
 				rc = 1
 				continue

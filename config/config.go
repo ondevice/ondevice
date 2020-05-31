@@ -13,15 +13,11 @@ import (
 )
 
 // if not nil, this will be used instead of `~/.config/ondevice` (mainly used for testing)
-var _configPathOverride *string
+var _configPath string
 
 var _fileOverrides = map[string]string{}
 
 var version = "0.0.1-devel"
-
-func setConfigPath(path string) {
-	_configPathOverride = &path
-}
 
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()
@@ -32,8 +28,8 @@ func GetConfigPath(filename string) string {
 
 	// global config path override (used in unit tests)
 	// TODO replace with single file overrides
-	if _configPathOverride != nil {
-		return path.Join(*_configPathOverride, filename)
+	if _configPath != "" {
+		return path.Join(_configPath, filename)
 	}
 
 	var u, err = user.Current()

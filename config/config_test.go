@@ -1,14 +1,17 @@
 package config
 
-import "testing"
-import "github.com/stretchr/testify/assert"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func setupTests() {
-	setConfigPath("../testData")
+	_configPath = "../testData"
 }
 
 func TestPathOverride(t *testing.T) {
-	setConfigPath("/tmp/ondevice_test/")
+	_configPath = "/tmp/ondevice_test/"
 	assert.Equal(t, "/tmp/ondevice_test/test.txt", GetConfigPath("test.txt"), "Config path override failed")
 }
 
@@ -35,7 +38,7 @@ func TestGetValue(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// test missing config file
-	setConfigPath("/tmp/nonexisting/")
+	_configPath = "/tmp/nonexisting/"
 	user, err = GetValue("device", "user_")
 	assert.Equal(t, "", user)
 	assert.NotNil(t, err)

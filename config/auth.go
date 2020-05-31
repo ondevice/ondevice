@@ -13,8 +13,8 @@ func _getAuth(section string) (string, string, error) {
 		return os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), nil
 	}
 
-	username, uerr := GetValue(section, "user")
-	auth, aerr := GetValue(section, "auth")
+	username, uerr := GetString(section, "user")
+	auth, aerr := GetString(section, "auth")
 
 	if uerr != nil {
 		return "", "", uerr
@@ -38,7 +38,7 @@ func GetClientUserAuth(username string) (string, string, error) {
 		return defaultU, defaultA, nil
 	}
 
-	auth, err := GetValue("client", "auth_"+username)
+	auth, err := GetString("client", "auth_"+username)
 	if err == nil {
 		return username, auth, nil
 	}

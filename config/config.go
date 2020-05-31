@@ -75,7 +75,7 @@ func GetConfigPath(filename string) string {
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
 func GetInt(section string, key string, defaultValue int) int {
-	var val, err = GetValue(section, key)
+	var val, err = GetString(section, key)
 	if err != nil {
 		return defaultValue
 	}
@@ -94,8 +94,8 @@ func GetVersion() string {
 	return version
 }
 
-// GetValue -- Get a configuration value (as string)
-func GetValue(section string, key string) (string, error) {
+// GetString -- Get a configuration value (as string)
+func GetString(section string, key string) (string, error) {
 	path := GetConfigPath("ondevice.conf")
 
 	cfg, err := ini.InsensitiveLoad(path)

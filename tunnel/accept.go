@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/util"
 	"github.com/sirupsen/logrus"
@@ -21,7 +20,7 @@ func Accept(t *Tunnel, tunnelID string, relayURL string, auths ...config.Auth) e
 	params := map[string]string{"key": deviceKey, "tunnel": tunnelID}
 
 	// get authentication
-	auth, err := api.GetDeviceAuth()
+	auth, err := config.GetDeviceAuth()
 	if len(auths) > 0 {
 		auth = auths[0]
 	} else if err != nil {

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/service"
 	"github.com/ondevice/ondevice/tunnel"
@@ -43,7 +42,7 @@ func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
 	params := map[string]string{"key": cfg.GetDeviceKey()}
 
 	if len(auths) == 0 {
-		auth, err := api.GetDeviceAuth()
+		auth, err := config.GetDeviceAuth()
 		if err != nil {
 			logrus.WithError(err).Fatal("couldn't get device auth")
 		}

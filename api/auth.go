@@ -20,8 +20,3 @@ func GetClientAuthForDevice(devID string) (config.Auth, error) {
 
 	return config.GetClientAuth()
 }
-
-// GetDeviceAuth -- Create default device authentication
-func GetDeviceAuth() (config.Auth, error) {
-	return config.GetDeviceAuth()
-}

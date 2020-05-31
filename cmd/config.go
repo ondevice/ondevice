@@ -25,7 +25,6 @@ import (
 	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func configRun(cmd *cobra.Command, args []string) {
@@ -72,14 +71,24 @@ when only one key is requested, only the value will be printed`,
 		var rc = 0
 
 		for _, key := range args {
-			var val = viper.Get(args[0])
-			if val == nil {
-				logrus.Error("config key not found: ", args[0])
+			var parts = strings.SplitN(key, ".", 2)
+			if len(parts) != 2 {
+				logrus.Errorf("invalid config key: '%s'", key)
+				os.Exit(1)
+			}
+
+			var section = parts[0]
+			key = parts[1]
+
+			var val, err = config.GetString(section, key)
+			if err != nil {
+				logrus.WithError(err).Errorf("config key not found: %s.%s", section, key)
 				rc = 1
 				continue
 			}
+
 			if printKeyVal {
-				fmt.Printf("%s=%v\n", key, val)
+				fmt.Printf("%s.%s=%v\n", section, key, val)
 			} else {
 				fmt.Println(val)
 			}
@@ -94,7 +103,11 @@ when only one key is requested, only the value will be printed`,
 		var matchingKeys []string
 		var shellDirective = cobra.ShellCompDirectiveNoFileComp
 
-		for _, k := range viper.AllKeys() {
+		var cfg, err = config.AllValues()
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to load config")
+		}
+		for k := range cfg {
 			if strings.HasPrefix(k, toComplete) {
 				matchingKeys = append(matchingKeys, k)
 			}

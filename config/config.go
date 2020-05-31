@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,20 +23,10 @@ var version = "0.0.1-devel"
 
 // Config -- config file's contents, acquired using config.Read()
 type Config struct {
-	cfg *ini.File
-}
+	cfg  *ini.File
+	path string
 
-// Read -- fetches the contents of ondevice.conf
-func Read() (Config, error) {
-	var rc Config
-	var err error
-	path := GetConfigPath("ondevice.conf")
-
-	if rc.cfg, err = ini.InsensitiveLoad(path); err != nil {
-		rc.cfg = ini.Empty()
-		return rc, err
-	}
-	return rc, nil
+	changed bool // set by SetValue()
 }
 
 // AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
@@ -89,6 +80,48 @@ func (c Config) GetString(section string, key string) (string, error) {
 	return val.String(), nil
 }
 
+func (c Config) IsChanged() bool { return c.changed }
+
+// SetValue -- create/update a config value - don't forget to call Write() afterwards
+func (c Config) SetValue(section string, key string, value string) error {
+	var s *ini.Section
+	var err error
+
+	c.changed = true
+
+	if s = c.cfg.Section(section); s == nil {
+		if s, err = c.cfg.NewSection(section); err != nil {
+			logrus.WithError(err).Errorf("failed to create config section: '%s'", section)
+			return err
+		}
+	}
+
+	var k *ini.Key
+	if k = s.Key(key); k == nil {
+		if k, err = s.NewKey(key, value); err != nil {
+			logrus.WithError(err).Errorf("failed to create new config value '%s.%s'='%s'", section, key, value)
+			return err
+		}
+		return nil
+	}
+
+	k.SetValue(value)
+	return nil
+}
+
+// Write -- writes ondevice.conf (using writeFile() for safe replacement)
+//
+// Make sure to only write freshly read Config files. otherwise you'll dramatically
+// increase the likelihood of creating race conditions
+func (c Config) Write() error {
+	var buff bytes.Buffer
+	if _, err := c.cfg.WriteTo(&buff); err != nil {
+		logrus.WithError(err).Error("failed to write ondevice.conf")
+		return err
+	}
+	return writeFile(buff.Bytes(), c.path, 0o644)
+}
+
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()
 func GetConfigPath(filename string) string {
@@ -128,52 +161,20 @@ func SetAuth(scope, user, auth string) error {
 		logrus.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
 	}
 
-	if err := SetValue(scope, "user", user); err != nil {
+	var cfg, err = Read()
+	if err != nil {
+		logrus.WithError(err).Error("failed to read ondevice.conf")
+		return err
+	}
+	if err := cfg.SetValue(scope, "user", user); err != nil {
 		return err
 	}
 
-	if err := SetValue(scope, "auth", auth); err != nil {
+	if err := cfg.SetValue(scope, "auth", auth); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// SetValue -- create/update a config value
-func SetValue(section string, key string, value string) error {
-	path := GetConfigPath("ondevice.conf")
-
-	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
-		return err
-	}
-
-	cfg, err := ini.InsensitiveLoad(path)
-	if os.IsNotExist(err) {
-		logrus.Debug("creating new ondevice.conf")
-		cfg = ini.Empty()
-	} else if err != nil {
-		return err
-	}
-
-	s := cfg.Section(section)
-	k := s.Key(key)
-
-	k.SetValue(value)
-
-	// save to a temporary file and only replace the old file if successful
-	// (to avoid corrupting the config file)
-	tmpPath := filepath.Join(filepath.Dir(path), ".ondevice.conf.tmp")
-	if err = cfg.SaveTo(tmpPath); err != nil {
-		return err
-	}
-	if err = os.Chmod(tmpPath, 0600); err != nil {
-		return err
-	}
-	if err = os.Rename(tmpPath, path); err != nil {
-		return err
-	}
-
-	return nil
+	return cfg.Write()
 }
 
 // Init -- sets up configuration, called by cobra.OnInitialize()

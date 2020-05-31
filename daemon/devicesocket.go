@@ -112,12 +112,16 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 	// update the key if changed
 	if cfg.GetDeviceKey() != key {
 		logrus.Debug("updating device key: ", key)
-		config.SetValue("device", "key", key)
+		cfg.SetValue("device", "key", key)
 	}
 
 	// update devID
 	if cfg.GetDeviceID() != devID {
-		config.SetValue("device", "dev-id", devID)
+		cfg.SetValue("device", "dev-id", devID)
+	}
+
+	if cfg.IsChanged() {
+		cfg.Write()
 	}
 
 	// TODO announce configured services

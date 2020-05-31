@@ -9,7 +9,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/looplab/fsm"
-	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/util"
 	"github.com/sirupsen/logrus"
@@ -57,7 +56,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	var auth config.Auth
 	if len(auths) == 0 {
 		var err error
-		if auth, err = api.GetClientAuth(); err != nil {
+		if auth, err = config.GetClientAuth(); err != nil {
 			return util.NewAPIError(util.OtherError, err.Error())
 		}
 	} else {

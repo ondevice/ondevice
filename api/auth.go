@@ -6,11 +6,6 @@ import (
 	"github.com/ondevice/ondevice/config"
 )
 
-// GetClientAuth -- Get default client authentication
-func GetClientAuth() (config.Auth, error) {
-	return config.GetClientAuth()
-}
-
 // GetClientAuthForDevice -- Returns credentials for the given devID
 //
 // with unqualified devIDs, this will do the same as GetClientAuth().
@@ -23,7 +18,7 @@ func GetClientAuthForDevice(devID string) (config.Auth, error) {
 		}
 	}
 
-	return GetClientAuth()
+	return config.GetClientAuth()
 }
 
 // GetClientAuthForUser -- Returns the client Authentication for the given user name (if available)

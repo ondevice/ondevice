@@ -35,7 +35,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 	if dotPos < 1 { // no dot in the hostname part
 		var auth config.Auth
 		var err error
-		if auth, err = api.GetClientAuth(); err != nil {
+		if auth, err = config.GetClientAuth(); err != nil {
 			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
 			return nil, cobra.ShellCompDirectiveError
 		}

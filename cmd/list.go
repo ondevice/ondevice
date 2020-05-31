@@ -120,7 +120,7 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 			return
 		}
 	} else {
-		if auth, err = api.GetClientAuth(); err != nil {
+		if auth, err = config.GetClientAuth(); err != nil {
 			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
 			return
 		}

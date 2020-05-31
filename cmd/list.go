@@ -22,6 +22,7 @@ import (
 	"os"
 
 	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/filter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -112,7 +113,7 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 	}
 
 	// --user
-	var auth api.Authentication
+	var auth config.Auth
 	if c.userFlag != "" {
 		if auth, err = api.GetClientAuthForUser(c.userFlag); err != nil {
 			logrus.Fatalf("can't find client auth for user '%s'", c.userFlag)

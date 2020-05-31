@@ -18,26 +18,26 @@ type ErrorMessage struct {
 	Msg    string `json:"msg"`
 }
 
-func delete(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
+func delete(endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) (*http.Response, error) {
 	return _request("DELETE", endpoint, params, bodyType, body, auths...)
 }
 
-func get(endpoint string, params map[string]string, auths ...Authentication) (*http.Response, error) {
+func get(endpoint string, params map[string]string, auths ...config.Auth) (*http.Response, error) {
 	return _request("GET", endpoint, params, "", nil, auths...)
 }
 
-func post(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
+func post(endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) (*http.Response, error) {
 	return _request("POST", endpoint, params, bodyType, body, auths...)
 }
 
-func _request(method string, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) (*http.Response, error) {
-	var auth *Authentication
+func _request(method string, endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) (*http.Response, error) {
+	var auth config.Auth
 
 	if auths == nil {
 		a, _ := GetClientAuth()
-		auth = &a
+		auth = a
 	} else {
-		auth = &auths[0]
+		auth = auths[0]
 	}
 
 	url := auth.GetURL(endpoint, params, "https")
@@ -65,15 +65,15 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	return resp, err
 }
 
-func deleteBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
+func deleteBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) ([]byte, error) {
 	return _getResponse(delete(endpoint, params, bodyType, body, auths...))
 }
 
-func getBody(endpoint string, params map[string]string, auths ...Authentication) ([]byte, error) {
+func getBody(endpoint string, params map[string]string, auths ...config.Auth) ([]byte, error) {
 	return _getResponse(get(endpoint, params, auths...))
 }
 
-func postBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) ([]byte, error) {
+func postBody(endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) ([]byte, error) {
 	return _getResponse(post(endpoint, params, bodyType, body, auths...))
 }
 
@@ -106,17 +106,17 @@ func _getResponse(resp *http.Response, err error) ([]byte, error) {
 	return body, nil
 }
 
-func deleteObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) error {
+func deleteObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) error {
 	body, err := deleteBody(endpoint, params, bodyType, body, auths...)
 	return _getObject(tgtValue, body, err)
 }
 
-func getObject(tgtValue interface{}, endpoint string, params map[string]string, auths ...Authentication) error {
+func getObject(tgtValue interface{}, endpoint string, params map[string]string, auths ...config.Auth) error {
 	body, err := getBody(endpoint, params, auths...)
 	return _getObject(tgtValue, body, err)
 }
 
-func postObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...Authentication) error {
+func postObject(tgtValue interface{}, endpoint string, params map[string]string, bodyType string, body []byte, auths ...config.Auth) error {
 	body, err := postBody(endpoint, params, bodyType, body, auths...)
 	return _getObject(tgtValue, body, err)
 }

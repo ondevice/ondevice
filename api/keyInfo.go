@@ -1,5 +1,7 @@
 package api
 
+import "github.com/ondevice/ondevice/config"
+
 // KeyInfo -- API key info
 type KeyInfo struct {
 	Role        string   `json:"role"`
@@ -38,7 +40,7 @@ func (i KeyInfo) IsType(typeName string) bool {
 }
 
 // GetKeyInfo -- Returns the role and permissions associated with the given credentials
-func GetKeyInfo(auth Authentication) (KeyInfo, error) {
+func GetKeyInfo(auth config.Auth) (KeyInfo, error) {
 	var rc KeyInfo
 	err := getObject(&rc, "/keyInfo", nil, auth)
 	if err != nil {

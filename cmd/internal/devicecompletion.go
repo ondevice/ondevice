@@ -33,7 +33,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 	var dotPos = strings.Index(toComplete, ".")
 
 	if dotPos < 1 { // no dot in the hostname part
-		var auth api.Authentication
+		var auth config.Auth
 		var err error
 		if auth, err = api.GetClientAuth(); err != nil {
 			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
@@ -66,7 +66,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 		}
 	} else { // user.devId
 		var username = toComplete[:dotPos]
-		var auth api.Authentication
+		var auth config.Auth
 		var err error
 		if auth, err = api.GetClientAuthForUser(username); err != nil {
 			logrus.Fatalf("missing client auth for user '%s'", username)

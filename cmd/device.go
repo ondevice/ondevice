@@ -27,6 +27,7 @@ import (
 
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/cmd/internal"
+	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -108,7 +109,7 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 	var cmd = args[1]
 	args = args[2:]
 
-	var auth api.Authentication
+	var auth config.Auth
 	if auth, err = api.GetClientAuthForDevice(devID); err != nil {
 		logrus.WithError(err).Fatal("missing client auth!")
 	}
@@ -131,14 +132,14 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 	return
 }
 
-func (c *deviceCmd) listProperties(devID string, extraArgs []string, auth api.Authentication) error {
+func (c *deviceCmd) listProperties(devID string, extraArgs []string, auth config.Auth) error {
 	if len(extraArgs) > 0 {
 		return errors.New("Too many arguments")
 	}
 	return c.printProperties(api.ListProperties(devID, auth))
 }
 
-func (c *deviceCmd) removeProperties(devID string, args []string, auth api.Authentication) error {
+func (c *deviceCmd) removeProperties(devID string, args []string, auth config.Auth) error {
 	if len(args) == 0 {
 		logrus.Error("too few arguments")
 	}
@@ -195,7 +196,7 @@ func (c *deviceCmd) removeProperties(devID string, args []string, auth api.Authe
 	return c.printProperties(api.RemoveProperties(devID, args, auth))
 }
 
-func (c *deviceCmd) setProperties(devID string, args []string, auth api.Authentication) error {
+func (c *deviceCmd) setProperties(devID string, args []string, auth config.Auth) error {
 	var props = make(map[string]string)
 
 	for _, arg := range args {

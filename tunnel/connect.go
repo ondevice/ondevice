@@ -3,13 +3,13 @@ package tunnel
 import (
 	"time"
 
-	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/util"
 	"github.com/sirupsen/logrus"
 )
 
 // Connect to a service on one of your devices
-func Connect(t *Tunnel, devID string, service string, protocol string, auths ...api.Authentication) util.APIError {
+func Connect(t *Tunnel, devID string, service string, protocol string, auths ...config.Auth) util.APIError {
 	params := map[string]string{"dev": devID, "service": service, "protocol": protocol}
 
 	t._initTunnel(ClientSide)

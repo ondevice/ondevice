@@ -36,7 +36,7 @@ type Connection struct {
 }
 
 // OpenWebsocket -- Open a websocket connection
-func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...api.Authentication) util.APIError {
+func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...config.Auth) util.APIError {
 	if c.state != nil {
 		panic("OpenWebsocket() called twice on a single Connection!")
 	}
@@ -54,7 +54,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 
 	hdr := http.Header{}
 
-	var auth api.Authentication
+	var auth config.Auth
 	if len(auths) == 0 {
 		var err error
 		if auth, err = api.GetClientAuth(); err != nil {

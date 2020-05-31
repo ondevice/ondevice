@@ -34,7 +34,7 @@ func (d *deviceSocket) announce(service string, protocol string) {
 }
 
 // connect -- Go online
-func (d *deviceSocket) connect(auths ...api.Authentication) util.APIError {
+func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
 	var cfg, err = config.Read()
 	if err != nil {
 		return util.NewAPIError(500, err.Error())
@@ -47,7 +47,7 @@ func (d *deviceSocket) connect(auths ...api.Authentication) util.APIError {
 		if err != nil {
 			logrus.WithError(err).Fatal("couldn't get device auth")
 		}
-		auths = []api.Authentication{auth}
+		auths = []config.Auth{auth}
 	}
 
 	if err := tunnel.OpenWebsocket(&d.Connection, "/serve", params, d.onMessage, auths...); err != nil {

@@ -12,7 +12,7 @@ import (
 
 // Accept -- Accept an incoming tunnel connection
 // Note: blocks until the tunnel has been established, so do this in a goroutine
-func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentication) error {
+func Accept(t *Tunnel, tunnelID string, relayURL string, auths ...config.Auth) error {
 	var cfg, err = config.Read()
 	if err != nil {
 		return err
@@ -28,8 +28,8 @@ func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentic
 		return err
 	}
 
-	// set brokerURL
-	auth.SetServerURL(brokerURL)
+	// set relayURL
+	auth = auth.WithAPIServer(relayURL)
 
 	t._initTunnel(DeviceSide)
 	t.CloseListeners = append(t.CloseListeners, t._onClose)

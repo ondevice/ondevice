@@ -21,7 +21,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ondevice/ondevice/api"
+	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/tunnel"
 	"github.com/ondevice/ondevice/util"
 	"github.com/sirupsen/logrus"
@@ -74,7 +74,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 	devID := args[0]
 	service := args[1]
 
-	auth, err := api.GetClientAuthForDevice(devID)
+	auth, err := config.GetClientAuthForDevice(devID)
 	if err != nil {
 		logrus.WithError(err).Fatal("missing client credentials")
 		return

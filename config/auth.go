@@ -43,6 +43,21 @@ func GetClientAuth() (Auth, error) {
 	return _getAuth("client")
 }
 
+// GetClientAuthForDevice -- Returns credentials for the given devID
+//
+// with unqualified devIDs, this will do the same as GetClientAuth().
+// But if the devID has a user prefix (and we have extra credentials for that user), it'll return those instead
+func GetClientAuthForDevice(devID string) (Auth, error) {
+	if strings.Contains(devID, ".") {
+		parts := strings.SplitN(devID, ".", 2)
+		if auth, err := GetClientAuthForUser(parts[0]); err == nil {
+			return auth, nil
+		}
+	}
+
+	return GetClientAuth()
+}
+
 // GetClientAuthForUser -- get the authentication credentials for a specific client user
 func GetClientAuthForUser(username string) (Auth, error) {
 	var auth, err = GetClientAuth()

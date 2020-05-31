@@ -110,7 +110,7 @@ func (c *deviceCmd) run(_ *cobra.Command, args []string) {
 	args = args[2:]
 
 	var auth config.Auth
-	if auth, err = api.GetClientAuthForDevice(devID); err != nil {
+	if auth, err = config.GetClientAuthForDevice(devID); err != nil {
 		logrus.WithError(err).Fatal("missing client auth!")
 	}
 

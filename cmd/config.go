@@ -22,17 +22,26 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 func configRun(cmd *cobra.Command, args []string) {
-	var keys = viper.AllKeys()
+	var cfg, err = config.AllValues()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to list config keys")
+	}
+
+	var keys []string
+	for k := range cfg {
+		keys = append(keys, k)
+	}
+
 	sort.Strings(keys)
 	for _, key := range keys {
-		var val = viper.GetString(key)
-		fmt.Printf("%s=%s\n", key, val)
+		fmt.Printf("%s=%s\n", key, cfg[key])
 	}
 }
 
@@ -55,7 +64,7 @@ when only one key is requested, only the value will be printed`,
 	Example: `  $ ondevice config get ssh.path
   ssh
 	
-  $ ondevice.config.get ssh.path rsync.path
+  $ ondevice config get ssh.path rsync.path
   ssh.path=ssh
   rsync.path=rsync`,
 	Run: func(cmd *cobra.Command, args []string) {

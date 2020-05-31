@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -18,6 +19,28 @@ var _configPath string
 var _fileOverrides = map[string]string{}
 
 var version = "0.0.1-devel"
+
+// AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
+func AllValues() (map[string]string, error) {
+	path := GetConfigPath("ondevice.conf")
+
+	cfg, err := ini.InsensitiveLoad(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var rc = make(map[string]string)
+
+	for _, s := range cfg.Sections() {
+		for _, k := range s.Keys() {
+			var key = fmt.Sprintf("%s.%s", s.Name(), k.Name())
+			var value = k.String()
+			rc[key] = value
+		}
+	}
+
+	return rc, nil
+}
 
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
 // Can be overridden using setConfigPath() (for testing only) or SetFilePath()

@@ -35,7 +35,12 @@ func (d *deviceSocket) announce(service string, protocol string) {
 
 // connect -- Go online
 func (d *deviceSocket) connect(auths ...api.Authentication) util.APIError {
-	params := map[string]string{"key": config.GetDeviceKey()}
+	var cfg, err = config.Read()
+	if err != nil {
+		return util.NewAPIError(500, err.Error())
+	}
+
+	params := map[string]string{"key": cfg.GetDeviceKey()}
 
 	if len(auths) == 0 {
 		auth, err := api.GetDeviceAuth()
@@ -99,14 +104,21 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 	logrus.Infof("connection established, online as '%s'", devID)
 	d.IsOnline = true
 
+	var cfg, err = config.Read()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to read ondevice.conf")
+	}
+
 	// update the key if changed
-	if config.GetDeviceKey() != key {
+	if cfg.GetDeviceKey() != key {
 		logrus.Debug("updating device key: ", key)
 		config.SetValue("device", "key", key)
 	}
 
 	// update devID
-	config.SetValue("device", "dev-id", devID)
+	if cfg.GetDeviceID() != devID {
+		config.SetValue("device", "dev-id", devID)
+	}
 
 	// TODO announce configured services
 	d.announce("ssh", "ssh")

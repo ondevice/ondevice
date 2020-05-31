@@ -13,7 +13,11 @@ import (
 // Accept -- Accept an incoming tunnel connection
 // Note: blocks until the tunnel has been established, so do this in a goroutine
 func Accept(t *Tunnel, tunnelID string, brokerURL string, auths ...api.Authentication) error {
-	deviceKey := config.GetDeviceKey()
+	var cfg, err = config.Read()
+	if err != nil {
+		return err
+	}
+	deviceKey := cfg.GetDeviceKey()
 	params := map[string]string{"key": deviceKey, "tunnel": tunnelID}
 
 	// get authentication

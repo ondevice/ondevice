@@ -105,7 +105,12 @@ func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	data.Device["devId"] = config.GetDeviceID()
+	var cfg, err = config.Read()
+	if err != nil {
+		logrus.WithError(err).Error("failed to read config")
+	}
+
+	data.Device["devId"] = cfg.GetDeviceID()
 	_sendJSON(w, data)
 }
 

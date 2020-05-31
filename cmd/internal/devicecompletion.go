@@ -68,7 +68,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 		var username = toComplete[:dotPos]
 		var auth config.Auth
 		var err error
-		if auth, err = api.GetClientAuthForUser(username); err != nil {
+		if auth, err = config.GetClientAuthForUser(username); err != nil {
 			logrus.Fatalf("missing client auth for user '%s'", username)
 			return nil, cobra.ShellCompDirectiveError
 		}

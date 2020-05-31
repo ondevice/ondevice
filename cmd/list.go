@@ -115,7 +115,7 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 	// --user
 	var auth config.Auth
 	if c.userFlag != "" {
-		if auth, err = api.GetClientAuthForUser(c.userFlag); err != nil {
+		if auth, err = config.GetClientAuthForUser(c.userFlag); err != nil {
 			logrus.Fatalf("can't find client auth for user '%s'", c.userFlag)
 			return
 		}

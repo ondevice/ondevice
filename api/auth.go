@@ -13,17 +13,12 @@ import (
 func GetClientAuthForDevice(devID string) (config.Auth, error) {
 	if strings.Contains(devID, ".") {
 		parts := strings.SplitN(devID, ".", 2)
-		if auth, err := config.GetClientUserAuth(parts[0]); err == nil {
+		if auth, err := config.GetClientAuthForUser(parts[0]); err == nil {
 			return auth, nil
 		}
 	}
 
 	return config.GetClientAuth()
-}
-
-// GetClientAuthForUser -- Returns the client Authentication for the given user name (if available)
-func GetClientAuthForUser(username string) (config.Auth, error) {
-	return config.GetClientUserAuth(username)
 }
 
 // GetDeviceAuth -- Create default device authentication

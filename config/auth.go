@@ -43,8 +43,8 @@ func GetClientAuth() (Auth, error) {
 	return _getAuth("client")
 }
 
-// GetClientUserAuth -- get the authentication credentials for a specific client user
-func GetClientUserAuth(username string) (Auth, error) {
+// GetClientAuthForUser -- get the authentication credentials for a specific client user
+func GetClientAuthForUser(username string) (Auth, error) {
 	var auth, err = GetClientAuth()
 	if err == nil && strings.ToLower(auth.User()) == strings.ToLower(username) {
 		return auth, nil

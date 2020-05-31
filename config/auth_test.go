@@ -18,24 +18,24 @@ func TestClientAuth(t *testing.T) {
 func TestClientUserAuth(t *testing.T) {
 	setupTests()
 
-	auth, err := GetClientUserAuth("demo")
+	auth, err := GetClientAuthForUser("demo")
 	assert.NoError(t, err)
 	assert.Equal(t, "demo", auth.User())
 	assert.Equal(t, "234567", auth.Key())
 
-	auth, err = GetClientUserAuth("hello")
+	auth, err = GetClientAuthForUser("hello")
 	assert.NoError(t, err)
 	assert.Equal(t, "hello", auth.User())
 	assert.Equal(t, "345678", auth.Key())
 
 	// test case insensitivity
-	auth, err = GetClientUserAuth("HeLLO")
+	auth, err = GetClientAuthForUser("HeLLO")
 	assert.NoError(t, err)
 	assert.Equal(t, "HeLLO", auth.User())
 	assert.Equal(t, "345678", auth.Key())
 
 	// test missing user
-	auth, err = GetClientUserAuth("nonexisting")
+	auth, err = GetClientAuthForUser("nonexisting")
 	assert.Error(t, err)
 	assert.Nil(t, auth)
 }

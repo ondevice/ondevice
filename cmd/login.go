@@ -94,7 +94,7 @@ func loginRun(cmd *cobra.Command, args []string) {
 		auth = string(authBytes)
 	}
 
-	info, err := api.GetKeyInfo(api.NewAuth(user, auth))
+	info, err := api.GetKeyInfo(api.NewAuth(config.NewAuth(user, auth, "")))
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to verify login info")
 	}

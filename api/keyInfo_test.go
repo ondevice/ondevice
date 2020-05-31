@@ -1,18 +1,22 @@
 package api
 
-import "testing"
-import "github.com/stretchr/testify/assert"
+import (
+	"testing"
+
+	"github.com/ondevice/ondevice/config"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestKeyInfo(t *testing.T) {
 	// check the 'demo' user's device key
-	auth := NewAuth("demo", "ehb8f971h1")
+	auth := NewAuth(config.NewAuth("demo", "ehb8f971h1", ""))
 	info, err := GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "device", info.Role)
 	assert.Equal(t, []string{"device"}, info.Permissions)
 
 	// and the 'demo' user's client key
-	auth = NewAuth("demo", "caxuaph5th")
+	auth = NewAuth(config.NewAuth("demo", "caxuaph5th", ""))
 	info, err = GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "client", info.Role)
@@ -24,12 +28,12 @@ func TestKeyInfo(t *testing.T) {
 
 	if false {
 		// nonexisting user
-		auth = NewAuth("xxx", "blablabla")
+		auth = NewAuth(config.NewAuth("xxx", "blablabla", ""))
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 
 		// wrong auth key
-		auth = NewAuth("demo", "blablabla")
+		auth = NewAuth(config.NewAuth("demo", "blablabla", ""))
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 	}

@@ -13,20 +13,18 @@ import (
 
 // Authentication -- authentication and other API options)
 type Authentication struct {
-	user      string
-	auth      string
-	apiServer string
+	auth config.Auth
 }
 
 // GetAuthHeader -- Return the value of the HTTP Basic Authentication header
 func (a Authentication) GetAuthHeader() string {
-	token := a.user + ":" + a.auth
+	token := a.auth.User() + ":" + a.auth.Key()
 	return "Basic " + base64.StdEncoding.EncodeToString([]byte(token))
 }
 
 // GetURL -- Get the full API server URL for the apiServer we store internally and the params we get
 func (a Authentication) GetURL(endpoint string, params map[string]string, scheme string) string {
-	server := a.apiServer
+	server := a.auth.APIServer()
 
 	if server == "" {
 		server = _apiServer
@@ -71,13 +69,12 @@ func (a Authentication) GetURL(endpoint string, params map[string]string, scheme
 
 // SetServerURL -- Set the API server's URL (used by GetURL(), necessary to use the correct API server in tunnel.Accept())
 func (a *Authentication) SetServerURL(apiServer string) {
-	a.apiServer = apiServer
+	a.auth = a.auth.WithAPIServer(apiServer)
 }
 
 // NewAuth -- Create Authentication object
-func NewAuth(user string, auth string) Authentication {
+func NewAuth(auth config.Auth) Authentication {
 	return Authentication{
-		user: user,
 		auth: auth,
 	}
 }
@@ -88,7 +85,7 @@ func GetClientAuth() (Authentication, error) {
 	if err != nil {
 		return Authentication{}, err
 	}
-	return NewAuth(auth.User(), auth.Key()), nil
+	return NewAuth(auth), nil
 }
 
 // GetClientAuthForDevice -- Returns an Authentication struct for the given devID
@@ -99,7 +96,7 @@ func GetClientAuthForDevice(devID string) (Authentication, error) {
 	if strings.Contains(devID, ".") {
 		parts := strings.SplitN(devID, ".", 2)
 		if auth, err := config.GetClientUserAuth(parts[0]); err == nil {
-			return NewAuth(auth.User(), auth.Key()), nil
+			return NewAuth(auth), nil
 		}
 	}
 
@@ -114,7 +111,7 @@ func GetClientAuthForUser(username string) (Authentication, error) {
 	if err != nil {
 		return rc, err
 	}
-	rc = NewAuth(auth.User(), auth.Key())
+	rc = NewAuth(auth)
 	return rc, nil
 }
 
@@ -124,7 +121,7 @@ func GetDeviceAuth() (Authentication, error) {
 	if err != nil {
 		return Authentication{}, err
 	}
-	return NewAuth(auth.User(), auth.Key()), nil
+	return NewAuth(auth), nil
 }
 
 func init() {

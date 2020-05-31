@@ -23,18 +23,28 @@ var _fileOverrides = map[string]string{}
 
 var version = "0.0.1-devel"
 
-// AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
-func AllValues() (map[string]string, error) {
+// Config -- config file's contents, acquired using config.Read()
+type Config struct {
+	cfg *ini.File
+}
+
+// Read -- fetches the contents of ondevice.conf
+func Read() (Config, error) {
+	var rc Config
+	var err error
 	path := GetConfigPath("ondevice.conf")
 
-	cfg, err := ini.InsensitiveLoad(path)
-	if err != nil {
-		return nil, err
+	if rc.cfg, err = ini.InsensitiveLoad(path); err != nil {
+		return rc, err
 	}
+	return rc, nil
+}
 
+// AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
+func (c Config) AllValues() map[string]string {
 	var rc = make(map[string]string)
 
-	for _, s := range cfg.Sections() {
+	for _, s := range c.cfg.Sections() {
 		for _, k := range s.Keys() {
 			var key = fmt.Sprintf("%s.%s", s.Name(), k.Name())
 			var value = k.String()
@@ -42,7 +52,7 @@ func AllValues() (map[string]string, error) {
 		}
 	}
 
-	return rc, nil
+	return rc
 }
 
 // GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)

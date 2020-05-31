@@ -63,11 +63,11 @@ func ListAuthenticatedUsers() []string {
 		uniqueUsers[strings.ToLower(mainUser)] = true
 	}
 
-	var cfg, err = AllValues()
+	var cfg, err = Read()
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to fetch configuration")
 	}
-	for k := range cfg {
+	for k := range cfg.AllValues() {
 		if strings.HasPrefix(k, "client.auth_") {
 			var name = k[12:]
 			var lowerName = strings.ToLower(name)

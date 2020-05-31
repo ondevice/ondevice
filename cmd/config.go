@@ -28,19 +28,20 @@ import (
 )
 
 func configRun(cmd *cobra.Command, args []string) {
-	var cfg, err = config.AllValues()
+	var cfg, err = config.Read()
 	if err != nil {
-		logrus.WithError(err).Fatal("failed to list config keys")
+		logrus.WithError(err).Fatal("failed to fetch config")
 	}
+	var values = cfg.AllValues()
 
 	var keys []string
-	for k := range cfg {
+	for k := range values {
 		keys = append(keys, k)
 	}
 
 	sort.Strings(keys)
 	for _, key := range keys {
-		fmt.Printf("%s=%s\n", key, cfg[key])
+		fmt.Printf("%s=%s\n", key, values[key])
 	}
 }
 
@@ -103,11 +104,11 @@ when only one key is requested, only the value will be printed`,
 		var matchingKeys []string
 		var shellDirective = cobra.ShellCompDirectiveNoFileComp
 
-		var cfg, err = config.AllValues()
+		var cfg, err = config.Read()
 		if err != nil {
 			logrus.WithError(err).Fatal("failed to load config")
 		}
-		for k := range cfg {
+		for k := range cfg.AllValues() {
 			if strings.HasPrefix(k, toComplete) {
 				matchingKeys = append(matchingKeys, k)
 			}

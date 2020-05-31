@@ -107,11 +107,10 @@ func (a AuthEntry) WithAPIServer(newServer string) Auth {
 }
 
 // NewAuth -- creates Auth credentials
-func NewAuth(username, key, apiServer string) Auth {
+func NewAuth(username, key string) Auth {
 	return AuthEntry{
-		UserField:      username,
-		KeyField:       key,
-		APIServerField: apiServer,
+		UserField: username,
+		KeyField:  key,
 	}
 }
 

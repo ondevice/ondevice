@@ -13,13 +13,13 @@ import (
 type Auth = internal.Auth
 
 // NewAuth -- creates new API server credentials
-func NewAuth(user, auth, apiServer string) Auth {
-	return internal.NewAuth(user, auth, apiServer)
+func NewAuth(user, auth string) Auth {
+	return internal.NewAuth(user, auth)
 }
 
 func _getAuth(section string) (Auth, error) {
 	if os.Getenv("ONDEVICE_USER") != "" || os.Getenv("ONDEVICE_AUTH") != "" {
-		return internal.NewAuth(os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"), ""), nil
+		return internal.NewAuth(os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH")), nil
 	}
 
 	var cfg, err = Read()
@@ -35,7 +35,7 @@ func _getAuth(section string) (Auth, error) {
 		return nil, err
 	}
 
-	return internal.NewAuth(username, auth, ""), nil
+	return internal.NewAuth(username, auth), nil
 }
 
 // GetClientAuth -- Get the default client authentication information
@@ -72,7 +72,7 @@ func GetClientAuthForUser(username string) (Auth, error) {
 
 	var key string
 	if key, err = cfg.GetString("client", "auth_"+username); err == nil {
-		return internal.NewAuth(username, key, ""), nil
+		return internal.NewAuth(username, key), nil
 	}
 
 	return nil, errors.New("no client credentials found for user")

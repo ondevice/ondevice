@@ -9,14 +9,14 @@ import (
 
 func TestKeyInfo(t *testing.T) {
 	// check the 'demo' user's device key
-	auth := config.NewAuth("demo", "ehb8f971h1", "")
+	auth := config.NewAuth("demo", "ehb8f971h1")
 	info, err := GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "device", info.Role)
 	assert.Equal(t, []string{"device"}, info.Permissions)
 
 	// and the 'demo' user's client key
-	auth = config.NewAuth("demo", "caxuaph5th", "")
+	auth = config.NewAuth("demo", "caxuaph5th")
 	info, err = GetKeyInfo(auth)
 	assert.NoError(t, err)
 	assert.Equal(t, "client", info.Role)
@@ -28,12 +28,12 @@ func TestKeyInfo(t *testing.T) {
 
 	if false {
 		// nonexisting user
-		auth = config.NewAuth("xxx", "blablabla", "")
+		auth = config.NewAuth("xxx", "blablabla")
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 
 		// wrong auth key
-		auth = config.NewAuth("demo", "blablabla", "")
+		auth = config.NewAuth("demo", "blablabla")
 		_, err = GetKeyInfo(auth)
 		assert.Error(t, err)
 	}

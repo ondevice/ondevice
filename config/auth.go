@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/viper"
+	"github.com/sirupsen/logrus"
 )
 
 func _getAuth(section string) (string, string, error) {
@@ -58,12 +58,16 @@ func ListAuthenticatedUsers() []string {
 	var rc []string
 	var uniqueUsers = make(map[string]bool)
 
-	if mainUser := viper.GetString("client.user"); mainUser != "" {
+	if mainUser, err := GetString("client", "user"); err != nil && mainUser != "" {
 		rc = append(rc, mainUser)
 		uniqueUsers[strings.ToLower(mainUser)] = true
 	}
 
-	for _, k := range viper.AllKeys() {
+	var cfg, err = AllValues()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to fetch configuration")
+	}
+	for k := range cfg {
 		if strings.HasPrefix(k, "client.auth_") {
 			var name = k[12:]
 			var lowerName = strings.ToLower(name)

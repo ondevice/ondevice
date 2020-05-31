@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -33,6 +32,7 @@ func Read() (Config, error) {
 	path := GetConfigPath("ondevice.conf")
 
 	if rc.cfg, err = ini.InsensitiveLoad(path); err != nil {
+		rc.cfg = ini.Empty()
 		return rc, err
 	}
 	return rc, nil
@@ -76,9 +76,6 @@ func (c Config) GetInt(section string, key string, defaultValue int) int {
 
 // GetString -- Get a configuration value (as string)
 func (c Config) GetString(section string, key string) (string, error) {
-	if c.cfg == nil {
-		return "", errors.New("trying to read from nil config")
-	}
 	s, err := c.cfg.GetSection(section)
 	if err != nil {
 		return "", err

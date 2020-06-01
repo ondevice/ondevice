@@ -13,6 +13,18 @@ type AuthJSON struct {
 	Client       AuthEntry
 	Device       AuthEntry
 	ExtraClients []AuthEntry `json:",omitempty"`
+
+	path string
+}
+
+func (j AuthJSON) Write() error {
+	var data, err = json.Marshal(j)
+	if err != nil {
+		logrus.WithError(err).Error("failed to marshal auth.json data")
+		return err
+	}
+
+	return WriteFile(data, j.path, 0o600)
 }
 
 // ReadAuth -- Read auth.json from the given file path
@@ -21,7 +33,9 @@ type AuthJSON struct {
 func ReadAuth(path string) (AuthJSON, error) {
 	var file *os.File
 	var err error
-	var rc AuthJSON
+	var rc = AuthJSON{
+		path: path,
+	}
 
 	if file, err = os.Open(path); err != nil {
 		logrus.WithError(err).WithField("path", path).Error("failed to open auth.json")

@@ -64,12 +64,14 @@ func migrateAuth() error {
 	if data, err = json.Marshal(auth); err != nil {
 		logrus.WithError(err).Fatal("failed to marshal auth.json")
 	}
-	panic(string(data))
 
-	/*if err = writeAuth(auth, filepath.Join(filepath.Dir(oldPath), "auth.json")); err != nil {
+	// TODO remove old auth from ondevice.conf
+
+	// TODO use auth.Write()
+	if err = internal.WriteFile(data, GetConfigPath("auth.json"), 0o600); err != nil {
 		logrus.WithError(err).Fatal("migrateConfig(): failed to write auth.json")
 		return err
-	}*/
+	}
 
 	return nil
 }

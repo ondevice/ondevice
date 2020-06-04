@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/mitchellh/go-homedir"
@@ -83,24 +84,22 @@ func (c Config) AllValues() map[string]string {
 }
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
-func (c Config) GetInt(section string, key string, defaultValue int) int {
-	var s = c.cfg.Section(section)
-	if s != nil {
-		return defaultValue // missing section
+func (c Config) GetInt(key configKey) int {
+	if s := c.cfg.Section(key.section); s != nil {
+		if k := s.Key(key.key); k != nil {
+			if rc, err := k.Int(); err == nil {
+				return rc
+			}
+		}
 	}
 
-	var k = s.Key(key)
-	if k != nil {
-		return defaultValue // missing key
-	}
-
-	var rc, err = k.Int()
+	var rc, err = strconv.ParseInt(key.defaultValue, 10, 32)
 	if err != nil {
-		logrus.WithError(err).Errorf("expected integer value for config key '%s.%s'", section, key)
-		return defaultValue
+		logrus.WithError(err).Fatalf("failed to parseInt for config key '%v': '%s'", key, key.defaultValue)
+		return 0
 	}
 
-	return rc
+	return int(rc)
 }
 
 // GetString -- Get a configuration value (as string)
@@ -250,6 +249,6 @@ func Init(cfgFile string) {
 	// set a default timeout of 30sec for REST API calls (will be reset in long-running commands)
 	// TODO use a builder pattern to be able to specify this on a per-request basis
 	// Note: doesn't affect websocket connections
-	var timeout = time.Duration(cfg.GetInt("client", "timeout", 30))
+	var timeout = time.Duration(cfg.GetInt(KeyClientTimeout))
 	http.DefaultClient.Timeout = timeout * time.Second
 }

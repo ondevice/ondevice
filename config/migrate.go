@@ -9,21 +9,23 @@ import (
 )
 
 // migrateAuth -- move stuff from ondevice.conf to auth.json
-func migrateAuth() error {
-	var cfg, err = Read()
-	if err != nil {
-		return err
+func (c Config) migrateAuth() error {
+	if !c.HasKey("device", "auth") && !c.HasKey("client", "auth") {
+		return nil // doesn't have auth
 	}
+	logrus.Info("migrating auth info to auth.json")
+	// TODO remove old auth once we're confident things work as expected
 
 	// target configurations
 	var auth internal.AuthJSON
+	var err error
 
 	// chain getValue calls until the first error happened
 	var getValue = func(olderr error, section, key string) (string, error) {
 		if olderr != nil {
 			return "", olderr
 		}
-		return cfg.GetString(section, key)
+		return c.GetString(section, key)
 	}
 
 	// device auth
@@ -37,7 +39,7 @@ func migrateAuth() error {
 
 	// client section
 	var extraClients []internal.AuthEntry
-	for key, val := range cfg.AllValues() {
+	for key, val := range c.AllValues() {
 		if strings.HasPrefix(strings.ToLower(key), "client.auth_") {
 			var username = key[len("client.auth_"):]
 
@@ -68,7 +70,7 @@ func migrateAuth() error {
 	// TODO remove old auth from ondevice.conf
 
 	// TODO use auth.Write()
-	if err = internal.WriteFile(data, GetConfigPath("auth.json"), 0o600); err != nil {
+	if err = internal.WriteFile(data, c.GetFilePath("auth.json"), 0o600); err != nil {
 		logrus.WithError(err).Fatal("migrateConfig(): failed to write auth.json")
 		return err
 	}

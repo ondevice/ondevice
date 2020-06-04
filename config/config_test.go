@@ -12,7 +12,11 @@ func setupTests() {
 
 func TestPathOverride(t *testing.T) {
 	_configPath = "/tmp/ondevice_test/ondevice.conf"
-	assert.Equal(t, "/tmp/ondevice_test/test.txt", GetConfigPath("test.txt"), "Config path override failed")
+	var cfg, err = Read()
+	assert.Error(t, err)
+	assert.Equal(t, _configPath, cfg.path)
+
+	assert.Equal(t, "/tmp/ondevice_test/test.txt", cfg.GetFilePath("test.txt"), "config path override failed")
 }
 
 func TestGetString(t *testing.T) {

@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"path"
 	"path/filepath"
 	"time"
-
-	"path"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/ondevice/ondevice/config/internal"
@@ -35,10 +34,32 @@ func Read() (Config, error) {
 	var rc Config
 	var err error
 
-	rc.path = GetConfigPath("ondevice.conf")
+	// fetch path
+	if _configPath != "" {
+		rc.path = _configPath
+	} else {
+		var u, err = user.Current()
+		var homeDir string
+
+		if err == nil {
+			homeDir = u.HomeDir
+		} else {
+			// This can happen when cross-compiling (it crept up on build-linux-armhf
+			// even though https://github.com/golang/go/issues/14626 has been closed for quite some time now)
+			//logrus.WithError(err).Warning("failed to get user.Current(), using $HOME instead")
+			homeDir = os.Getenv("HOME")
+			if homeDir == "" {
+				logrus.WithError(err).Fatal("couldn't get current user (and $HOME is empty)")
+			}
+		}
+
+		rc.path = path.Join(homeDir, ".config/ondevice/ondevice.conf")
+	}
+
+	// read file
 	if rc.cfg, err = ini.InsensitiveLoad(rc.path); err != nil {
 		if !os.IsNotExist(err) {
-			logrus.WithError(err).Error("config.Read(): failed to read ondevice.conf")
+			logrus.WithError(err).Error("config.Read(): file not found: ondevice.conf")
 		}
 		rc.cfg = ini.Empty()
 		return rc, err
@@ -97,6 +118,17 @@ func (c Config) GetString(section string, key string) (string, error) {
 	return val.String(), nil
 }
 
+// HasKey -- returns true iff the given value has been defined (defaults don't count)
+func (c Config) HasKey(section string, key string) bool {
+	if s := c.cfg.Section(section); s != nil {
+		if k := s.Key(key); k != nil {
+			return true
+		}
+	}
+
+	return false
+}
+
 // IsChanged -- returns true once SetValue() has been called
 func (c Config) IsChanged() bool { return c.changed }
 
@@ -140,36 +172,27 @@ func (c Config) Write() error {
 	return internal.WriteFile(buff.Bytes(), c.path, 0o644)
 }
 
-// GetConfigPath -- Return the full path of a file in our config directory (usually ~/.config/ondevice/)
-// Can be overridden using setConfigPath() (for testing only) or SetFilePath()
-func GetConfigPath(filename string) string {
-	// global config path override (used in unit tests)
-	// TODO replace with single file overrides
-	if _configPath != "" {
-		return path.Join(filepath.Dir(_configPath), filename)
-	}
-
-	var u, err = user.Current()
-	var homeDir string
-
-	if err == nil {
-		homeDir = u.HomeDir
-	} else {
-		// This can happen when cross-compiling (it crept up on build-linux-armhf
-		// even though https://github.com/golang/go/issues/14626 has been closed for quite some time now)
-		//logrus.WithError(err).Warning("failed to get user.Current(), using $HOME instead")
-		homeDir = os.Getenv("HOME")
-		if homeDir == "" {
-			logrus.Fatal("Couldn't get current user (and $HOME is empty): ", err)
-		}
-	}
-
-	return path.Join(homeDir, ".config/ondevice", filename)
+// GetFilePath -- returns the path of a file, relative to ondevice.conf
+func (c Config) GetFilePath(filename string) string {
+	var dir = filepath.Dir(c.path)
+	return filepath.Join(dir, filename)
 }
 
 // GetVersion -- Returns the app version
 func GetVersion() string {
 	return version
+}
+
+// LoadAuth -- fetches information stored in auth.json
+//
+// uses [path].auth_json as reference
+func (c Config) LoadAuth() (internal.AuthJSON, error) {
+	var path = c.GetFilePath("auth.json")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		c.migrateAuth()
+	}
+
+	return internal.ReadAuth(path)
 }
 
 // SetAuth -- Set client/user authentication details

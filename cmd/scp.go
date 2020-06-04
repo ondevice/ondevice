@@ -83,7 +83,12 @@ func scpRun(cmd *cobra.Command, args []string) {
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
 	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
-		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
+		var cfg, err = config.Read()
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to read config")
+			return
+		}
+		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", cfg.GetFilePath("known_hosts")))
 	}
 
 	a = append(a, opts...)
@@ -92,6 +97,7 @@ func scpRun(cmd *cobra.Command, args []string) {
 	err := syscall.Exec(scpPath, a, os.Environ())
 	if err != nil {
 		logrus.WithError(err).Fatalf("failed to run '%s'", scpPath)
+		return
 	}
 
 	logrus.Fatal("we shouldn't be here")

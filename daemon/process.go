@@ -35,7 +35,11 @@ func IsRunning(p *os.Process) error {
 }
 
 func getDaemonPID() (int, error) {
-	var paths = []string{config.GetConfigPath("ondevice.pid"), "/var/run/ondevice/ondevice.pid"}
+	var cfg, err = config.Read()
+	if err != nil {
+		return 0, err
+	}
+	var paths = []string{cfg.GetFilePath("ondevice.pid"), "/var/run/ondevice/ondevice.pid"}
 	var file *os.File
 
 	for _, path := range paths {

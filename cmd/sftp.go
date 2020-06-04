@@ -75,7 +75,12 @@ func sftpRun(cmd *cobra.Command, args []string) {
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{sftpPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
 	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
-		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.GetConfigPath("known_hosts")))
+		var cfg, err = config.Read()
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to read config")
+			return
+		}
+		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", cfg.GetFilePath("known_hosts")))
 	}
 
 	a = append(a, opts...)

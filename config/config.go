@@ -30,6 +30,18 @@ type Config struct {
 	changed bool // set by SetValue()
 }
 
+// MustLoad -- calls Read() and fatals on error (except on os.IsNotExist - in which case a zero Config struct will be returned)
+func MustLoad() Config {
+	var rc, err = Read()
+	if os.IsNotExist(err) {
+		return rc
+	} else if err != nil {
+		logrus.WithError(err).Fatal("failed to load ondevice.conf")
+		panic("should have fataled by now")
+	}
+	return rc
+}
+
 // Read -- fetches the contents of ondevice.conf
 func Read() (Config, error) {
 	var rc Config

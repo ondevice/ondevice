@@ -11,25 +11,26 @@ var KeyDeviceID = newKey("device", "devId", "").setRO()
 // KeySSHCommand -- the path to the 'ssh' command
 var KeySSHCommand = newKey("command", "ssh", "ssh")
 
-type configKey struct {
+// Key -- config key struct (use the predefined Key* values when using config)
+type Key struct {
 	section, key, defaultValue string
 
 	ro bool
 }
 
 // setRO -- marks configKey as being read-only (to users running 'ondevice config')
-func (k *configKey) setRO() *configKey {
+func (k *Key) setRO() *Key {
 	k.ro = true
 	return k
 }
 
-func (k configKey) String() string {
+func (k Key) String() string {
 	return fmt.Sprintf("%s.%s", k.section, k.key)
 }
 
-// returns a modified configKey with defaultValue set to 'val'
-func (k configKey) WithDefault(val string) configKey {
-	return configKey{
+// WithDefault -- returns a modified configKey with defaultValue set to 'val'
+func (k Key) WithDefault(val string) Key {
+	return Key{
 		section:      k.section,
 		key:          k.key,
 		defaultValue: val,
@@ -37,8 +38,8 @@ func (k configKey) WithDefault(val string) configKey {
 	}
 }
 
-func newKey(section string, key string, defaultValue string) *configKey {
-	var rc = configKey{
+func newKey(section string, key string, defaultValue string) *Key {
+	var rc = Key{
 		section:      section,
 		key:          key,
 		defaultValue: defaultValue,
@@ -47,4 +48,4 @@ func newKey(section string, key string, defaultValue string) *configKey {
 	return &rc
 }
 
-var allKeys = make(map[string]*configKey)
+var allKeys = make(map[string]*Key)

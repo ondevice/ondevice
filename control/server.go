@@ -105,7 +105,7 @@ func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	data.Device["devId"] = config.MustLoad().GetDeviceID()
+	data.Device["devId"] = config.MustLoad().GetString(config.KeyDeviceID)
 	_sendJSON(w, data)
 }
 

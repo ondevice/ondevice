@@ -115,7 +115,7 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 	}
 
 	// update devID
-	if cfg.GetDeviceID() != devID {
+	if cfg.GetString(config.KeyDeviceID) != devID {
 		cfg.SetValue(config.KeyDeviceID, devID)
 	}
 

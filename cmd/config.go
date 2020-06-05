@@ -67,26 +67,18 @@ when only one key is requested, only the value will be printed`,
 		var printKeyVal = len(args) > 1 // print in the form key=val if more than one key was specified
 		var rc = 0
 
-		for _, key := range args {
-			var parts = strings.SplitN(key, ".", 2)
-			if len(parts) != 2 {
-				logrus.Errorf("invalid config key: '%s'", key)
-				os.Exit(1)
-			}
-
-			var section = parts[0]
-			key = parts[1]
-
-			var val string
-			var err error
-			if val, err = config.MustLoad().GetStringOld(section, key); err != nil {
-				logrus.WithError(err).Errorf("config key not found: %s.%s", section, key)
+		for _, keyName := range args {
+			var key = config.FindKey(keyName)
+			if key == nil {
+				logrus.Errorf("config key not found: %v", key)
 				rc = 1
 				continue
 			}
 
+			var val = config.MustLoad().GetString(*key)
+
 			if printKeyVal {
-				fmt.Printf("%s.%s=%v\n", section, key, val)
+				fmt.Printf("%v=%s\n", key, val)
 			} else {
 				fmt.Println(val)
 			}

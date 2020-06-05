@@ -3,10 +3,10 @@ package config
 import "fmt"
 
 // KeyClientTimeout -- specifies the timeout for HTTP requests
-var KeyClientTimeout = newKey("client", "timeout", "0")
+var KeyClientTimeout = newKey("client", "timeout", "30")
 
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
-var KeyDeviceID = newKey("device", "devId", "").setRO()
+var KeyDeviceID = newKey("device", "dev-id", "").setRO()
 
 // KeySSHCommand -- the path to the 'ssh' command
 var KeySSHCommand = newKey("command", "ssh", "ssh")
@@ -65,9 +65,8 @@ func AllKeys(withReadOnly bool) map[string]Key {
 }
 
 // FindKey -- returns the configKey for the given string key (or nil if not found)
-func FindKey(key string) Key {
-	var rc = *allKeys[key]
-	return rc
+func FindKey(keyName string) *Key {
+	return allKeys[keyName]
 }
 
 var allKeys = make(map[string]*Key)

@@ -115,7 +115,7 @@ func (c Config) GetInt(key Key) int {
 }
 
 // GetString -- Fetch a configuration value (will return key.defaultValue if not defined)
-func (c Config) GetString(key *Key) string {
+func (c Config) GetString(key Key) string {
 	if s := c.cfg.Section(key.section); s != nil {
 		if k := s.Key(key.key); k != nil {
 			return k.String()

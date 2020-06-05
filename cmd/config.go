@@ -67,6 +67,8 @@ when only one key is requested, only the value will be printed`,
 		var printKeyVal = len(args) > 1 // print in the form key=val if more than one key was specified
 		var rc = 0
 
+		var cfg = config.MustLoad()
+
 		for _, keyName := range args {
 			var key = config.FindKey(keyName)
 			if key == nil {
@@ -75,7 +77,7 @@ when only one key is requested, only the value will be printed`,
 				continue
 			}
 
-			var val = config.MustLoad().GetString(*key)
+			var val = cfg.GetString(*key)
 
 			if printKeyVal {
 				fmt.Printf("%v=%s\n", key, val)

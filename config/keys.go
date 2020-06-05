@@ -8,6 +8,15 @@ var KeyClientTimeout = newKey("client", "timeout", "30")
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
 var KeyDeviceID = newKey("device", "dev-id", "").setRO()
 
+// KeyRSYNCCommand -- the path to the 'rsync' command
+var KeyRSYNCCommand = newKey("command", "rsync", "rsync")
+
+// KeySCPCommand -- the path to the 'scp' command
+var KeySCPCommand = newKey("command", "scp", "scp")
+
+// KeySFTPCommand -- the path to the 'sftp' command
+var KeySFTPCommand = newKey("command", "sftp", "sftp")
+
 // KeySSHCommand -- the path to the 'ssh' command
 var KeySSHCommand = newKey("command", "ssh", "ssh")
 

@@ -101,7 +101,7 @@ when only one key is requested, only the value will be printed`,
 		var matchingKeys []string
 		var shellDirective = cobra.ShellCompDirectiveNoFileComp
 
-		for k := range config.MustLoad().AllValues() {
+		for k := range config.AllKeys(true) {
 			if strings.HasPrefix(k, toComplete) {
 				matchingKeys = append(matchingKeys, k)
 			}

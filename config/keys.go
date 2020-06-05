@@ -19,8 +19,9 @@ type Key struct {
 }
 
 // setRO -- marks configKey as being read-only (to users running 'ondevice config')
-func (k *Key) setRO() *Key {
+func (k Key) setRO() Key {
 	k.ro = true
+	allKeys[k.String()].ro = true
 	return k
 }
 
@@ -38,19 +39,35 @@ func (k Key) WithDefault(val string) Key {
 	}
 }
 
-func newKey(section string, key string, defaultValue string) *Key {
+func newKey(section string, key string, defaultValue string) Key {
 	var rc = Key{
 		section:      section,
 		key:          key,
 		defaultValue: defaultValue,
 	}
 	allKeys[rc.String()] = &rc
-	return &rc
+	return rc
+}
+
+// AllKeys -- returns all defined config Keys
+//
+// if withReadOnly is set to false, this will filter out values not
+func AllKeys(withReadOnly bool) map[string]Key {
+	var rc = make(map[string]Key, len(allKeys))
+
+	for k, v := range allKeys {
+		if withReadOnly || !v.ro {
+			rc[k] = *v
+		}
+	}
+
+	return rc
 }
 
 // FindKey -- returns the configKey for the given string key (or nil if not found)
-func FindKey(key string) *Key {
-	return allKeys[key]
+func FindKey(key string) Key {
+	var rc = *allKeys[key]
+	return rc
 }
 
 var allKeys = make(map[string]*Key)

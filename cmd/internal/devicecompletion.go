@@ -66,7 +66,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 			}
 		}
 
-		for _, clientUser := range config.ListAuthenticatedUsers() {
+		for _, clientUser := range a.ListClientUsers() {
 			if strings.HasPrefix(clientUser, toComplete) {
 				matchingDevices = append(matchingDevices, fmt.Sprintf("%s%s.", prefix, clientUser))
 			}

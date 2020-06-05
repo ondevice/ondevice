@@ -2,10 +2,8 @@ package config
 
 import (
 	"os"
-	"strings"
 
 	"github.com/ondevice/ondevice/config/internal"
-	"github.com/sirupsen/logrus"
 )
 
 // Auth -- contains API server credentials
@@ -35,37 +33,6 @@ func _getAuth(section string) (Auth, error) {
 	}
 
 	return internal.NewAuth(username, auth), nil
-}
-
-// ListAuthenticatedUsers -- returns the names of users we have client auth for
-func ListAuthenticatedUsers() []string {
-	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file
-
-	var rc []string
-	var uniqueUsers = make(map[string]bool)
-
-	var cfg, err = Read()
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to fetch configuration")
-	}
-
-	if mainUser, err := cfg.GetString("client", "user"); err != nil && mainUser != "" {
-		rc = append(rc, mainUser)
-		uniqueUsers[strings.ToLower(mainUser)] = true
-	}
-
-	for k := range cfg.AllValues() {
-		if strings.HasPrefix(k, "client.auth_") {
-			var name = k[12:]
-			var lowerName = strings.ToLower(name)
-			if !uniqueUsers[lowerName] {
-				rc = append(rc, k[12:])
-				uniqueUsers[lowerName] = true
-			}
-		}
-	}
-
-	return rc
 }
 
 // LoadAuth -- shorthand for MustLoad().LoadAuth()

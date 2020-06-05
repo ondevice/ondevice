@@ -80,6 +80,29 @@ func (j AuthJSON) GetDeviceAuth() (Auth, error) {
 	return j.Device, nil
 }
 
+// ListClientUsers -- returns the names of users we have client auth for
+func (j AuthJSON) ListClientUsers() []string {
+	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file
+
+	var rc []string
+	var uniqueUsers = make(map[string]bool)
+
+	if mainUser := j.Client.UserField; mainUser != "" {
+		rc = append(rc, mainUser)
+		uniqueUsers[strings.ToLower(mainUser)] = true
+	}
+
+	for _, auth := range j.ExtraClients {
+		var lowerName = strings.ToLower(auth.UserField)
+		if !uniqueUsers[lowerName] {
+			rc = append(rc, auth.UserField)
+			uniqueUsers[lowerName] = true
+		}
+	}
+
+	return rc
+}
+
 func (j AuthJSON) Write() error {
 	var data, err = json.Marshal(j)
 	if err != nil {

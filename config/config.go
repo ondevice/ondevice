@@ -197,7 +197,7 @@ func GetVersion() string {
 // LoadAuth -- fetches information stored in auth.json
 //
 // uses [path].auth_json as reference
-func (c Config) LoadAuth() internal.AuthJSON {
+func (c Config) LoadAuth() AuthConfig {
 	var path = c.GetFilePath("auth.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		c.migrateAuth()

@@ -97,8 +97,8 @@ func (c Config) AllValues() map[string]string {
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
 func (c Config) GetInt(key Key) int {
-	if s := c.cfg.Section(key.section); s != nil {
-		if k := s.Key(key.key); k != nil {
+	if s, err := c.cfg.GetSection(key.section); err == nil {
+		if k, err := s.GetKey(key.key); err == nil {
 			if rc, err := k.Int(); err == nil {
 				return rc
 			}
@@ -107,7 +107,8 @@ func (c Config) GetInt(key Key) int {
 
 	var rc, err = strconv.ParseInt(key.defaultValue, 10, 32)
 	if err != nil {
-		logrus.WithError(err).Fatalf("failed to parseInt for config key '%v': '%s'", key, key.defaultValue)
+		// fail hard because the default value is not an int (i.e. there's a coding issue)
+		logrus.WithError(err).Fatalf("expected integer default value for config key '%v', not '%s'", key, key.defaultValue)
 		return 0
 	}
 
@@ -116,12 +117,11 @@ func (c Config) GetInt(key Key) int {
 
 // GetString -- Fetch a configuration value (will return key.defaultValue if not defined)
 func (c Config) GetString(key Key) string {
-	if s := c.cfg.Section(key.section); s != nil {
-		if k := s.Key(key.key); k != nil {
+	if s, err := c.cfg.GetSection(key.section); err == nil {
+		if k, err := s.GetKey(key.key); err == nil {
 			return k.String()
 		}
 	}
-
 	return key.defaultValue
 }
 

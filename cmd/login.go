@@ -121,16 +121,19 @@ func loginRun(cmd *cobra.Command, args []string) {
 	}
 
 	// update auth
+	var a = config.LoadAuth()
 	if info.IsType("client") {
 		logrus.Info("updating client auth")
-		if err := config.SetAuth("client", user, string(auth)); err != nil {
-			logrus.WithError(err).Fatal("failed to set client auth")
-		}
+		a.SetClientAuth(user, string(auth))
 	}
 	if info.IsType("device") {
 		logrus.Info("updating device auth")
-		if err := config.SetAuth("device", user, string(auth)); err != nil {
-			logrus.WithError(err).Fatal("failed to set device auth")
+		a.SetDeviceAuth(user, string(auth))
+	}
+	if a.IsChanged() {
+		if err := a.Write(); err != nil {
+			logrus.WithError(err).Fatal("failed to write auth.json")
 		}
+
 	}
 }

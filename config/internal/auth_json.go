@@ -25,6 +25,8 @@ type AuthJSON struct {
 
 	path string
 	err  error
+
+	isChanged bool
 }
 
 // GetClientAuth -- returns client credentials
@@ -86,6 +88,8 @@ func (j AuthJSON) GetDeviceKey() string {
 	return j.Client.DeviceKey
 }
 
+func (j AuthJSON) IsChanged() bool { return j.isChanged }
+
 // ListClientUsers -- returns the names of users we have client auth for
 func (j AuthJSON) ListClientUsers() []string {
 	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file
@@ -109,6 +113,21 @@ func (j AuthJSON) ListClientUsers() []string {
 	return rc
 }
 
+// SetClientAuth -- updates the client credentials (don't forget to call .Write())
+func (j AuthJSON) SetClientAuth(user string, key string) {
+	j.Client.UserField = user
+	j.Client.KeyField = key
+	j.isChanged = true
+}
+
+// SetDeviceAuth -- updates the device credentials (don't forget to call .Write())
+func (j AuthJSON) SetDeviceAuth(user string, key string) {
+	j.Device.UserField = user
+	j.Device.KeyField = key
+	j.isChanged = true
+}
+
+// Write -- atomically update auth.json
 func (j AuthJSON) Write() error {
 	var data, err = json.Marshal(j)
 	if err != nil {

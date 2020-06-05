@@ -206,29 +206,6 @@ func (c Config) LoadAuth() internal.AuthJSON {
 	return internal.ReadAuth(path)
 }
 
-// SetAuth -- Set client/user authentication details
-func SetAuth(scope, user, auth string) error {
-	if scope != "client" && scope != "device" {
-		// panic instead of returning an error (since it pretty much has to be a programming error)
-		logrus.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
-	}
-
-	var cfg, err = Load()
-	if err != nil {
-		logrus.WithError(err).Error("failed to read ondevice.conf")
-		return err
-	}
-	if err := cfg.SetValue(scope, "user", user); err != nil {
-		return err
-	}
-
-	if err := cfg.SetValue(scope, "auth", auth); err != nil {
-		return err
-	}
-
-	return cfg.Write()
-}
-
 // Init -- sets up configuration, called by cobra.OnInitialize()
 func Init(cfgFile string) {
 	if cfgFile != "" {

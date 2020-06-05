@@ -96,7 +96,7 @@ func (c Config) AllValues() map[string]string {
 }
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
-func (c Config) GetInt(key configKey) int {
+func (c Config) GetInt(key *configKey) int {
 	if s := c.cfg.Section(key.section); s != nil {
 		if k := s.Key(key.key); k != nil {
 			if rc, err := k.Int(); err == nil {
@@ -144,7 +144,7 @@ func (c Config) HasKey(section string, key string) bool {
 func (c Config) IsChanged() bool { return c.changed }
 
 // SetValue -- create/update a config value - don't forget to call Write() afterwards
-func (c Config) SetValue(key configKey, value string) error {
+func (c Config) SetValue(key *configKey, value string) error {
 	var s *ini.Section
 	var err error
 

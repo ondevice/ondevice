@@ -28,13 +28,20 @@ func (c Config) migrateAuth() error {
 		return c.GetString(section, key)
 	}
 
+	var getOrDefault = func(section, key, defaultValue string) string {
+		if s := c.cfg.Section(section); s != nil {
+			if k := s.Key(key); k != nil {
+				return k.String()
+			}
+		}
+		return defaultValue
+	}
+
 	// device auth
-	auth.Device.UserField, err = getValue(err, "device", "user")
-	auth.Device.KeyField, err = getValue(err, "device", "auth")
-	auth.Device.DeviceKey, err = getValue(err, "device", "key")
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to convert device config")
-		return err
+	auth.Device = internal.AuthEntry{
+		UserField: getOrDefault("device", "user", ""),
+		KeyField:  getOrDefault("device", "auth", ""),
+		DeviceKey: getOrDefault("device", "key", ""),
 	}
 
 	// client section

@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 
 	"github.com/ondevice/ondevice/config/internal"
@@ -68,7 +69,18 @@ func (c Config) migrateAuth() error {
 		return err
 	}
 
-	// TODO apply overrides
+	if user, pw := os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"); user != "" || pw != "" {
+		// apply overrides
+		if auth.Device.UserField != "" || auth.Device.KeyField != "" {
+			// TODO think about how to behave here
+			logrus.Fatal("migrateAuth(): got both device.user/device.auth and ONDEVICE_USER/ONDEVICE_AUTH")
+		}
+		auth.Device.UserField = user
+		auth.Device.KeyField = pw
+
+		// TODO should we also apply them to .Client?
+	}
+
 	var data []byte
 	if data, err = json.Marshal(auth); err != nil {
 		logrus.WithError(err).Fatal("failed to marshal auth.json")

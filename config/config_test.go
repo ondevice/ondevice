@@ -13,7 +13,7 @@ func setupTests() {
 
 func TestPathOverride(t *testing.T) {
 	_configPath = "/tmp/ondevice_test/ondevice.conf"
-	var cfg, err = Read()
+	var cfg, err = Load()
 	assert.Error(t, err)
 	assert.True(t, os.IsNotExist(err))
 	assert.Equal(t, _configPath, cfg.path)
@@ -27,7 +27,7 @@ func TestPathOverride(t *testing.T) {
 func TestGetString(t *testing.T) {
 	setupTests()
 
-	var cfg, err = Read()
+	var cfg, err = Load()
 	assert.NoError(t, err)
 
 	user, err := cfg.GetString("device", "user")
@@ -51,7 +51,7 @@ func TestGetString(t *testing.T) {
 
 	// test missing config file
 	_configPath = "/tmp/nonexisting/ondevice.conf"
-	cfg, err = Read()
+	cfg, err = Load()
 	assert.Error(t, err)
 	user, err = cfg.GetString("device", "user_")
 	assert.Error(t, err)

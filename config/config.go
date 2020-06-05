@@ -30,20 +30,8 @@ type Config struct {
 	changed bool // set by SetValue()
 }
 
-// MustLoad -- calls Read() and fatals on error (except on os.IsNotExist - in which case a zero Config struct will be returned)
-func MustLoad() Config {
-	var rc, err = Read()
-	if os.IsNotExist(err) {
-		return rc
-	} else if err != nil {
-		logrus.WithError(err).Fatal("failed to load ondevice.conf")
-		panic("should have fataled by now")
-	}
-	return rc
-}
-
-// Read -- fetches the contents of ondevice.conf
-func Read() (Config, error) {
+// Load -- fetches the contents of ondevice.conf
+func Load() (Config, error) {
 	var rc Config
 	var err error
 
@@ -78,6 +66,18 @@ func Read() (Config, error) {
 		return rc, err
 	}
 	return rc, nil
+}
+
+// MustLoad -- calls Load() and fatals on error (except on os.IsNotExist - in which case a zero Config struct will be returned)
+func MustLoad() Config {
+	var rc, err = Load()
+	if os.IsNotExist(err) {
+		return rc
+	} else if err != nil {
+		logrus.WithError(err).Fatal("failed to load ondevice.conf")
+		panic("should have fataled by now")
+	}
+	return rc
 }
 
 // AllValues -- returns a flattened key/value dictionary for all values in ondevice.conf
@@ -213,7 +213,7 @@ func SetAuth(scope, user, auth string) error {
 		logrus.Fatal("config.SetAuth(): scope needs to be one of 'device' and 'client': ", scope)
 	}
 
-	var cfg, err = Read()
+	var cfg, err = Load()
 	if err != nil {
 		logrus.WithError(err).Error("failed to read ondevice.conf")
 		return err
@@ -255,7 +255,7 @@ func Init(cfgFile string) {
 	// TODO we're always reading the configuration here -> think about caching this
 	//   Note: for ondevice daemon (and other long-running commands) the config should be re-read periodically
 	var cfg Config
-	if cfg, err = Read(); err != nil {
+	if cfg, err = Load(); err != nil {
 		logrus.WithError(err).Error("failed to read ondevice.conf")
 		return
 	}

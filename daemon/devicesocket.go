@@ -34,7 +34,7 @@ func (d *deviceSocket) announce(service string, protocol string) {
 
 // connect -- Go online
 func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
-	var cfg, err = config.Read()
+	var cfg, err = config.Load()
 	if err != nil {
 		return util.NewAPIError(util.OtherError, err.Error())
 	}

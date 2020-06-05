@@ -32,7 +32,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 	prefix, toComplete = c.stripUserAt(toComplete)
 	var dotPos = strings.Index(toComplete, ".")
 
-	var cfg, err = config.Read() // can't use MustLoad() here because we want to return ShellCompDirectiveError
+	var cfg, err = config.Load() // can't use MustLoad() here because we want to return ShellCompDirectiveError
 	if err != nil {
 		logrus.WithError(err).Error("failed to load ondevice.conf")
 		return nil, cobra.ShellCompDirectiveError

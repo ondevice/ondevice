@@ -12,7 +12,7 @@ import (
 // Accept -- Accept an incoming tunnel connection
 // Note: blocks until the tunnel has been established, so do this in a goroutine
 func Accept(t *Tunnel, tunnelID string, relayURL string, auths ...config.Auth) error {
-	var cfg, err = config.Read()
+	var cfg, err = config.Load()
 	if err != nil {
 		return err
 	}

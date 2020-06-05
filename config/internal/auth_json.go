@@ -127,6 +127,16 @@ func (j AuthJSON) SetDeviceAuth(user string, key string) {
 	j.isChanged = true
 }
 
+// SetDeviceKey -- updates the device key (happens when first logging in or when resolving device conflicts)
+func (j AuthJSON) SetDeviceKey(newKey string) (changed bool) {
+	changed = j.Device.DeviceKey != newKey
+	j.Device.DeviceKey = newKey
+	if changed {
+		j.isChanged = true
+	}
+	return changed
+}
+
 // Write -- atomically update auth.json
 func (j AuthJSON) Write() error {
 	var data, err = json.Marshal(j)

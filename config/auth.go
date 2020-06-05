@@ -52,6 +52,12 @@ type AuthConfig interface {
 	// You need to call Write() to actually update auth.json
 	SetDeviceAuth(user string, key string)
 
+	// SetDeviceKey -- update unique device key
+	//
+	// Returns true if the key has changed
+	// You need to call Write() to actually update auth.json
+	SetDeviceKey(newKey string) (changed bool)
+
 	// updates auth.json with the credentials stored in this struct
 	//
 	// make sure not quickly call LoadAuth(), Set*Auth() and Write() to prevent concurrent write issues (i.e. overwrite changes by another instance)

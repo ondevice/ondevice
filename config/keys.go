@@ -48,4 +48,9 @@ func newKey(section string, key string, defaultValue string) *Key {
 	return &rc
 }
 
+// FindKey -- returns the configKey for the given string key (or nil if not found)
+func FindKey(key string) *Key {
+	return allKeys[key]
+}
+
 var allKeys = make(map[string]*Key)

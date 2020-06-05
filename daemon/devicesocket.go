@@ -42,7 +42,7 @@ func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
 	params := map[string]string{"key": cfg.GetDeviceKey()}
 
 	if len(auths) == 0 {
-		auth, err := config.GetDeviceAuth()
+		auth, err := config.LoadAuth().GetDeviceAuth()
 		if err != nil {
 			logrus.WithError(err).Fatal("couldn't get device auth")
 		}

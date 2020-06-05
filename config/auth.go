@@ -37,11 +37,6 @@ func _getAuth(section string) (Auth, error) {
 	return internal.NewAuth(username, auth), nil
 }
 
-// GetDeviceAuth -- Get the device authentication
-func GetDeviceAuth() (Auth, error) {
-	return _getAuth("device")
-}
-
 // ListAuthenticatedUsers -- returns the names of users we have client auth for
 func ListAuthenticatedUsers() []string {
 	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file

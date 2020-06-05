@@ -45,7 +45,7 @@ func TestClientUserAuth(t *testing.T) {
 func TestDeviceAuth(t *testing.T) {
 	setupTests()
 
-	auth, err := GetDeviceAuth()
+	auth, err := LoadAuth().GetDeviceAuth()
 	assert.NoError(t, err)
 	assert.Equal(t, "hello", auth.User())
 	assert.Equal(t, "123456", auth.Key())

@@ -4,7 +4,7 @@ package config
 func (c Config) GetDeviceID() string {
 	var rc string
 	var err error
-	if rc, err = c.GetString("device", "dev-id"); err != nil {
+	if rc, err = c.GetStringOld("device", "dev-id"); err != nil {
 		return ""
 	}
 	return rc

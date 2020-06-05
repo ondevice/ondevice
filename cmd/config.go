@@ -79,7 +79,7 @@ when only one key is requested, only the value will be printed`,
 
 			var val string
 			var err error
-			if val, err = config.MustLoad().GetString(section, key); err != nil {
+			if val, err = config.MustLoad().GetStringOld(section, key); err != nil {
 				logrus.WithError(err).Errorf("config key not found: %s.%s", section, key)
 				rc = 1
 				continue

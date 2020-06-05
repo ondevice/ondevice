@@ -30,22 +30,22 @@ func TestGetString(t *testing.T) {
 	var cfg, err = Load()
 	assert.NoError(t, err)
 
-	user, err := cfg.GetString("device", "user")
+	user, err := cfg.GetStringOld("device", "user")
 	assert.NoError(t, err)
 	assert.Equal(t, "hello", user)
 
 	// test case insensitivity
-	user, err = cfg.GetString("devIce", "User")
+	user, err = cfg.GetStringOld("devIce", "User")
 	assert.NoError(t, err)
 	assert.Equal(t, "hello", user)
 
 	// test missing section
-	user, err = cfg.GetString("device_", "user")
+	user, err = cfg.GetStringOld("device_", "user")
 	assert.Error(t, err)
 	assert.Equal(t, "", user)
 
 	// test missing key
-	user, err = cfg.GetString("device", "user_")
+	user, err = cfg.GetStringOld("device", "user_")
 	assert.Error(t, err)
 	assert.Equal(t, "", user)
 
@@ -53,7 +53,7 @@ func TestGetString(t *testing.T) {
 	_configPath = "/tmp/nonexisting/ondevice.conf"
 	cfg, err = Load()
 	assert.Error(t, err)
-	user, err = cfg.GetString("device", "user_")
+	user, err = cfg.GetStringOld("device", "user_")
 	assert.Error(t, err)
 	assert.Equal(t, "", user)
 }

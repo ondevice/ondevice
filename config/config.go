@@ -114,8 +114,8 @@ func (c Config) GetInt(key *configKey) int {
 	return int(rc)
 }
 
-// GetString -- Get a configuration value (as string)
-func (c Config) GetString(section string, key string) (string, error) {
+// GetStringOld -- Get a configuration value (as string)
+func (c Config) GetStringOld(section string, key string) (string, error) {
 	s, err := c.cfg.GetSection(section)
 	if err != nil {
 		return "", err

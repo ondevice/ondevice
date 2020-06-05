@@ -26,7 +26,7 @@ func (c Config) migrateAuth() error {
 		if olderr != nil {
 			return "", olderr
 		}
-		return c.GetString(section, key)
+		return c.GetStringOld(section, key)
 	}
 
 	var getOrDefault = func(section, key, defaultValue string) string {

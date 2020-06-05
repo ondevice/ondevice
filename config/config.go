@@ -144,23 +144,23 @@ func (c Config) HasKey(section string, key string) bool {
 func (c Config) IsChanged() bool { return c.changed }
 
 // SetValue -- create/update a config value - don't forget to call Write() afterwards
-func (c Config) SetValue(section string, key string, value string) error {
+func (c Config) SetValue(key configKey, value string) error {
 	var s *ini.Section
 	var err error
 
 	c.changed = true
 
-	if s = c.cfg.Section(section); s == nil {
-		if s, err = c.cfg.NewSection(section); err != nil {
-			logrus.WithError(err).Errorf("failed to create config section: '%s'", section)
+	if s = c.cfg.Section(key.section); s == nil {
+		if s, err = c.cfg.NewSection(key.section); err != nil {
+			logrus.WithError(err).Errorf("failed to create config section: '%s'", key.section)
 			return err
 		}
 	}
 
 	var k *ini.Key
-	if k = s.Key(key); k == nil {
-		if k, err = s.NewKey(key, value); err != nil {
-			logrus.WithError(err).Errorf("failed to create new config value '%s.%s'='%s'", section, key, value)
+	if k = s.Key(key.key); k == nil {
+		if k, err = s.NewKey(key.key, value); err != nil {
+			logrus.WithError(err).Errorf("failed to create new config value '%v'='%s'", key, value)
 			return err
 		}
 		return nil

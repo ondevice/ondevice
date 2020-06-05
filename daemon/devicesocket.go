@@ -110,13 +110,13 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 	if changed := a.SetDeviceKey(key); changed {
 		logrus.Debug("updating device key: ", key)
 		if err := a.Write(); err != nil {
-			return logrus.WithError(err).Error("failed to update device key")
+			logrus.WithError(err).Error("failed to update device key")
 		}
 	}
 
 	// update devID
 	if cfg.GetDeviceID() != devID {
-		cfg.SetValue("device", "dev-id", devID)
+		cfg.SetValue(config.KeyDeviceID, devID)
 	}
 
 	if cfg.IsChanged() {

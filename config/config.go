@@ -252,6 +252,8 @@ func Init(cfgFile string) {
 		logrus.WithError(err).Fatalf("failed to create config directory: '%s'", filepath.Dir(_configPath))
 	}
 
+	// TODO we're always reading the configuration here -> think about caching this
+	//   Note: for ondevice daemon (and other long-running commands) the config should be re-read periodically
 	var cfg Config
 	if cfg, err = Read(); err != nil {
 		logrus.WithError(err).Error("failed to read ondevice.conf")

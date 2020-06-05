@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,9 +15,13 @@ func TestPathOverride(t *testing.T) {
 	_configPath = "/tmp/ondevice_test/ondevice.conf"
 	var cfg, err = Read()
 	assert.Error(t, err)
+	assert.True(t, os.IsNotExist(err))
 	assert.Equal(t, _configPath, cfg.path)
 
 	assert.Equal(t, "/tmp/ondevice_test/test.txt", cfg.GetFilePath("test.txt"), "config path override failed")
+
+	// make sure MustLoad() doesn't fail on FileNotExists
+	MustLoad()
 }
 
 func TestGetString(t *testing.T) {

@@ -28,11 +28,7 @@ import (
 )
 
 func configRun(cmd *cobra.Command, args []string) {
-	var cfg, err = config.Read()
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to fetch config")
-	}
-	var values = cfg.AllValues()
+	var values = config.MustLoad().AllValues()
 
 	var keys []string
 	for k := range values {
@@ -81,13 +77,9 @@ when only one key is requested, only the value will be printed`,
 			var section = parts[0]
 			key = parts[1]
 
-			var cfg, err = config.Read()
-			if err != nil {
-				logrus.WithError(err).Fatal("failed to read ondevice.conf")
-			}
-
 			var val string
-			if val, err = cfg.GetString(section, key); err != nil {
+			var err error
+			if val, err = config.MustLoad().GetString(section, key); err != nil {
 				logrus.WithError(err).Errorf("config key not found: %s.%s", section, key)
 				rc = 1
 				continue
@@ -109,11 +101,7 @@ when only one key is requested, only the value will be printed`,
 		var matchingKeys []string
 		var shellDirective = cobra.ShellCompDirectiveNoFileComp
 
-		var cfg, err = config.Read()
-		if err != nil {
-			logrus.WithError(err).Fatal("failed to load config")
-		}
-		for k := range cfg.AllValues() {
+		for k := range config.MustLoad().AllValues() {
 			if strings.HasPrefix(k, toComplete) {
 				matchingKeys = append(matchingKeys, k)
 			}

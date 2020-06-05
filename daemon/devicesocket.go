@@ -36,10 +36,11 @@ func (d *deviceSocket) announce(service string, protocol string) {
 func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
 	var cfg, err = config.Read()
 	if err != nil {
-		return util.NewAPIError(500, err.Error())
+		return util.NewAPIError(util.OtherError, err.Error())
 	}
-
-	params := map[string]string{"key": cfg.GetDeviceKey()}
+	params := map[string]string{
+		"key": cfg.GetDeviceKey(),
+	}
 
 	if len(auths) == 0 {
 		auth, err := config.LoadAuth().GetDeviceAuth()
@@ -103,12 +104,8 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 	logrus.Infof("connection established, online as '%s'", devID)
 	d.IsOnline = true
 
-	var cfg, err = config.Read()
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to read ondevice.conf")
-	}
-
-	// update the key if changed
+	// update config if changed
+	var cfg = config.MustLoad()
 	if cfg.GetDeviceKey() != key {
 		logrus.Debug("updating device key: ", key)
 		cfg.SetValue("device", "key", key)

@@ -29,14 +29,8 @@ func getSocketURLs() []url.URL {
 		return []url.URL{*u}
 	}
 
-	var cfg, err = config.Read()
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to read config")
-		return nil
-	}
-
 	return []url.URL{
-		{Scheme: "unix", Path: cfg.GetFilePath("ondevice.sock")},
+		{Scheme: "unix", Path: config.MustLoad().GetFilePath("ondevice.sock")},
 		{Scheme: "unix", Path: "/var/run/ondevice/ondevice.sock"},
 	}
 }

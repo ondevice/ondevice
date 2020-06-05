@@ -120,11 +120,7 @@ func daemonParseArgs(cmd *cobra.Command, args []string, d *daemon.Daemon) (*url.
 			return nil, err
 		}
 	} else {
-		var cfg config.Config
-		if cfg, err = config.Read(); err != nil {
-			return nil, err
-		}
-		d.PIDFile = cfg.GetFilePath("ondevice.pid")
+		d.PIDFile = config.MustLoad().GetFilePath("ondevice.pid")
 	}
 
 	if rc, err = url.Parse(cmd.Flag("sock").Value.String()); err != nil {

@@ -16,7 +16,7 @@ func Accept(t *Tunnel, tunnelID string, relayURL string, auths ...config.Auth) e
 	if err != nil {
 		return err
 	}
-	deviceKey := cfg.GetDeviceKey()
+	deviceKey := cfg.LoadAuth().GetDeviceKey()
 	params := map[string]string{"key": deviceKey, "tunnel": tunnelID}
 
 	// get authentication

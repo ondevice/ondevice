@@ -80,6 +80,12 @@ func (j AuthJSON) GetDeviceAuth() (Auth, error) {
 	return j.Device, nil
 }
 
+// GetDeviceKey -- returns the unique deviceKey that identifies this device (or "")
+func (j AuthJSON) GetDeviceKey() string {
+	// won't check j.err here
+	return j.Client.DeviceKey
+}
+
 // ListClientUsers -- returns the names of users we have client auth for
 func (j AuthJSON) ListClientUsers() []string {
 	// TODO this is messy but will do for now - we'll improve this once we have a separate auth file

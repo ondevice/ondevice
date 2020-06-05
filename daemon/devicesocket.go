@@ -39,7 +39,7 @@ func (d *deviceSocket) connect(auths ...config.Auth) util.APIError {
 		return util.NewAPIError(util.OtherError, err.Error())
 	}
 	params := map[string]string{
-		"key": cfg.GetDeviceKey(),
+		"key": cfg.LoadAuth().GetDeviceKey(),
 	}
 
 	if len(auths) == 0 {
@@ -106,7 +106,7 @@ func (d *deviceSocket) onHello(msg *map[string]interface{}) {
 
 	// update config if changed
 	var cfg = config.MustLoad()
-	if cfg.GetDeviceKey() != key {
+	if cfg.LoadAuth().GetDeviceKey() != key {
 		logrus.Debug("updating device key: ", key)
 		cfg.SetValue("device", "key", key)
 	}

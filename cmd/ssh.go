@@ -221,7 +221,7 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 
 	// always use qualified device names
 	if !strings.Contains(tgtHost, ".") {
-		if auth, err := config.GetClientAuth(); err == nil {
+		if auth, err := config.LoadAuth().GetClientAuth(); err == nil {
 			tgtHost = fmt.Sprintf("%s.%s", auth.User(), tgtHost)
 		}
 	}

@@ -74,7 +74,7 @@ func (c *pipeCmd) run(cmd *cobra.Command, args []string) {
 	devID := args[0]
 	service := args[1]
 
-	auth, err := config.GetClientAuthForDevice(devID)
+	auth, err := config.LoadAuth().GetClientAuthForDevice(devID)
 	if err != nil {
 		logrus.WithError(err).Fatal("missing client credentials")
 		return

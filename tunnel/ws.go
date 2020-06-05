@@ -56,7 +56,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	var auth config.Auth
 	if len(auths) == 0 {
 		var err error
-		if auth, err = config.GetClientAuth(); err != nil {
+		if auth, err = config.LoadAuth().GetClientAuth(); err != nil {
 			return util.NewAPIError(util.OtherError, err.Error())
 		}
 	} else {

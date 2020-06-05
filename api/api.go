@@ -34,8 +34,11 @@ func _request(method string, endpoint string, params map[string]string, bodyType
 	var auth config.Auth
 
 	if auths == nil {
-		a, _ := config.GetClientAuth()
-		auth = a
+		var a = config.LoadAuth()
+		var err error
+		if auth, err = a.GetClientAuth(); err != nil {
+			logrus.WithError(err).Fatal("missing client auth - try running 'ondevice login'")
+		}
 	} else {
 		auth = auths[0]
 	}

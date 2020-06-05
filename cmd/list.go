@@ -115,12 +115,12 @@ func (c *listCmd) run(cmd *cobra.Command, filters []string) {
 	// --user
 	var auth config.Auth
 	if c.userFlag != "" {
-		if auth, err = config.GetClientAuthForUser(c.userFlag); err != nil {
+		if auth, err = config.LoadAuth().GetClientAuthForUser(c.userFlag); err != nil {
 			logrus.Fatalf("can't find client auth for user '%s'", c.userFlag)
 			return
 		}
 	} else {
-		if auth, err = config.GetClientAuth(); err != nil {
+		if auth, err = config.LoadAuth().GetClientAuth(); err != nil {
 			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
 			return
 		}

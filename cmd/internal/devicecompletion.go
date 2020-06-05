@@ -32,11 +32,18 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 	prefix, toComplete = c.stripUserAt(toComplete)
 	var dotPos = strings.Index(toComplete, ".")
 
+	var cfg, err = config.Read() // can't use MustLoad() here because we want to return ShellCompDirectiveError
+	if err != nil {
+		logrus.WithError(err).Error("failed to load ondevice.conf")
+		return nil, cobra.ShellCompDirectiveError
+	}
+	var a = cfg.LoadAuth()
+
 	if dotPos < 1 { // no dot in the hostname part
 		var auth config.Auth
 		var err error
-		if auth, err = config.GetClientAuth(); err != nil {
-			logrus.Fatal("missing client auth, have you run 'ondevice login'?")
+		if auth, err = a.GetClientAuth(); err != nil {
+			logrus.WithError(err).Error("missing client auth, have you run 'ondevice login'?")
 			return nil, cobra.ShellCompDirectiveError
 		}
 
@@ -68,7 +75,7 @@ func (c DeviceListCompletion) Run(cmd *cobra.Command, args []string, toComplete 
 		var username = toComplete[:dotPos]
 		var auth config.Auth
 		var err error
-		if auth, err = config.GetClientAuthForUser(username); err != nil {
+		if auth, err = a.GetClientAuthForUser(username); err != nil {
 			logrus.Fatalf("missing client auth for user '%s'", username)
 			return nil, cobra.ShellCompDirectiveError
 		}

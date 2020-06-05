@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"strings"
 
@@ -38,46 +37,6 @@ func _getAuth(section string) (Auth, error) {
 	return internal.NewAuth(username, auth), nil
 }
 
-// GetClientAuth -- Get the default client authentication information
-func GetClientAuth() (Auth, error) {
-	return _getAuth("client")
-}
-
-// GetClientAuthForDevice -- Returns credentials for the given devID
-//
-// with unqualified devIDs, this will do the same as GetClientAuth().
-// But if the devID has a user prefix (and we have extra credentials for that user), it'll return those instead
-func GetClientAuthForDevice(devID string) (Auth, error) {
-	if strings.Contains(devID, ".") {
-		parts := strings.SplitN(devID, ".", 2)
-		if auth, err := GetClientAuthForUser(parts[0]); err == nil {
-			return auth, nil
-		}
-	}
-
-	return GetClientAuth()
-}
-
-// GetClientAuthForUser -- get the authentication credentials for a specific client user
-func GetClientAuthForUser(username string) (Auth, error) {
-	var auth, err = GetClientAuth()
-	if err == nil && strings.ToLower(auth.User()) == strings.ToLower(username) {
-		return auth, nil
-	}
-
-	var cfg Config
-	if cfg, err = Read(); err != nil {
-		return nil, errors.New("failed to read ondevice.conf")
-	}
-
-	var key string
-	if key, err = cfg.GetString("client", "auth_"+username); err == nil {
-		return internal.NewAuth(username, key), nil
-	}
-
-	return nil, errors.New("no client credentials found for user")
-}
-
 // GetDeviceAuth -- Get the device authentication
 func GetDeviceAuth() (Auth, error) {
 	return _getAuth("device")
@@ -112,4 +71,9 @@ func ListAuthenticatedUsers() []string {
 	}
 
 	return rc
+}
+
+// LoadAuth -- shorthand for MustLoad().LoadAuth()
+func LoadAuth() internal.AuthJSON {
+	return MustLoad().LoadAuth()
 }

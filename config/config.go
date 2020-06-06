@@ -97,15 +97,19 @@ func (c Config) AllValues() map[string]string {
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
 func (c Config) GetInt(key Key) int {
-	if s, err := c.cfg.GetSection(key.section); err == nil {
-		if k, err := s.GetKey(key.key); err == nil {
-			if rc, err := k.Int(); err == nil {
-				return rc
-			}
-		}
+	var strVal = c.GetString(key)
+	var rc, err = strconv.ParseInt(strVal, 0, 32)
+	if err == nil {
+		return int(rc)
 	}
 
-	var rc, err = strconv.ParseInt(key.defaultValue, 10, 32)
+	// -> err != nil - assume it's the user's value
+	//  if empty, simply return the default value
+	//  if not, log the error and also return the default value
+	if strVal != "" {
+		logrus.WithError(err).Errorf("failed to parse value for '%v' (expected integer): '%s'", key, strVal)
+	}
+	rc, err = strconv.ParseInt(key.defaultValue, 10, 32)
 	if err != nil {
 		// fail hard because the default value is not an int (i.e. there's a coding issue)
 		logrus.WithError(err).Fatalf("expected integer default value for config key '%v', not '%s'", key, key.defaultValue)

@@ -10,6 +10,8 @@ import (
 )
 
 // migrateAuth -- move stuff from ondevice.conf to auth.json
+//
+// (up until v0.6.1 credentials were stored in ondevice.conf)
 func (c Config) migrateAuth() error {
 	if !c.HasKey("device", "auth") && !c.HasKey("client", "auth") {
 		return nil // doesn't have auth
@@ -21,17 +23,9 @@ func (c Config) migrateAuth() error {
 	var auth internal.AuthJSON
 	var err error
 
-	// chain getValue calls until the first error happened
-	var getValue = func(olderr error, section, key string) (string, error) {
-		if olderr != nil {
-			return "", olderr
-		}
-		return c.GetStringOld(section, key)
-	}
-
 	var getOrDefault = func(section, key, defaultValue string) string {
-		if s := c.cfg.Section(section); s != nil {
-			if k := s.Key(key); k != nil {
+		if s, err := c.cfg.GetSection(section); err == nil {
+			if k, err := s.GetKey(key); err == nil {
 				return k.String()
 			}
 		}
@@ -62,11 +56,9 @@ func (c Config) migrateAuth() error {
 	}
 	auth.ExtraClients = extraClients
 
-	auth.Client.UserField, err = getValue(err, "client", "user")
-	auth.Client.KeyField, err = getValue(err, "client", "auth")
-	if err != nil {
-		logrus.WithError(err).Fatal("failed to convert client config")
-		return err
+	auth.Client = internal.AuthEntry{
+		UserField: getOrDefault("client", "user", ""),
+		KeyField:  getOrDefault("client", "auth", ""),
 	}
 
 	if user, pw := os.Getenv("ONDEVICE_USER"), os.Getenv("ONDEVICE_AUTH"); user != "" || pw != "" {

@@ -49,7 +49,7 @@ func init() {
 }
 
 func sftpRun(cmd *cobra.Command, args []string) {
-	var sftpPath = config.MustLoad().GetString(config.KeySFTPCommand)
+	var sftpPath = config.MustLoad().GetString(config.CommandSFTP)
 
 	args, opts := sshParseArgs(sftpFlags, args)
 

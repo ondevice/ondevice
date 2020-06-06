@@ -57,7 +57,7 @@ func init() {
 var scpFlags = sshParseFlags("12346BCpqrvc:F:i:l:o:P:S:")
 
 func scpRun(cmd *cobra.Command, args []string) {
-	var scpPath = config.MustLoad().GetString(config.KeySCPCommand)
+	var scpPath = config.MustLoad().GetString(config.CommandSCP)
 
 	args, opts := sshParseArgs(scpFlags, args)
 

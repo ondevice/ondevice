@@ -8,17 +8,17 @@ var KeyClientTimeout = newKey("client", "timeout", "30")
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
 var KeyDeviceID = newKey("device", "dev-id", "").setRO()
 
-// KeyRSYNCCommand -- the path to the 'rsync' command
-var KeyRSYNCCommand = newKey("command", "rsync", "rsync")
+// CommandRSYNC -- the path to the 'rsync' command
+var CommandRSYNC = newKey("command", "rsync", "rsync")
 
-// KeySCPCommand -- the path to the 'scp' command
-var KeySCPCommand = newKey("command", "scp", "scp")
+// CommandSCP -- the path to the 'scp' command
+var CommandSCP = newKey("command", "scp", "scp")
 
-// KeySFTPCommand -- the path to the 'sftp' command
-var KeySFTPCommand = newKey("command", "sftp", "sftp")
+// CommandSFTP -- the path to the 'sftp' command
+var CommandSFTP = newKey("command", "sftp", "sftp")
 
-// KeySSHCommand -- the path to the 'ssh' command
-var KeySSHCommand = newKey("command", "ssh", "ssh")
+// CommandSSH -- the path to the 'ssh' command
+var CommandSSH = newKey("command", "ssh", "ssh")
 
 // PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'
 var PathAuthJSON = newKey("path", "auth_json", "auth.json")

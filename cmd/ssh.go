@@ -82,7 +82,7 @@ Notes:
 }
 
 func (c *sshCmd) run(cmd *cobra.Command, args []string) {
-	var sshPath = config.MustLoad().GetString(config.KeySSHCommand)
+	var sshPath = config.MustLoad().GetString(config.CommandSSH)
 
 	// parse args (to detect the ones before 'user@host')
 	args, opts := sshParseArgs(sshFlags, args)

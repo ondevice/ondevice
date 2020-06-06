@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -90,22 +90,13 @@ when only one key is requested, only the value will be printed`,
 			os.Exit(rc)
 		}
 	},
-	Args: cobra.MinimumNArgs(1),
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		var matchingKeys []string
-		var shellDirective = cobra.ShellCompDirectiveNoFileComp
-
-		for k := range config.AllKeys(true) {
-			if strings.HasPrefix(k, toComplete) {
-				matchingKeys = append(matchingKeys, k)
-			}
-		}
-
-		return matchingKeys, shellDirective
-	},
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: internal.ConfigCompletion{WithReadOnly: true}.Run,
 }
 
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configGetCmd)
+	//	configCmd.AddCommand(configSetCmd)
+	//	configCmd.AddCommand(configUnsetCmd)
 }

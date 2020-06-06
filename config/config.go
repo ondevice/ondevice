@@ -125,21 +125,6 @@ func (c Config) GetString(key Key) string {
 	return key.defaultValue
 }
 
-// GetStringOld -- Get a configuration value (as string)
-func (c Config) GetStringOld(section string, key string) (string, error) {
-	s, err := c.cfg.GetSection(section)
-	if err != nil {
-		return "", err
-	}
-
-	val, err := s.GetKey(key)
-	if err != nil {
-		return "", err
-	}
-
-	return val.String(), nil
-}
-
 // HasKey -- returns true iff the given value has been defined (defaults don't count)
 func (c Config) HasKey(section string, key string) bool {
 	if s, err := c.cfg.GetSection(section); err == nil {

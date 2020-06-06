@@ -166,6 +166,11 @@ func (c Config) SetValue(key Key, value string) error {
 		return nil
 	}
 
+	if err = key.Validate(value); err != nil {
+		logrus.WithError(err).Errorf("failed to set '%v' to '%s': validation failed", key, value)
+		return err
+	}
+
 	k.SetValue(value)
 	return nil
 }

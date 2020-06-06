@@ -1,9 +1,15 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/ondevice/ondevice/config/internal"
+)
 
 // KeyClientTimeout -- specifies the timeout for HTTP requests
-var KeyClientTimeout = newKey("client", "timeout", "30")
+var KeyClientTimeout = newKey("client", "timeout", "30").setValidator(
+	internal.IntValidator{}.Validate,
+)
 
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
 var KeyDeviceID = newKey("device", "dev-id", "").setRO()
@@ -37,6 +43,8 @@ type Key struct {
 	section, key, defaultValue string
 
 	ro bool
+
+	validateFn func(val string) error
 }
 
 // setRO -- marks configKey as being read-only (to users running 'ondevice config')
@@ -46,8 +54,23 @@ func (k Key) setRO() Key {
 	return k
 }
 
+// setValidator -- sets a validator for the given value
+func (k Key) setValidator(fn func(val string) error) Key {
+	k.validateFn = fn
+	allKeys[k.String()].validateFn = fn
+	return k
+}
+
 func (k Key) String() string {
 	return fmt.Sprintf("%s.%s", k.section, k.key)
+}
+
+// Validate -- if the config Key has a validator set, run it and return an error if something went wrong
+func (k Key) Validate(val string) error {
+	if k.validateFn == nil {
+		return nil
+	}
+	return k.validateFn(val)
 }
 
 // WithDefault -- returns a modified configKey with defaultValue set to 'val'

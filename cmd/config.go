@@ -74,7 +74,7 @@ when only one key is requested, only the value will be printed`,
 		for _, keyName := range args {
 			var key = config.FindKey(keyName)
 			if key == nil {
-				logrus.Errorf("config key not found: %s", keyName)
+				logrus.Errorf("config key not found: '%s'", keyName)
 				rc = 1
 				continue
 			}
@@ -116,14 +116,12 @@ If you specify the same key more than once, the last one in the list wins`,
 			var newValue = parts[1]
 
 			if key == nil {
-				logrus.Fatalf("config key not found: %v", key)
+				logrus.Fatalf("config key not found: '%s'", keyValue)
 				rc = 1
 				continue
 			}
 
-			// TODO run validation
 			if err := cfg.SetValue(*key, newValue); err != nil {
-				logrus.WithError(err).Error("failed to set '%v'", key)
 				rc = 1
 			}
 		}
@@ -154,7 +152,7 @@ var configUnsetCmd = &cobra.Command{
 			var key = config.FindKey(arg)
 
 			if key == nil {
-				logrus.Fatalf("config key not found: %s", arg)
+				logrus.Fatalf("config key not found: '%s'", arg)
 				rc = 1
 				continue
 			}

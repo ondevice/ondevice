@@ -190,8 +190,13 @@ func (c Config) Write() error {
 
 // GetFilePath -- returns the path of the file in question, relative to ondevice.conf
 func (c Config) GetFilePath(key Key) string {
-	var dir = filepath.Dir(c.path)
-	return filepath.Join(dir, c.GetString(key))
+	// unlike python's path.join() go's version will always concat the two!?!
+	var rc = c.GetString(key)
+	if !filepath.IsAbs(rc) {
+		var dir = filepath.Dir(c.path)
+		rc = filepath.Join(dir, c.GetString(key))
+	}
+	return rc
 }
 
 // GetFilePathOld -- returns the path of a file, relative to ondevice.conf

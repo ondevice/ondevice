@@ -20,11 +20,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -59,7 +57,7 @@ func init() {
 var scpFlags = sshParseFlags("12346BCpqrvc:F:i:l:o:P:S:")
 
 func scpRun(cmd *cobra.Command, args []string) {
-	scpPath := "/usr/bin/scp"
+	var scpPath = config.MustLoad().GetString(config.KeySCPCommand)
 
 	args, opts := sshParseArgs(scpFlags, args)
 
@@ -89,13 +87,8 @@ func scpRun(cmd *cobra.Command, args []string) {
 	a = append(a, opts...)
 	a = append(a, args...)
 
-	err := syscall.Exec(scpPath, a, os.Environ())
-	if err != nil {
-		logrus.WithError(err).Fatalf("failed to run '%s'", scpPath)
-		return
-	}
-
-	logrus.Fatal("we shouldn't be here")
+	// execExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
+	execExternalCommand(scpPath, a)
 }
 
 func scpValidate(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

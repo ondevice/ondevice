@@ -19,9 +19,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"syscall"
 
-	"github.com/sirupsen/logrus"
+	"github.com/ondevice/ondevice/config"
 	"github.com/spf13/cobra"
 )
 
@@ -51,16 +50,12 @@ func init() {
 }
 
 func rsyncRun(cmd *cobra.Command, args []string) {
-	rsyncPath := "/usr/bin/rsync"
+	var rsyncPath = config.MustLoad().GetString(config.KeyRSYNCCommand)
 
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{rsyncPath, "-e", fmt.Sprintf("%s ssh", os.Args[0])}
 	a = append(a, args...)
 
-	err := syscall.Exec(rsyncPath, a, os.Environ())
-	if err != nil {
-		logrus.WithError(err).Fatalf("failed to run '%s'", rsyncPath)
-	}
-
-	logrus.Fatal("we shouldn't be here")
+	// execExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
+	execExternalCommand(rsyncPath, a)
 }

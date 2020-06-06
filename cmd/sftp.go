@@ -20,11 +20,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +49,7 @@ func init() {
 }
 
 func sftpRun(cmd *cobra.Command, args []string) {
-	sftpPath := "/usr/bin/sftp"
+	var sftpPath = config.MustLoad().GetString(config.KeySFTPCommand)
 
 	args, opts := sshParseArgs(sftpFlags, args)
 
@@ -81,10 +79,6 @@ func sftpRun(cmd *cobra.Command, args []string) {
 	a = append(a, opts...)
 	a = append(a, args...)
 
-	err := syscall.Exec(sftpPath, a, os.Environ())
-	if err != nil {
-		logrus.WithError(err).Fatalf("failed to run '%s'", sftpPath)
-	}
-
-	logrus.Fatal("we shouldn't be here")
+	// execExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
+	execExternalCommand(sftpPath, a)
 }

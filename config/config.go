@@ -181,6 +181,15 @@ func (c Config) SetValue(key Key, value string) error {
 	return nil
 }
 
+// Unset -- reverts the given config key to its default value
+//
+// (if the key/section in question doesn't exist nothing happens)
+func (c Config) Unset(key Key) {
+	if s, err := c.cfg.GetSection(key.section); err == nil {
+		s.DeleteKey(key.key)
+	}
+}
+
 // Write -- writes ondevice.conf (using writeFile() for safe replacement)
 //
 // Make sure to only write freshly read Config files. otherwise you'll dramatically

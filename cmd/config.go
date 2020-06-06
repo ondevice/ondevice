@@ -48,6 +48,7 @@ var configCmd = &cobra.Command{
 	Short: "show or modify your local ondevice configuration",
 	Long:  `calling ondevice config without parameters will print a list of key=value lines`,
 	Run:   configRun,
+	Args:  cobra.NoArgs,
 	//Hidden: true,
 }
 
@@ -73,7 +74,7 @@ when only one key is requested, only the value will be printed`,
 		for _, keyName := range args {
 			var key = config.FindKey(keyName)
 			if key == nil {
-				logrus.Errorf("config key not found: %v", key)
+				logrus.Errorf("config key not found: %s", keyName)
 				rc = 1
 				continue
 			}
@@ -101,8 +102,7 @@ var configSetCmd = &cobra.Command{
 	Long: `ondevice config set updates one or more configuration values.
 If you specify the same key more than once, the last one in the list wins`,
 	Example: `  $ ondevice config set ssh.path=/usr/local/bin/ssh rsync.path=echo
-  $ ondevice config set client.timeout=5
-`,
+  $ ondevice config set client.timeout=5`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var rc = 0
 
@@ -140,9 +140,43 @@ If you specify the same key more than once, the last one in the list wins`,
 	ValidArgsFunction: internal.ConfigCompletion{WithReadOnly: false, Suffix: "="}.Run,
 }
 
+var configUnsetCmd = &cobra.Command{
+	Use:   "unset <key>...",
+	Short: "revert one or more configuration values to their defaults",
+	Long:  `ondevice config unset deletes the specified configuration values.`,
+	Example: `  $ ondevice config unset ssh.path rsync.path
+  $ ondevice config unset client.timeout`,
+	Run: func(cmd *cobra.Command, args []string) {
+		var rc = 0
+
+		var cfg = config.MustLoad()
+		for _, arg := range args {
+			var key = config.FindKey(arg)
+
+			if key == nil {
+				logrus.Fatalf("config key not found: %s", arg)
+				rc = 1
+				continue
+			}
+
+			cfg.Unset(*key)
+		}
+
+		if rc != 0 {
+			os.Exit(rc)
+		}
+
+		if err := cfg.Write(); err != nil {
+			logrus.WithError(err).Error("failed to write config")
+		}
+	},
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: internal.ConfigCompletion{WithReadOnly: false}.Run,
+}
+
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configGetCmd)
 	configCmd.AddCommand(configSetCmd)
-	//	configCmd.AddCommand(configUnsetCmd)
+	configCmd.AddCommand(configUnsetCmd)
 }

@@ -199,12 +199,6 @@ func (c Config) GetFilePath(key Key) string {
 	return rc
 }
 
-// GetFilePathOld -- returns the path of a file, relative to ondevice.conf
-func (c Config) GetFilePathOld(filename string) string {
-	var dir = filepath.Dir(c.path)
-	return filepath.Join(dir, filename)
-}
-
 // GetVersion -- Returns the app version
 func GetVersion() string {
 	return version

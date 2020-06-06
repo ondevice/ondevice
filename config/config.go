@@ -142,8 +142,8 @@ func (c Config) GetStringOld(section string, key string) (string, error) {
 
 // HasKey -- returns true iff the given value has been defined (defaults don't count)
 func (c Config) HasKey(section string, key string) bool {
-	if s := c.cfg.Section(section); s != nil {
-		if k := s.Key(key); k != nil {
+	if s, err := c.cfg.GetSection(section); err == nil {
+		if _, err := s.GetKey(key); err == nil {
 			return true
 		}
 	}

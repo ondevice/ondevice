@@ -80,8 +80,8 @@ func (c Config) migrateAuth() error {
 
 	// TODO remove old auth from ondevice.conf
 
-	// TODO use auth.Write()
-	if err = internal.WriteFile(data, c.GetFilePathOld("auth.json"), 0o600); err != nil {
+	// TODO use auth.Write() - only works if auth.path is set correctly
+	if err = internal.WriteFile(data, c.GetFilePath(PathAuthJSON), 0o600); err != nil {
 		logrus.WithError(err).Fatal("migrateConfig(): failed to write auth.json")
 		return err
 	}

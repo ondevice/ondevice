@@ -20,6 +20,9 @@ var KeySFTPCommand = newKey("command", "sftp", "sftp")
 // KeySSHCommand -- the path to the 'ssh' command
 var KeySSHCommand = newKey("command", "ssh", "ssh")
 
+// PathAuthJSON -- the path to 'auth.json', usually in the same directory as 'ondevice.conf'
+var PathAuthJSON = newKey("path", "auth_json", "auth.json")
+
 // Key -- config key struct (use the predefined Key* values when using config)
 type Key struct {
 	section, key, defaultValue string

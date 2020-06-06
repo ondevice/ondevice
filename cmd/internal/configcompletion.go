@@ -11,6 +11,7 @@ import (
 type ConfigCompletion struct {
 	// WithReadOnly -- if set, also include read-only keys in the results
 	WithReadOnly bool
+	Suffix       string
 }
 
 // Run -- proviceds shell completion for devIDs
@@ -27,7 +28,7 @@ func (c ConfigCompletion) Run(cmd *cobra.Command, args []string, toComplete stri
 
 	for k := range config.AllKeys(c.WithReadOnly) {
 		if strings.HasPrefix(k, toComplete) {
-			matchingKeys = append(matchingKeys, k)
+			matchingKeys = append(matchingKeys, k+c.Suffix)
 		}
 	}
 

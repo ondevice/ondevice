@@ -18,7 +18,7 @@ func TestPathOverride(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 	assert.Equal(t, _configPath, cfg.path)
 
-	assert.Equal(t, "/tmp/ondevice_test/test.txt", cfg.GetFilePath("test.txt"), "config path override failed")
+	assert.Equal(t, "/tmp/ondevice_test/test.txt", cfg.GetFilePathOld("test.txt"), "config path override failed")
 
 	// make sure MustLoad() doesn't fail on FileNotExists
 	MustLoad()

@@ -104,7 +104,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 
 	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
 		// use our own known_hosts file unless the user specified an override
-		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath("known_hosts")))
+		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePathOld("known_hosts")))
 	}
 
 	a = append(a, opts...) // ... ssh flags (-L -R -D ...)

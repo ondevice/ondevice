@@ -189,7 +189,7 @@ func (c Config) Write() error {
 }
 
 // GetFilePath -- returns the path of a file, relative to ondevice.conf
-func (c Config) GetFilePath(filename string) string {
+func (c Config) GetFilePathOld(filename string) string {
 	var dir = filepath.Dir(c.path)
 	return filepath.Join(dir, filename)
 }
@@ -203,7 +203,7 @@ func GetVersion() string {
 //
 // uses [path].auth_json as reference
 func (c Config) LoadAuth() AuthConfig {
-	var path = c.GetFilePath("auth.json")
+	var path = c.GetFilePathOld("auth.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		c.migrateAuth()
 	}

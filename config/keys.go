@@ -20,11 +20,17 @@ var KeySFTPCommand = newKey("command", "sftp", "sftp")
 // KeySSHCommand -- the path to the 'ssh' command
 var KeySSHCommand = newKey("command", "ssh", "ssh")
 
-// PathAuthJSON -- the path to 'auth.json', usually in the same directory as 'ondevice.conf'
+// PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'
 var PathAuthJSON = newKey("path", "auth_json", "auth.json")
 
-// PathKnownHosts -- the path to our 'known_hosts' file, usually in the same directory as 'ondevice.conf'
+// PathKnownHosts -- the path to our 'known_hosts' file, relative to 'ondevice.conf'
 var PathKnownHosts = newKey("path", "known_hosts", "known_hosts")
+
+// PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
+var PathOndevicePID = newKey("path", "ondevice_pid", "ondevice.pid")
+
+// PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
+var PathOndeviceSock = newKey("path", "ondevice_sock", "ondevice.sock")
 
 // Key -- config key struct (use the predefined Key* values when using config)
 type Key struct {

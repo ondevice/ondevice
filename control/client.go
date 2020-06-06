@@ -30,7 +30,7 @@ func getSocketURLs() []url.URL {
 	}
 
 	return []url.URL{
-		{Scheme: "unix", Path: config.MustLoad().GetFilePathOld("ondevice.sock")},
+		{Scheme: "unix", Path: config.MustLoad().GetFilePath(config.PathOndeviceSock)},
 		{Scheme: "unix", Path: "/var/run/ondevice/ondevice.sock"},
 	}
 }

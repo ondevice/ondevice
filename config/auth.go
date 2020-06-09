@@ -65,8 +65,12 @@ type AuthConfig interface {
 }
 
 // NewAuth -- creates new API server credentials
-func NewAuth(user, auth string) Auth {
-	return internal.NewAuth(user, auth)
+func NewAuth(user, authKey string) Auth {
+	return internal.AuthEntry{
+		UserField: user,
+		KeyField:  authKey,
+	}
+
 }
 
 // LoadAuth -- shorthand for MustLoad().LoadAuth()

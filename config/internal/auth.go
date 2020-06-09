@@ -17,7 +17,7 @@ type Auth interface {
 	// Key -- API key for the given user
 	Key() string
 
-	// APIServer -- API server these credentials are valid for - if "", defaults to https://api.ondevice.io/
+	// APIServer -- API server these credentials are valid for - if "", defaults to https://via.ondevice.io/
 	APIServer() string
 
 	// GetAuthHeader -- Encode the credentials into a HTTP Basic auth header
@@ -109,18 +109,10 @@ func (a AuthEntry) WithAPIServer(newServer string) Auth {
 	}
 }
 
-// NewAuth -- creates Auth credentials
-func NewAuth(username, key string) Auth {
-	return AuthEntry{
-		UserField: username,
-		KeyField:  key,
-	}
-}
-
 func init() {
 	if os.Getenv("ONDEVICE_SERVER") != "" {
 		_apiServer = os.Getenv("ONDEVICE_SERVER")
 	}
 }
 
-var _apiServer = "https://api.ondevice.io/"
+var _apiServer = "https://via.ondevice.io/"

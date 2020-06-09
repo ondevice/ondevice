@@ -57,7 +57,7 @@ from stdin, e.g.:
 }
 
 func loginRun(cmd *cobra.Command, args []string) {
-	var user, auth string
+	var user, authKey string
 	var err error
 
 	user = cmd.Flag("batch").Value.String()
@@ -66,18 +66,12 @@ func loginRun(cmd *cobra.Command, args []string) {
 
 	if user != "" {
 		// run in batch mode
-		if auth, err = reader.ReadString('\n'); err != nil {
+		if authKey, err = reader.ReadString('\n'); err != nil {
 			logrus.WithError(err).Fatal("failed to read auth key from stdin")
 		}
-		auth = strings.TrimSpace(auth)
+		authKey = strings.TrimSpace(authKey)
 	} else {
 		fmt.Print("Please login using one of your ondevice.io Auth Keys.\n\n")
-
-		fmt.Println("-----")
-		fmt.Println("DO NOT use your account password - it won't work.")
-		fmt.Println("If you haven't set one up yet, visit https://my.ondevice.io/me/keys")
-		fmt.Println("(see https://docs.ondevice.io/basics/auth-keys/ for details)")
-		fmt.Print("-----\n\n")
 
 		fmt.Print("User: ")
 		user, err = reader.ReadString('\n')
@@ -91,22 +85,22 @@ func loginRun(cmd *cobra.Command, args []string) {
 		if authBytes, err = gopass.GetPasswd(); err != nil {
 			logrus.WithError(err).Fatal("failed to read auth key")
 		}
-		auth = string(authBytes)
+		authKey = string(authBytes)
 	}
 
-	info, err := api.GetKeyInfo(config.NewAuth(user, auth))
+	keyInfo, err := api.GetKeyInfo(config.NewAuth(user, authKey))
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to verify login info")
 	}
 
-	if info.Key != "" {
+	if keyInfo.Key != "" {
 		// the API server wants us to use a different auth key
 		// (most likely because the user has used their account password)
-		auth = info.Key
+		authKey = keyInfo.Key
 	}
 
 	// display any messages the server might have for us
-	for _, msg := range info.Messages {
+	for _, msg := range keyInfo.Messages {
 		var parts = strings.SplitN(msg, ":", 2)
 		switch parts[0] {
 		case "info":
@@ -122,13 +116,13 @@ func loginRun(cmd *cobra.Command, args []string) {
 
 	// update auth
 	var a = config.LoadAuth()
-	if info.IsType("client") {
+	if keyInfo.IsType("client") {
 		logrus.Info("updating client auth")
-		a.SetClientAuth(user, string(auth))
+		a.SetClientAuth(user, string(authKey))
 	}
-	if info.IsType("device") {
+	if keyInfo.IsType("device") {
 		logrus.Info("updating device auth")
-		a.SetDeviceAuth(user, string(auth))
+		a.SetDeviceAuth(user, string(authKey))
 	}
 	if a.IsChanged() {
 		if err := a.Write(); err != nil {

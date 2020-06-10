@@ -79,6 +79,6 @@ func sftpRun(cmd *cobra.Command, args []string) {
 	a = append(a, opts...)
 	a = append(a, args...)
 
-	// execExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
-	execExternalCommand(sftpPath, a)
+	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
+	internal.ExecExternalCommand(sftpPath, a)
 }

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
 	"github.com/spf13/cobra"
 )
@@ -56,6 +57,6 @@ func rsyncRun(cmd *cobra.Command, args []string) {
 	a := []string{rsyncPath, "-e", fmt.Sprintf("%s ssh", os.Args[0])}
 	a = append(a, args...)
 
-	// execExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
-	execExternalCommand(rsyncPath, a)
+	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
+	internal.ExecExternalCommand(rsyncPath, a)
 }

@@ -19,9 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
-	"syscall"
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
@@ -117,8 +115,8 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	}
 	a = append(a, args...) // non-option ssh arguments (command to be run on the host)
 
-	// execExternalCommand won't return
-	execExternalCommand(sshPath, a)
+	// ExecExternalCommand won't return
+	internal.ExecExternalCommand(sshPath, a)
 }
 
 // sshGetConfig -- returns the specified -o SSH option (if present)
@@ -216,29 +214,4 @@ func sshParseTarget(target string) (tgtHost string, tgtUser string) {
 	}
 
 	return tgtHost, tgtUser
-}
-
-// execExternalCommand -- uses syscall.Exec() to execute the given command
-//
-// uses exec.LookPath() to find cmd in path
-// syscall.Exec() won't return unless there's an error
-// and this function logs a fatal error
-// -> this function won't return
-func execExternalCommand(cmd string, args []string) error {
-	var err error
-	if cmd, err = exec.LookPath(cmd); err != nil {
-		logrus.WithError(err).Fatalf("failed to find command '%s'", cmd)
-		return err
-	}
-
-	// syscall.Exec will replace this app with the new one (yes, replace it, not just launch)
-	// therefore, unless there's an error, this is the last line of code to be executed
-	if err = syscall.Exec(cmd, args, os.Environ()); err != nil {
-		logrus.WithError(err).Fatalf("failed to run external command: '%s'", cmd)
-		return err
-	}
-
-	// nothing here should ever be executed
-	logrus.Fatalf("this should never happen")
-	return nil
 }

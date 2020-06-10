@@ -129,8 +129,8 @@ func (c Config) GetString(key Key) string {
 	return key.defaultValue
 }
 
-// HasKey -- returns true iff the given value has been defined (defaults don't count)
-func (c Config) HasKey(section string, key string) bool {
+// hasKey -- returns true iff the given value has been defined (defaults don't count)
+func (c Config) hasKey(section string, key string) bool {
 	if s, err := c.cfg.GetSection(section); err == nil {
 		if _, err := s.GetKey(key); err == nil {
 			return true
@@ -145,7 +145,7 @@ func (c Config) IsChanged() bool { return c.changed }
 
 // SetNX -- set a config value, but only if it hasn't been defined before
 func (c *Config) SetNX(key Key, value string) error {
-	if c.HasKey(key.section, key.key) {
+	if c.hasKey(key.section, key.key) {
 		logrus.Infof("not setting %q=%q, already set", key, value)
 		return nil
 	}

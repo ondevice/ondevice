@@ -19,7 +19,7 @@ func (c Config) migrateAuth(path string) (internal.AuthJSON, error) {
 	var overrideUser = os.Getenv("ONDEVICE_USER")
 	var overrideAuth = os.Getenv("ONDEVICE_AUTH")
 
-	if !c.HasKey("device", "auth") && !c.HasKey("client", "auth") && overrideAuth == "" {
+	if !c.hasKey("device", "auth") && !c.hasKey("client", "auth") && overrideAuth == "" {
 		return rc, nil // no credentials found, return empty AuthJSON instance
 	}
 

@@ -143,6 +143,15 @@ func (c Config) HasKey(section string, key string) bool {
 // IsChanged -- returns true once SetValue() has been called
 func (c Config) IsChanged() bool { return c.changed }
 
+// SetNX -- set a config value, but only if it hasn't been defined before
+func (c *Config) SetNX(key Key, value string) error {
+	if c.HasKey(key.section, key.key) {
+		logrus.Infof("not setting %q=%q, already set", key, value)
+		return nil
+	}
+	return c.SetValue(key, value)
+}
+
 // SetValue -- create/update a config value - don't forget to call Write() afterwards
 func (c *Config) SetValue(key Key, value string) error {
 	var s *ini.Section

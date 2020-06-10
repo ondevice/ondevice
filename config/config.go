@@ -144,7 +144,7 @@ func (c Config) HasKey(section string, key string) bool {
 func (c Config) IsChanged() bool { return c.changed }
 
 // SetValue -- create/update a config value - don't forget to call Write() afterwards
-func (c Config) SetValue(key Key, value string) error {
+func (c *Config) SetValue(key Key, value string) error {
 	var s *ini.Section
 	var err error
 
@@ -178,7 +178,7 @@ func (c Config) SetValue(key Key, value string) error {
 // Unset -- reverts the given config key to its default value
 //
 // (if the key/section in question doesn't exist nothing happens)
-func (c Config) Unset(key Key) {
+func (c *Config) Unset(key Key) {
 	if s, err := c.cfg.GetSection(key.section); err == nil {
 		s.DeleteKey(key.key)
 	}

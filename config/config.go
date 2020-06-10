@@ -227,11 +227,15 @@ func GetVersion() string {
 // uses [path].auth_json as reference
 func (c Config) LoadAuth() AuthConfig {
 	var path = c.GetFilePath(PathAuthJSON)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		c.migrateAuth()
+	var rc = internal.ReadAuth(path)
+	if rc.Error() != nil && os.IsNotExist(rc.Error()) {
+		var err error
+		if rc, err = c.migrateAuth(path); err != nil {
+			logrus.WithError(err).Fatal("failed to migrate credentials to auth.json")
+		}
 	}
 
-	return internal.ReadAuth(path)
+	return rc
 }
 
 // Init -- sets up configuration, called by cobra.OnInitialize()

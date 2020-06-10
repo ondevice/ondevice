@@ -29,6 +29,11 @@ type AuthJSON struct {
 	isChanged bool
 }
 
+// Error -- returns any error that might have happened in Readauth()
+func (j AuthJSON) Error() error {
+	return j.err
+}
+
 // GetClientAuth -- returns client credentials
 func (j AuthJSON) GetClientAuth() (Auth, error) {
 	if j.err != nil {
@@ -135,6 +140,14 @@ func (j AuthJSON) SetDeviceKey(newKey string) (changed bool) {
 		j.isChanged = true
 	}
 	return changed
+}
+
+// WithError -- returns a copy of this with .err set to the given error
+//
+// TODO this should only be used in migrateAuth(). Remove this method once we remove migrateAuth()
+func (j AuthJSON) WithError(err error) AuthJSON {
+	j.err = err
+	return j
 }
 
 // Write -- atomically update auth.json

@@ -161,10 +161,10 @@ func (j AuthJSON) Write() error {
 	return WriteFile(data, j.path, 0o600)
 }
 
-// ReadAuth -- Read auth.json from the given file path
+// LoadAuth -- Read auth.json from the given file path
 //
 // On errors, this will silently return empty credential information - but calls to AuthJSON methods will fail returning the error we suppressed
-func ReadAuth(path string) AuthJSON {
+func LoadAuth(path string) AuthJSON {
 	var file *os.File
 	var err error
 	var rc = AuthJSON{

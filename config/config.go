@@ -227,7 +227,7 @@ func GetVersion() string {
 // uses [path].auth_json as reference
 func (c Config) LoadAuth() AuthConfig {
 	var path = c.GetFilePath(PathAuthJSON)
-	var rc = internal.ReadAuth(path)
+	var rc = internal.LoadAuth(path)
 	if rc.Error() != nil && os.IsNotExist(rc.Error()) {
 		var err error
 		if rc, err = c.migrateAuth(path); err != nil {

@@ -90,7 +90,7 @@ func (j AuthJSON) GetDeviceAuth() (Auth, error) {
 // GetDeviceKey -- returns the unique deviceKey that identifies this device (or "")
 func (j AuthJSON) GetDeviceKey() string {
 	// won't check j.err here
-	return j.Client.DeviceKey
+	return j.Device.DeviceKey
 }
 
 func (j AuthJSON) IsChanged() bool { return j.isChanged }

@@ -235,7 +235,7 @@ func (c Config) LoadAuth() AuthConfig {
 		}
 	}
 
-	return rc
+	return &rc
 }
 
 // Init -- sets up configuration, called by cobra.OnInitialize()

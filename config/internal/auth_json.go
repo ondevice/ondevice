@@ -119,21 +119,21 @@ func (j AuthJSON) ListClientUsers() []string {
 }
 
 // SetClientAuth -- updates the client credentials (don't forget to call .Write())
-func (j AuthJSON) SetClientAuth(user string, key string) {
+func (j *AuthJSON) SetClientAuth(user string, key string) {
 	j.Client.UserField = user
 	j.Client.KeyField = key
 	j.isChanged = true
 }
 
 // SetDeviceAuth -- updates the device credentials (don't forget to call .Write())
-func (j AuthJSON) SetDeviceAuth(user string, key string) {
+func (j *AuthJSON) SetDeviceAuth(user string, key string) {
 	j.Device.UserField = user
 	j.Device.KeyField = key
 	j.isChanged = true
 }
 
 // SetDeviceKey -- updates the device key (happens when first logging in or when resolving device conflicts)
-func (j AuthJSON) SetDeviceKey(newKey string) (changed bool) {
+func (j *AuthJSON) SetDeviceKey(newKey string) (changed bool) {
 	changed = j.Device.DeviceKey != newKey
 	j.Device.DeviceKey = newKey
 	if changed {

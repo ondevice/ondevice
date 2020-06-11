@@ -18,7 +18,7 @@ func (v IntValidator) WithMax(max int) IntValidator {
 	return v
 }
 
-// WithMax -- returns a copy of this with min limited to the given value
+// WithMin -- returns a copy of this with min limited to the given value
 func (v IntValidator) WithMin(min int) IntValidator {
 	v.min = min
 	v.hasMin = true

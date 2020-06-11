@@ -176,6 +176,7 @@ func LoadAuth(path string) AuthJSON {
 		rc.err = err
 		return rc
 	}
+	defer file.Close()
 
 	var stat os.FileInfo
 	if stat, err = file.Stat(); err != nil {

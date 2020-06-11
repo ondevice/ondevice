@@ -80,6 +80,11 @@ func (r request) Get() response {
 	return r.Do("GET")
 }
 
+func (r request) PostForm(form url.Values) response {
+	r.body = strings.NewReader(form.Encode())
+	return r.Do("POST")
+}
+
 func getSocketURLs() []url.URL {
 	if env := os.Getenv("ONDEVICE_HOST"); env != "" {
 		// e.g.:

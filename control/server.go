@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/daemon"
 	"github.com/sirupsen/logrus"
@@ -32,7 +33,8 @@ func NewSocket(d *daemon.Daemon, u url.URL) *ControlSocket {
 	}
 
 	var mux = new(http.ServeMux)
-	mux.HandleFunc("/state", rc.getState)
+	mux.HandleFunc("/state", rc.getStateHandler)
+	mux.HandleFunc("/login", rc.postLoginHandler)
 	rc.server.Handler = mux
 
 	return &rc
@@ -92,7 +94,8 @@ func (c *ControlSocket) run(protocol string, path string) {
 	}
 }
 
-func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
+// getStateHandler -- implements GET /state
+func (c *ControlSocket) getStateHandler(w http.ResponseWriter, r *http.Request) {
 	devState := "offline"
 	if c.Daemon != nil && c.Daemon.IsOnline() {
 		devState = "online"
@@ -109,13 +112,51 @@ func (c *ControlSocket) getState(w http.ResponseWriter, req *http.Request) {
 	_sendJSON(w, data)
 }
 
+// postLoginHandler -- implements POST /login
+func (c *ControlSocket) postLoginHandler(w http.ResponseWriter, r *http.Request) {
+	var auth = config.NewAuth(r.FormValue("user"), r.FormValue("auth"))
+	if auth.User() == "" || auth.Key() == "" {
+		_sendError(w, http.StatusBadRequest, "expected valid user/auth")
+		return
+	}
+
+	var keyInfo, err = api.GetKeyInfo(auth)
+	if err != nil {
+		logrus.WithError(err).Error("failed to fetch key info")
+		_sendError(w, http.StatusInternalServerError, "failed to fetch key info")
+	}
+	if !keyInfo.IsType("device") {
+		logrus.Error("not 'ondevice login' sent us credentials that aren't device credentials")
+		_sendError(w, http.StatusBadRequest, "expected device credentials")
+	}
+
+	var authJSON = config.MustLoad().LoadAuth()
+	authJSON.SetDeviceAuth(auth.User(), auth.Key())
+	if err = authJSON.Write(); err != nil {
+		logrus.WithError(err).Error("failed to update device credentials")
+		_sendError(w, http.StatusInternalServerError, "failed to update device credentials")
+	}
+}
+
+func _sendError(w http.ResponseWriter, statusCode int, msg string) {
+	json.Marshal(struct {
+		ErrorCode int
+		Error     string
+	}{
+		ErrorCode: statusCode,
+		Error:     msg,
+	})
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(statusCode)
+}
+
 func _sendJSON(w http.ResponseWriter, data interface{}) {
 	d, err := json.Marshal(data)
 	if err != nil {
-		logrus.Fatal("JSON encode failed: ", data)
+		logrus.WithError(err).Fatal("JSON encode failed: ", data)
 	}
-	// TODO make sure we're not messing up the encoding
 
-	logrus.Debug("Sending JSON response: ", string(d))
+	//logrus.Debug("Sending JSON response: ", string(d))
+	w.Header().Set("Content-type", "application/json")
 	io.WriteString(w, string(d))
 }

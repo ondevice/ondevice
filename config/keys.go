@@ -78,20 +78,6 @@ var PathOndeviceSock = regKey(Key{
 	defaultValue: "ondevice.sock",
 })
 
-// setRO -- marks configKey as being read-only (to users running 'ondevice config')
-func (k Key) setRO() Key {
-	k.ro = true
-	allKeys[k.String()].ro = true
-	return k
-}
-
-// setValidator -- sets a validator for the given value
-func (k Key) setValidator(fn func(val string) error) Key {
-	k.validateFn = fn
-	allKeys[k.String()].validateFn = fn
-	return k
-}
-
 func (k Key) String() string {
 	return fmt.Sprintf("%s.%s", k.section, k.key)
 }
@@ -121,7 +107,7 @@ func regKey(key Key) Key {
 
 // AllKeys -- returns all defined config Keys
 //
-// if withReadOnly is set to false, this will filter out values not
+// if withReadOnly is set to false, this will filter out values that aren't writable
 func AllKeys(withReadOnly bool) map[string]Key {
 	var rc = make(map[string]Key, len(allKeys))
 

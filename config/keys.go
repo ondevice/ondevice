@@ -6,38 +6,6 @@ import (
 	"github.com/ondevice/ondevice/config/internal"
 )
 
-// KeyClientTimeout -- specifies the timeout for HTTP requests
-var KeyClientTimeout = newKey("client", "timeout", "30").setValidator(
-	internal.IntValidator{}.Validate,
-)
-
-// KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
-var KeyDeviceID = newKey("device", "dev-id", "").setRO()
-
-// CommandRSYNC -- the path to the 'rsync' command
-var CommandRSYNC = newKey("command", "rsync", "rsync")
-
-// CommandSCP -- the path to the 'scp' command
-var CommandSCP = newKey("command", "scp", "scp")
-
-// CommandSFTP -- the path to the 'sftp' command
-var CommandSFTP = newKey("command", "sftp", "sftp")
-
-// CommandSSH -- the path to the 'ssh' command
-var CommandSSH = newKey("command", "ssh", "ssh")
-
-// PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'
-var PathAuthJSON = newKey("path", "auth_json", "auth.json")
-
-// PathKnownHosts -- the path to our 'known_hosts' file, relative to 'ondevice.conf'
-var PathKnownHosts = newKey("path", "known_hosts", "known_hosts")
-
-// PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
-var PathOndevicePID = newKey("path", "ondevice_pid", "ondevice.pid")
-
-// PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
-var PathOndeviceSock = newKey("path", "ondevice_sock", "ondevice.sock")
-
 // Key -- config key struct (use the predefined Key* values when using config)
 type Key struct {
 	section, key, defaultValue string
@@ -46,6 +14,69 @@ type Key struct {
 
 	validateFn func(val string) error
 }
+
+// KeyClientTimeout -- specifies the timeout for HTTP requests
+var KeyClientTimeout = regKey(Key{
+	section:      "client",
+	key:          "timeout",
+	defaultValue: "30",
+	validateFn:   internal.IntValidator{}.Validate,
+})
+
+// KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
+var KeyDeviceID = regKey(Key{
+	section: "device", key: "dev-id",
+	defaultValue: "",
+	ro:           true,
+})
+
+// CommandRSYNC -- the path to the 'rsync' command
+var CommandRSYNC = regKey(Key{
+	section: "command", key: "rsync",
+	defaultValue: "rsync",
+})
+
+// CommandSCP -- the path to the 'scp' command
+var CommandSCP = regKey(Key{
+	section: "command", key: "scp",
+	defaultValue: "scp",
+})
+
+// CommandSFTP -- the path to the 'sftp' command
+var CommandSFTP = regKey(Key{
+	section: "command", key: "sftp",
+	defaultValue: "sftp",
+})
+
+// CommandSSH -- the path to the 'ssh' command
+var CommandSSH = regKey(Key{
+	section: "command", key: "ssh",
+	defaultValue: "ssh",
+})
+
+// PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'
+var PathAuthJSON = regKey(Key{
+	section: "path", key: "auth_json",
+	defaultValue: "auth.json",
+})
+
+// PathKnownHosts -- the path to our 'known_hosts' file, relative to 'ondevice.conf'
+var PathKnownHosts = regKey(Key{
+	section: "path", key: "known_hosts",
+	defaultValue: "known_hosts",
+})
+
+// PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
+var PathOndevicePID = regKey(Key{
+	section: "path", key: "ondevice_pid",
+	defaultValue: "ondevice.pid",
+})
+
+// PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
+var PathOndeviceSock = regKey(Key{
+	section: "path", key: "ondevice_sock",
+	defaultValue: "ondevice.sock",
+})
 
 // setRO -- marks configKey as being read-only (to users running 'ondevice config')
 func (k Key) setRO() Key {
@@ -83,14 +114,9 @@ func (k Key) WithDefault(val string) Key {
 	}
 }
 
-func newKey(section string, key string, defaultValue string) Key {
-	var rc = Key{
-		section:      section,
-		key:          key,
-		defaultValue: defaultValue,
-	}
-	allKeys[rc.String()] = &rc
-	return rc
+func regKey(key Key) Key {
+	allKeys[key.String()] = &key
+	return key
 }
 
 // AllKeys -- returns all defined config Keys

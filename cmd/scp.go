@@ -59,13 +59,9 @@ var scpFlags = sshParseFlags("12346BCpqrvc:F:i:l:o:P:S:")
 func scpRun(cmd *cobra.Command, args []string) {
 	var scpPath = config.MustLoad().GetString(config.CommandSCP)
 
-	args, opts := sshParseArgs(scpFlags, args)
-
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
 	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
-
-	a = append(a, opts...)
 	a = append(a, args...)
 
 	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)

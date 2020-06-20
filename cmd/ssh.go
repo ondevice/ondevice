@@ -22,7 +22,6 @@ import (
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -81,77 +80,20 @@ Notes:
 func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	var sshPath = config.MustLoad().GetString(config.CommandSSH)
 
-	// parse args (to detect the ones before 'user@host')
-	args, opts := sshParseArgs(sshFlags, args)
-	if len(args) < 1 {
-		logrus.Fatal("missing target host")
-	}
-
-	// first non-option target is the [user@]host.
-	var tgtHost = args[0]
-	args = args[1:]
-
-	// compose ProxyCommand
-	// TODO this will fail miserably if os.Args[0] contain spaces
-
 	// compose the ssh command
-	var a = make([]string, 0, 20)
-	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
+	var a = make([]string, 0, len(args)+5)
+
+	// we use the ProxyCommand option to have ssh invoke 'ondevice pipe %h ssh'
+	// TODO this will fail miserably if os.Args[0] contain spaces
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
 
-	// use our own known_hosts file unless the user specified an override
+	// use our own known_hosts file
 	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
 
-	a = append(a, opts...) // ... ssh flags (-L -R -D ...)
-
-	// target [user@]devId (qualified devId)
-
-	a = append(a, tgtHost)
-
-	a = append(a, args...) // non-option ssh arguments (command to be run on the host)
+	a = append(a, args...)
 
 	// ExecExternalCommand won't return
 	internal.ExecExternalCommand(sshPath, a)
-}
-
-// sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)
-func sshParseArgs(flags map[byte]bool, args []string) (outArgs []string, outOpts []string) {
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-
-		if len(arg) == 0 {
-			logrus.Fatal("failed to parse ssh arguments: got an empty argument while looking for '[user@]host'")
-		} else if arg == "-" {
-			logrus.Fatal("stray '-' ssh argument")
-		} else if arg[0] == '-' {
-			hasValue, ok := flags[arg[1]]
-			if !ok {
-				logrus.Fatal("unsupported ssh argument: ", arg)
-			}
-			if hasValue && len(arg) == 2 {
-				// the value's in the next argument, push them as one (simplifying subsequent parsing)
-				outOpts = append(outOpts, arg+args[i+1])
-				i++
-			} else if hasValue && len(arg) > 2 {
-				// the value's part of arg
-				outOpts = append(outOpts, arg)
-			} else if !hasValue && len(arg) > 2 { // && !hasValue
-				logrus.Fatal("got value for flag that doesn't expect one: ", arg)
-			} else if !hasValue && len(arg) == 2 {
-				// a simple flag
-				outOpts = append(outOpts, arg)
-			} else {
-				// yay to defensive programming
-				logrus.Fatal("this should never happen (fifth state of two binary values)")
-			}
-		} else {
-			// first non-option argument -> we're done
-			outArgs = args[i:]
-			break
-		}
-	}
-
-	return
 }
 
 // sshParseFlags -- takes a getopt-style argument string and returns a map

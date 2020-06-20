@@ -50,13 +50,10 @@ func init() {
 func sftpRun(cmd *cobra.Command, args []string) {
 	var sftpPath = config.MustLoad().GetString(config.CommandSFTP)
 
-	args, opts := sshParseArgs(sftpFlags, args)
-
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{sftpPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
 	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
 
-	a = append(a, opts...)
 	a = append(a, args...)
 
 	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)

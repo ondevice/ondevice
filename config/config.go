@@ -95,6 +95,11 @@ func (c Config) AllValues() map[string]string {
 	return rc
 }
 
+// GetCommand -- returns a CommandValue for the given key
+func (c Config) GetCommand(key Key) CommandValue {
+	return CommandValue(c.GetString(key))
+}
+
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)
 func (c Config) GetInt(key Key) int {
 	var strVal = c.GetString(key)

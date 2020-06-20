@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
@@ -52,23 +51,6 @@ func sftpRun(cmd *cobra.Command, args []string) {
 	var sftpPath = config.MustLoad().GetString(config.CommandSFTP)
 
 	args, opts := sshParseArgs(sftpFlags, args)
-
-	// parse all the args as possible remote files [[user@]devId]:/path/to/file
-	for i := 0; i < len(args); i++ {
-		var arg = args[i]
-		if strings.HasPrefix(arg, "./") || strings.HasPrefix(arg, "/") {
-			// absolute/relative filename -> local file (this if block allows copying of files with colons in them)
-			continue
-		} else if parts := strings.SplitN(arg, ":", 2); len(parts) == 2 {
-			// remote file -> parse and transform user@host part
-			// results in "[user@]account.devId"
-			var tgtHost, tgtUser = sshParseTarget(parts[0])
-			if tgtUser != "" {
-				tgtHost = fmt.Sprintf("%s@%s", tgtUser, tgtHost)
-			}
-			args[i] = fmt.Sprintf("%s:%s", tgtHost, parts[1])
-		}
-	}
 
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{sftpPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}

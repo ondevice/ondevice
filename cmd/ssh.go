@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/ondevice/ondevice/cmd/internal"
 	"github.com/ondevice/ondevice/config"
@@ -89,7 +88,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	}
 
 	// first non-option target is the [user@]host.
-	tgtHost, tgtUser := sshParseTarget(args[0])
+	var tgtHost = args[0]
 	args = args[1:]
 
 	// compose ProxyCommand
@@ -106,11 +105,9 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	a = append(a, opts...) // ... ssh flags (-L -R -D ...)
 
 	// target [user@]devId (qualified devId)
-	if tgtUser != "" {
-		a = append(a, fmt.Sprintf("%s@%s", tgtUser, tgtHost))
-	} else {
-		a = append(a, tgtHost)
-	}
+
+	a = append(a, tgtHost)
+
 	a = append(a, args...) // non-option ssh arguments (command to be run on the host)
 
 	// ExecExternalCommand won't return
@@ -172,26 +169,4 @@ func sshParseFlags(flags string) map[byte]bool {
 		rc[flag] = hasValue
 	}
 	return rc
-}
-
-func sshParseTarget(target string) (tgtHost string, tgtUser string) {
-	parts := strings.SplitN(target, "@", 2)
-	if len(parts) == 1 {
-		tgtUser = ""
-		tgtHost = parts[0]
-	} else if len(parts) == 2 {
-		tgtUser = parts[0]
-		tgtHost = parts[1]
-	} else {
-		logrus.Fatal("SplitN(..., 2) returned odd number of results: ", len(parts))
-	}
-
-	// always use qualified device names
-	if !strings.Contains(tgtHost, ".") {
-		if auth, err := config.LoadAuth().GetClientAuth(); err == nil {
-			tgtHost = fmt.Sprintf("%s.%s", auth.User(), tgtHost)
-		}
-	}
-
-	return tgtHost, tgtUser
 }

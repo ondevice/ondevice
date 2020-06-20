@@ -25,8 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var sftpFlags = sshParseFlags("1246aCfpqrvB:b:c:D:F:i:l:o:P:R:S:s:")
-
 // sftpCmd represents the sftp command
 var sftpCmd = &cobra.Command{
 	Use:   "sftp [sftp-flags] [user@]devId",

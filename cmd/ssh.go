@@ -25,9 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// option list copied from debian jessie's openssh source package (from ssh.c, line 509)
-var sshFlags = sshParseFlags("1246ab:c:e:fgi:kl:m:no:p:qstvxD:L:NR:")
-
 // sshCmd represents the ssh command
 type sshCmd struct {
 	cobra.Command
@@ -94,21 +91,4 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 
 	// ExecExternalCommand won't return
 	internal.ExecExternalCommand(sshPath, a)
-}
-
-// sshParseFlags -- takes a getopt-style argument string and returns a map
-// of flag characters and whether or not they expect an argument
-func sshParseFlags(flags string) map[byte]bool {
-	rc := map[byte]bool{}
-
-	for i := 0; i < len(flags); i++ {
-		flag := flags[i]
-		hasValue := false
-		if flags[i+1] == ':' {
-			hasValue = true
-			i++
-		}
-		rc[flag] = hasValue
-	}
-	return rc
 }

@@ -57,8 +57,7 @@ func init() {
 func scpRun(cmd *cobra.Command, args []string) {
 	var scpPath = config.MustLoad().GetString(config.CommandSCP)
 
-	// TODO this will fail if argv[0] contains spaces
-	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
+	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0])}
 	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
 	a = append(a, args...)
 

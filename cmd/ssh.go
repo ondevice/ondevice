@@ -81,8 +81,7 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	var a = make([]string, 0, len(args)+5)
 
 	// we use the ProxyCommand option to have ssh invoke 'ondevice pipe %h ssh'
-	// TODO this will fail miserably if os.Args[0] contain spaces
-	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
+	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
 
 	// use our own known_hosts file
 	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))

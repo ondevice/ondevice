@@ -80,9 +80,7 @@ func scpRun(cmd *cobra.Command, args []string) {
 
 	// TODO this will fail if argv[0] contains spaces
 	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0])}
-	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
-		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
-	}
+	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
 
 	a = append(a, opts...)
 	a = append(a, args...)

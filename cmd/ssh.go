@@ -100,10 +100,8 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	// ssh -oProxyCommand=ondevice pipe ssh %h ssh
 	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand=%s pipe %%h ssh", os.Args[0]))
 
-	if sshGetConfig(opts, "UserKnownHostsFile") == "" {
-		// use our own known_hosts file unless the user specified an override
-		a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
-	}
+	// use our own known_hosts file unless the user specified an override
+	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
 
 	a = append(a, opts...) // ... ssh flags (-L -R -D ...)
 
@@ -117,24 +115,6 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 
 	// ExecExternalCommand won't return
 	internal.ExecExternalCommand(sshPath, a)
-}
-
-// sshGetConfig -- returns the specified -o SSH option (if present)
-//
-// note that key is case insensitive
-func sshGetConfig(opts []string, key string) string {
-	key = strings.ToLower(key)
-	for _, opt := range opts {
-		if !strings.HasPrefix(opt, "-o") {
-			continue
-		}
-		var parts = strings.SplitN(opt[2:], "=", 2)
-		if strings.ToLower(parts[0]) == key {
-			return parts[1]
-		}
-	}
-
-	return ""
 }
 
 // sshParseArgs -- Takes `ondevice ssh` arguments and parses them (into flags/options and other arguments)

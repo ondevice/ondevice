@@ -55,14 +55,16 @@ func init() {
 }
 
 func scpRun(cmd *cobra.Command, args []string) {
-	var scpPath = config.MustLoad().GetString(config.CommandSCP)
+	var scpCommand = config.MustLoad().GetCommand(config.CommandSCP).Value()
 
-	a := []string{scpPath, "-3", fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0])}
-	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
-	a = append(a, args...)
+	scpCommand = append(scpCommand, "-3", fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
+	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {
+		scpCommand = append(scpCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsFile))
+	}
+	scpCommand = append(scpCommand, args...)
 
 	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
-	internal.ExecExternalCommand(scpPath, a)
+	internal.ExecExternalCommand(scpCommand[0], scpCommand)
 }
 
 func scpValidate(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

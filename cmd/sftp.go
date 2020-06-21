@@ -46,13 +46,15 @@ func init() {
 }
 
 func sftpRun(cmd *cobra.Command, args []string) {
-	var sftpPath = config.MustLoad().GetString(config.CommandSFTP)
+	var sftpCommand = config.MustLoad().GetCommand(config.CommandSFTP).Value()
 
-	a := []string{sftpPath, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0])}
-	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
+	sftpCommand = append(sftpCommand, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
+	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {
+		sftpCommand = append(sftpCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsFile))
+	}
 
-	a = append(a, args...)
+	sftpCommand = append(sftpCommand, args...)
 
 	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
-	internal.ExecExternalCommand(sftpPath, a)
+	internal.ExecExternalCommand(sftpCommand[0], sftpCommand)
 }

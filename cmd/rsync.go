@@ -51,12 +51,12 @@ func init() {
 }
 
 func rsyncRun(cmd *cobra.Command, args []string) {
-	var rsyncPath = config.MustLoad().GetString(config.CommandRSYNC)
+	var rsyncCommand = config.MustLoad().GetCommand(config.CommandRSYNC).Value()
 
 	// TODO this will fail if argv[0] contains spaces
-	a := []string{rsyncPath, "-e", fmt.Sprintf("%s ssh", os.Args[0])}
-	a = append(a, args...)
+	rsyncCommand = append(rsyncCommand, "-e", fmt.Sprintf("'%s' ssh", os.Args[0]))
+	rsyncCommand = append(rsyncCommand, args...)
 
 	// ExecExternalCommand won't return (potential errors will cause logrus.Fatal() calls)
-	internal.ExecExternalCommand(rsyncPath, a)
+	internal.ExecExternalCommand(rsyncCommand[0], rsyncCommand)
 }

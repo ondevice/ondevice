@@ -75,19 +75,18 @@ Notes:
 }
 
 func (c *sshCmd) run(cmd *cobra.Command, args []string) {
-	var sshPath = config.MustLoad().GetString(config.CommandSSH)
-
-	// compose the ssh command
-	var a = make([]string, 0, len(args)+5)
+	var sshCommand = config.MustLoad().GetCommand(config.CommandSSH).Value()
 
 	// we use the ProxyCommand option to have ssh invoke 'ondevice pipe %h ssh'
-	a = append(a, sshPath, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
+	sshCommand = append(sshCommand, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
 
 	// use our own known_hosts file
-	a = append(a, fmt.Sprintf("-oUserKnownHostsFile=%s", config.MustLoad().GetFilePath(config.PathKnownHosts)))
+	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {
+		sshCommand = append(sshCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsFile))
+	}
 
-	a = append(a, args...)
+	sshCommand = append(sshCommand, args...)
 
 	// ExecExternalCommand won't return
-	internal.ExecExternalCommand(sshPath, a)
+	internal.ExecExternalCommand(sshCommand[0], sshCommand)
 }

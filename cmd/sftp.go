@@ -46,7 +46,7 @@ func init() {
 }
 
 func sftpRun(cmd *cobra.Command, args []string) {
-	var sftpCommand = config.MustLoad().GetCommand(config.CommandSFTP).Value()
+	var sftpCommand = config.MustLoad().GetCommand(config.CommandSFTP)
 
 	sftpCommand = append(sftpCommand, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
 	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {

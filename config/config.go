@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/ondevice/ondevice/config/configtype"
 	"github.com/ondevice/ondevice/config/internal"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
@@ -96,8 +97,8 @@ func (c Config) AllValues() map[string]string {
 }
 
 // GetCommand -- returns a CommandValue for the given key
-func (c Config) GetCommand(key Key) CommandValue {
-	return CommandValue(c.GetString(key))
+func (c Config) GetCommand(key Key) configtype.Command {
+	return configtype.ParseCommand(c.GetString(key))
 }
 
 // GetInt -- Returns the specified integer config value (or defaultValue if not found or on error)

@@ -12,7 +12,7 @@ type Key struct {
 
 	ro bool
 
-	validateFn func(val string) error
+	validator internal.Validator
 }
 
 // KeyClientTimeout -- specifies the timeout for HTTP requests
@@ -20,7 +20,7 @@ var KeyClientTimeout = regKey(Key{
 	section:      "client",
 	key:          "timeout",
 	defaultValue: "30",
-	validateFn:   internal.IntValidator{}.Validate,
+	validator:    internal.IntValidator{},
 })
 
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
@@ -67,15 +67,19 @@ var PathKnownHosts = regKey(Key{
 })
 
 // PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
+//
+// if you specify more than one, clients will try them in order. ondevice daemon will always use the first one
 var PathOndevicePID = regKey(Key{
 	section: "path", key: "ondevice_pid",
-	defaultValue: "ondevice.pid",
+	defaultValue: `["ondevice.pid", "/var/run/ondevice/ondevice.pid"]`,
 })
 
 // PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
+//
+// if you specify more than one, clients will try them in order. ondevice daemon will always use the first one
 var PathOndeviceSock = regKey(Key{
 	section: "path", key: "ondevice_sock",
-	defaultValue: "ondevice.sock",
+	defaultValue: `["ondevice.sock", "unix:///var/run/ondevice/ondevice.sock"]`,
 })
 
 func (k Key) String() string {
@@ -84,10 +88,10 @@ func (k Key) String() string {
 
 // Validate -- if the config Key has a validator set, run it and return an error if something went wrong
 func (k Key) Validate(val string) error {
-	if k.validateFn == nil {
+	if k.validator == nil {
 		return nil
 	}
-	return k.validateFn(val)
+	return k.validator.Validate(val)
 }
 
 // WithDefault -- returns a modified configKey with defaultValue set to 'val'

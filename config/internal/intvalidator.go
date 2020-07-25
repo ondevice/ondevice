@@ -27,18 +27,21 @@ func (v IntValidator) WithMin(min int) IntValidator {
 
 // Validate -- returns nil if val is valid
 func (v IntValidator) Validate(val string) error {
-	var i, err = strconv.ParseInt(val, 0, 32)
-	if err != nil {
-		return err
+	return v.Value(val).Error
+}
+
+// Value -- returns a Value object for the given string
+func (v IntValidator) Value(raw string) (rc Value) {
+	var i int64
+	if i, rc.Error = strconv.ParseInt(raw, 0, 32); rc.Error != nil {
+		return
 	}
 
 	if v.hasMin && int(i) < v.min {
-		return fmt.Errorf("value is below the minimum of %d: %d", v.min, i)
+		rc.Error = fmt.Errorf("value is below the minimum of %d: %d", v.min, i)
+	} else if v.hasMax && int(i) > v.max {
+		rc.Error = fmt.Errorf("value is above the maximum of %d: %d", v.max, i)
 	}
 
-	if v.hasMax && int(i) > v.max {
-		return fmt.Errorf("value is above the maximum of %d: %d", v.max, i)
-	}
-
-	return nil
+	return
 }

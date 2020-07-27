@@ -58,12 +58,14 @@ var CommandSSH = regKey(Key{
 var PathAuthJSON = regKey(Key{
 	section: "path", key: "auth_json",
 	defaultValue: "auth.json",
+	validator:    internal.PathValidator{},
 })
 
 // PathKnownHosts -- the path to our 'known_hosts' file, relative to 'ondevice.conf'
 var PathKnownHosts = regKey(Key{
 	section: "path", key: "known_hosts",
 	defaultValue: "known_hosts",
+	validator:    internal.PathValidator{},
 })
 
 // PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
@@ -72,6 +74,7 @@ var PathKnownHosts = regKey(Key{
 var PathOndevicePID = regKey(Key{
 	section: "path", key: "ondevice_pid",
 	defaultValue: `["ondevice.pid", "/var/run/ondevice/ondevice.pid"]`,
+	validator:    internal.PathValidator{AllowMultiple: true},
 })
 
 // PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
@@ -80,6 +83,10 @@ var PathOndevicePID = regKey(Key{
 var PathOndeviceSock = regKey(Key{
 	section: "path", key: "ondevice_sock",
 	defaultValue: `["ondevice.sock", "unix:///var/run/ondevice/ondevice.sock"]`,
+	validator: internal.PathValidator{
+		AllowMultiple: true,
+		ValidSchemes:  map[string]bool{"": true, "file": true, "unix": true, "http": true},
+	},
 })
 
 func (k Key) String() string {

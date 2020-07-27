@@ -23,23 +23,7 @@ type PathValidator struct {
 
 // Validate -- checks if the given value meets our criteria
 func (v PathValidator) Validate(value string) error {
-	var err error
-	if v.AllowMultiple {
-		var paths []string
-		if err = json.Unmarshal([]byte(value), &paths); err == nil {
-			// valid JSON list -> check each individual item
-
-			for _, value := range paths {
-				if err = v.validatePath(value); err != nil {
-					return err
-				}
-			}
-			return nil
-		} else if strings.HasPrefix(value, "[") {
-			logrus.WithField("path", value).WithError(err).Warn("your path looks like it should be a JSON array - but it's not formatted properly")
-		}
-	}
-	return v.validatePath(value)
+	return v.Value(value).Error
 }
 
 // validatePath -- checks an individual path
@@ -69,8 +53,10 @@ func (v PathValidator) validatePath(value string) error {
 		switch scheme {
 		case "http", "https":
 			if u.Path != "" || u.RawPath != "" || u.Opaque != "" {
-				logrus.WithField("url", value).Errorf("%s URLs should only have a hostPort, but no path", strings.ToUpper(scheme))
-				return errors.New("PathValidator: got path in HTTP(s) URL")
+				if u.Path != "/" {
+					logrus.WithField("url", value).Errorf("%s URLs should only have a hostPort, but no path", strings.ToUpper(scheme))
+					return errors.New("PathValidator: got path in HTTP(s) URL")
+				}
 			}
 		case "", "file", "unix":
 			if u.Host != "" {
@@ -89,19 +75,31 @@ func (v PathValidator) validatePath(value string) error {
 
 // Value -- puts the parsed data into a Value
 func (v PathValidator) Value(raw string) Value {
-	var rc Value
-
 	if len(raw) == 0 {
-		return rc // empty value
+		return Value{} // empty value
 	}
 
 	if v.AllowMultiple {
-		if err := json.Unmarshal([]byte(raw), &rc.values); err == nil {
-			return rc // return split data
+		var values []string
+		if err := json.Unmarshal([]byte(raw), &values); err == nil {
+			// valid JSON list -> check each individual item
+			for _, value := range values {
+				if err = v.validatePath(value); err != nil {
+					break
+				}
+			}
+			return Value{
+				values: values,
+				Error:  err,
+			}
+		} else if strings.HasPrefix(raw, "[") {
+			logrus.WithField("path", raw).WithError(err).Warn("your path looks like it should be a JSON array - but it's not formatted properly")
 		}
 	}
 
 	// default behaviour: put it into the first slice
-	rc.values = []string{raw}
-	return rc
+	return Value{
+		values: []string{raw},
+		Error:  v.validatePath(raw),
+	}
 }

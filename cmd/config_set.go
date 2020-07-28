@@ -26,13 +26,14 @@ func init() {
 
 	configCmd.AddCommand(&c.Command)
 	c.Flags().BoolVar(&c.noOverwriteFlag, "no-overwrite", false, "if set, won't overwrite an already existing value (i.e. only set if not yet defined')")
-
+	c.Flags().BoolVar(&c.dryRunFlag, "dry-run", false, "if set, only does validation but won't update the config file")
 }
 
 type configSetCmd struct {
 	cobra.Command
 
 	noOverwriteFlag bool
+	dryRunFlag      bool
 }
 
 func (c *configSetCmd) Run(cmd *cobra.Command, args []string) {
@@ -72,7 +73,9 @@ func (c *configSetCmd) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if err := cfg.Write(); err != nil {
-		logrus.WithError(err).Error("failed to write config")
+	if !c.dryRunFlag {
+		if err := cfg.Write(); err != nil {
+			logrus.WithError(err).Error("failed to write config")
+		}
 	}
 }

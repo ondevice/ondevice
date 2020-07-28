@@ -34,24 +34,28 @@ var KeyDeviceID = regKey(Key{
 var CommandRSYNC = regKey(Key{
 	section: "command", key: "rsync",
 	defaultValue: "rsync",
+	validator:    internal.CommandValidator{},
 })
 
 // CommandSCP -- the path to the 'scp' command
 var CommandSCP = regKey(Key{
 	section: "command", key: "scp",
 	defaultValue: "scp",
+	validator:    internal.CommandValidator{},
 })
 
 // CommandSFTP -- the path to the 'sftp' command
 var CommandSFTP = regKey(Key{
 	section: "command", key: "sftp",
 	defaultValue: "sftp",
+	validator:    internal.CommandValidator{},
 })
 
 // CommandSSH -- the path to the 'ssh' command
 var CommandSSH = regKey(Key{
 	section: "command", key: "ssh",
 	defaultValue: "ssh",
+	validator:    internal.CommandValidator{},
 })
 
 // PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'

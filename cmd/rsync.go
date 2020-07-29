@@ -51,7 +51,7 @@ func init() {
 }
 
 func rsyncRun(cmd *cobra.Command, args []string) {
-	var rsyncCommand = config.MustLoad().GetCommand(config.CommandRSYNC)
+	var rsyncCommand = config.MustLoad().GetValue(config.CommandRSYNC).Strings()
 
 	// TODO this will fail if argv[0] contains spaces
 	rsyncCommand = append(rsyncCommand, "-e", fmt.Sprintf("'%s' ssh", os.Args[0]))

@@ -75,7 +75,7 @@ Notes:
 }
 
 func (c *sshCmd) run(cmd *cobra.Command, args []string) {
-	var sshCommand = config.MustLoad().GetCommand(config.CommandSSH)
+	var sshCommand = config.MustLoad().GetValue(config.CommandSSH).Strings()
 
 	// we use the ProxyCommand option to have ssh invoke 'ondevice pipe %h ssh'
 	sshCommand = append(sshCommand, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))

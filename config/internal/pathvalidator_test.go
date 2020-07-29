@@ -143,13 +143,12 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	assert.False(value.HasNext())
 	assert.Equal("https://ondevice.io/index.html", value.String("--defaultValue--"))
 
-	// invalid json -> should be interpreted as-is (since it starts with a '[', we'll issue a warning though)
+	// invalid json -> error
 	str = "[\"https://ondevice.io/index.html\""
 	value = validator.Value(str)
-	assert.NoError(value.Error)
-	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
-	assert.Equal(str, value.String("--defaultValue--"))
+	assert.Error(value.Error)
+	assert.Empty(value.values)
+	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
 
 	// valid JSON, but not a list -> should be interpreted as-is
 	str = "\"https://ondevice.io/index.html\""
@@ -159,13 +158,12 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
 
-	// valid JSON list, but not of strings -> should be interpreted as-is (json.Unmarshal() should fail with a warning)
+	// valid JSON list, but not of strings -> error
 	str = "[\"https://ondevice.io/index.html\", 1,2,3]"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
-	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
-	assert.Equal(str, value.String("--defaultValue--"))
+	assert.Error(value.Error)
+	assert.Empty(value.values)
+	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
 }
 
 // TestParseURL -- tests some edge cases of URL parsing with url.Parse()

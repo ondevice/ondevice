@@ -3,16 +3,31 @@ package internal
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 )
 
-// PathValidator -- validates Path values
+// PathValidator -- parses and validates Path values
+//
+// we use different types of paths. we distinguish
+//
+// - single vs multi-value paths (.AllowMultiple)
+//   If only one value is expected, the string passed to PathValidator will be used as-is.
+//   If multiple paths are allowed, any string starting with '[' will be parsed as JSON (parsing errors ending up in Value.Error)
+// - simple paths or URLs
+//   Some config paths (namely the one for ondevice.sock) allow URLs to be used.
+//   PathValidator will try to parse each URL and check their validity.
 //
 //
-// - JSON array ()
+// When allowing URLs, we check:
+// - whether the given value is a path or URL (i.e. can be parsed by url.Parse() and has a Scheme prefix)
+// - simple paths will be used as-is
+// - for URLs we check if their Scheme is in our Whitelist and whether they match some simple checks
+//   - HTTP(S) URLs can't have a path (e.g. ondevice.sock=http://localhost:1234/foo.txt wouldn't make sense)
+//   - UNIX (or file://) URLs can't have a hostname (to prevent accidents like unix://var/run/ondevice/ondevice.sock)
 type PathValidator struct {
 	// AllowMultiple -- if true, attempt to json.Unmarshal into a string slice before validating the whole thing
 	AllowMultiple bool
@@ -79,22 +94,21 @@ func (v PathValidator) Value(raw string) Value {
 		return Value{} // empty value
 	}
 
-	if v.AllowMultiple {
-		var values []string
-		if err := json.Unmarshal([]byte(raw), &values); err == nil {
-			// valid JSON list -> check each individual item
-			for _, value := range values {
-				if err = v.validatePath(value); err != nil {
-					break
-				}
-			}
-			return Value{
-				values: values,
-				Error:  err,
-			}
-		} else if strings.HasPrefix(raw, "[") {
-			logrus.WithField("path", raw).WithError(err).Warn("your path looks like it should be a JSON array - but it's not formatted properly")
+	if v.AllowMultiple && strings.HasPrefix(raw, "[") {
+		// parse as JSON
+		var rc Value
+
+		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {
+			return Value{Error: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
 		}
+
+		// valid JSON list -> check each individual item
+		for _, value := range rc.values {
+			if rc.Error = v.validatePath(value); rc.Error != nil {
+				break
+			}
+		}
+		return rc
 	}
 
 	// default behaviour: put it into the first slice

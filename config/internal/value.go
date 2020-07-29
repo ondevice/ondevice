@@ -17,6 +17,9 @@ type Value struct {
 // HasNext -- returns true if there are more than one values remaining
 func (v Value) HasNext() bool { return len(v.values) > 1 }
 
+// Len -- returns the number of (remaining) elements stored in this Value
+func (v Value) Len() int { return len(v.values) }
+
 // Next -- returns a copy of this Value with the first .values entry removed
 //
 // Note that you must reassign your iterator variable to the value returned (as Value is call-by-value)
@@ -33,4 +36,9 @@ func (v Value) String(defaultValue string) string {
 		return defaultValue
 	}
 	return v.values[0]
+}
+
+// Strings -- returns all (remaining) values stored in this Value
+func (v Value) Strings() []string {
+	return v.values
 }

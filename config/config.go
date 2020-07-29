@@ -137,7 +137,11 @@ func (c Config) GetString(key Key) string {
 
 // GetValue -- Fetch a config value wrapped in a config.Value
 func (c Config) GetValue(key Key) internal.Value {
-	return key.validator.Value(c.GetString(key))
+	var str = c.GetString(key)
+	if str == "" {
+		str = key.defaultValue
+	}
+	return key.validator.Value(str)
 }
 
 // hasKey -- returns true iff the given value has been defined (defaults don't count)

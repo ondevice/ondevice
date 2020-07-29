@@ -96,7 +96,7 @@ func (c Config) AllValues() map[string]string {
 	return rc
 }
 
-// GetCommand -- returns a CommandValue for the given key
+// GetCommand -- wraps the requested value in configtype.Command
 func (c Config) GetCommand(key Key) configtype.Command {
 	return configtype.ParseCommand(c.GetString(key))
 }
@@ -133,6 +133,11 @@ func (c Config) GetString(key Key) string {
 		}
 	}
 	return key.defaultValue
+}
+
+// GetValue -- Fetch a config value wrapped in a config.Value
+func (c Config) GetValue(key Key) internal.Value {
+	return key.validator.Value(c.GetString(key))
 }
 
 // hasKey -- returns true iff the given value has been defined (defaults don't count)

@@ -2,23 +2,24 @@ package internal
 
 // Value -- represents a parsed config value
 //
-// returned by Validator.Value(), and filled according to the validator's constraints (e.g. if the type allows multiple values, they are split up, else everything is put in [0])
+// returned by config.GetValue(), and filled according to each validator's constraints (e.g. if the type allows multiple values, they are split up, else everything is put in [0])
 //
-// has helper methods that mostly act on the first element
+// Has helper methods that mostly act on the first element
 //
 // can be used like an iterator:
 // - HasNext() returns true as long as there are values remaining
 // - Next() returns a new Value with the first item removed
-//
-// immutable if you only use the helper methods
 type Value struct {
 	values []string
 	Error  error
 }
 
-// returns true if there are
+// HasNext -- returns true if there are more than one values remaining
 func (v Value) HasNext() bool { return len(v.values) > 1 }
 
+// Next -- returns a copy of this Value with the first .values entry removed
+//
+// Note that you must reassign your iterator variable to the value returned (as Value is call-by-value)
 func (v Value) Next() Value {
 	if len(v.values) > 0 {
 		v.values = v.values[1:]
@@ -26,6 +27,7 @@ func (v Value) Next() Value {
 	return v
 }
 
+// String -- returns the first item stored in this Value - or defaultValue if empty
 func (v Value) String(defaultValue string) string {
 	if len(v.values) == 0 {
 		return defaultValue

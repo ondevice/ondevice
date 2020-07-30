@@ -49,7 +49,7 @@ func NewDaemon() *Daemon {
 func (d *Daemon) Run() int {
 	d.lock.Path = d.PIDFile
 	if err := d.lock.TryLock(); err != nil {
-		logrus.Fatal("couldn't acquire lock file")
+		logrus.WithField("pidFile", d.PIDFile).Fatal("couldn't acquire lock file")
 		return -1
 	}
 	defer d.lock.Unlock()

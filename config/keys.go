@@ -12,7 +12,7 @@ type Key struct {
 
 	ro bool
 
-	validator internal.Validator
+	parser internal.Parser
 }
 
 // KeyClientTimeout -- specifies the timeout for HTTP requests
@@ -20,7 +20,7 @@ var KeyClientTimeout = regKey(Key{
 	section:      "client",
 	key:          "timeout",
 	defaultValue: "30",
-	validator:    internal.IntValidator{},
+	parser:       internal.IntParser{},
 })
 
 // KeyDeviceID -- represents the key where we store devId ('device.devId', defaults to '')
@@ -34,42 +34,42 @@ var KeyDeviceID = regKey(Key{
 var CommandRSYNC = regKey(Key{
 	section: "command", key: "rsync",
 	defaultValue: "rsync",
-	validator:    internal.CommandValidator{},
+	parser:       internal.CommandParser{},
 })
 
 // CommandSCP -- the path to the 'scp' command
 var CommandSCP = regKey(Key{
 	section: "command", key: "scp",
 	defaultValue: "scp",
-	validator:    internal.CommandValidator{},
+	parser:       internal.CommandParser{},
 })
 
 // CommandSFTP -- the path to the 'sftp' command
 var CommandSFTP = regKey(Key{
 	section: "command", key: "sftp",
 	defaultValue: "sftp",
-	validator:    internal.CommandValidator{},
+	parser:       internal.CommandParser{},
 })
 
 // CommandSSH -- the path to the 'ssh' command
 var CommandSSH = regKey(Key{
 	section: "command", key: "ssh",
 	defaultValue: "ssh",
-	validator:    internal.CommandValidator{},
+	parser:       internal.CommandParser{},
 })
 
 // PathAuthJSON -- the path to 'auth.json', relative to 'ondevice.conf'
 var PathAuthJSON = regKey(Key{
 	section: "path", key: "auth_json",
 	defaultValue: "auth.json",
-	validator:    internal.PathValidator{},
+	parser:       internal.PathParser{},
 })
 
 // PathKnownHosts -- the path to our 'known_hosts' file, relative to 'ondevice.conf'
 var PathKnownHosts = regKey(Key{
 	section: "path", key: "known_hosts",
 	defaultValue: "known_hosts",
-	validator:    internal.PathValidator{},
+	parser:       internal.PathParser{},
 })
 
 // PathOndevicePID -- the path to 'ondevice.pid', relative to 'ondevice.conf'
@@ -78,7 +78,7 @@ var PathKnownHosts = regKey(Key{
 var PathOndevicePID = regKey(Key{
 	section: "path", key: "ondevice_pid",
 	defaultValue: `["ondevice.pid", "/var/run/ondevice/ondevice.pid"]`,
-	validator:    internal.PathValidator{AllowMultiple: true},
+	parser:       internal.PathParser{AllowMultiple: true},
 })
 
 // PathOndeviceSock -- the path to 'ondevice.sock', relative to 'ondevice.conf'
@@ -87,7 +87,7 @@ var PathOndevicePID = regKey(Key{
 var PathOndeviceSock = regKey(Key{
 	section: "path", key: "ondevice_sock",
 	defaultValue: `["ondevice.sock", "unix:///var/run/ondevice/ondevice.sock"]`,
-	validator: internal.PathValidator{
+	parser: internal.PathParser{
 		AllowMultiple: true,
 		ValidSchemes:  map[string]bool{"": true, "file": true, "unix": true, "http": true},
 	},
@@ -97,22 +97,12 @@ func (k Key) String() string {
 	return fmt.Sprintf("%s.%s", k.section, k.key)
 }
 
-// Validate -- if the config Key has a validator set, run it and return an error if something went wrong
+// Validate -- if the config Key has a Parser set, run it and return an error if something went wrong
 func (k Key) Validate(val string) error {
-	if k.validator == nil {
+	if k.parser == nil {
 		return nil
 	}
-	return k.validator.Validate(val)
-}
-
-// WithDefault -- returns a modified configKey with defaultValue set to 'val'
-func (k Key) WithDefault(val string) Key {
-	return Key{
-		section:      k.section,
-		key:          k.key,
-		defaultValue: val,
-		ro:           k.ro,
-	}
+	return k.parser.Validate(val)
 }
 
 func regKey(key Key) Key {

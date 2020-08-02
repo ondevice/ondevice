@@ -135,7 +135,7 @@ func (c Config) GetValue(key Key) Value {
 	if str == "" {
 		str = key.defaultValue
 	}
-	var rc = key.validator.Value(str)
+	var rc = key.parser.Value(str)
 	return &rc
 }
 

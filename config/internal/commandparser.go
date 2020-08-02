@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// CommandValidator -- parses and validates Command values
+// CommandParser -- parses and validates Command values
 //
 // There are two ways to specify commands
 // - literal string path
@@ -19,10 +19,10 @@ import (
 // e.g: `ssh -C` (compressing data) should be declared as `["ssh", "-C"]`.
 //
 // to use a command starting with '[', wrap it inside a JSON array: `["["]`
-type CommandValidator struct{}
+type CommandParser struct{}
 
 // Validate -- returns any errors found while parsing this Command Value
-func (v CommandValidator) Validate(value string) error {
+func (v CommandParser) Validate(value string) error {
 	return v.Value(value).Error()
 }
 
@@ -31,7 +31,7 @@ func (v CommandValidator) Validate(value string) error {
 // if the string you pass to .Value() starts with '[', it will be parsed as JSON.
 //
 // Otherwise the whole string will be put inside the first (and only) array element
-func (v CommandValidator) Value(raw string) ValueImpl {
+func (v CommandParser) Value(raw string) ValueImpl {
 	if len(raw) == 0 {
 		return ValueImpl{} // empty value -> use default
 	}

@@ -5,33 +5,33 @@ import (
 	"strconv"
 )
 
-// IntValidator -- validates integer config values
-type IntValidator struct {
+// IntParser -- validates integer config values
+type IntParser struct {
 	min, max       int
 	hasMin, hasMax bool
 }
 
 // WithMax -- returns a copy of this with max limited to the given value
-func (v IntValidator) WithMax(max int) IntValidator {
+func (v IntParser) WithMax(max int) IntParser {
 	v.max = max
 	v.hasMax = true
 	return v
 }
 
 // WithMin -- returns a copy of this with min limited to the given value
-func (v IntValidator) WithMin(min int) IntValidator {
+func (v IntParser) WithMin(min int) IntParser {
 	v.min = min
 	v.hasMin = true
 	return v
 }
 
 // Validate -- returns nil if val is valid
-func (v IntValidator) Validate(val string) error {
+func (v IntParser) Validate(val string) error {
 	return v.Value(val).Error()
 }
 
 // Value -- returns a Value object for the given string
-func (v IntValidator) Value(raw string) (rc ValueImpl) {
+func (v IntParser) Value(raw string) (rc ValueImpl) {
 	var i int64
 	if i, rc.err = strconv.ParseInt(raw, 0, 32); rc.err != nil {
 		return

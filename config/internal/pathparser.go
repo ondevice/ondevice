@@ -10,16 +10,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// PathValidator -- parses and validates Path values
+// PathParser -- parses and validates Path values
 //
 // we use different types of paths. we distinguish
 //
 // - single vs multi-value paths (.AllowMultiple)
-//   If only one value is expected, the string passed to PathValidator will be used as-is.
+//   If only one value is expected, the string passed to Patharser will be used as-is.
 //   If multiple paths are allowed, any string starting with '[' will be parsed as JSON (parsing errors ending up in Value.Error)
 // - simple paths or URLs
 //   Some config paths (namely the one for ondevice.sock) allow URLs to be used.
-//   PathValidator will try to parse each URL and check their validity.
+//   PathParser will try to parse each URL and check their validity.
 //
 //
 // When allowing URLs, we check:
@@ -28,7 +28,7 @@ import (
 // - for URLs we check if their Scheme is in our Whitelist and whether they match some simple checks
 //   - HTTP(S) URLs can't have a path (e.g. ondevice.sock=http://localhost:1234/foo.txt wouldn't make sense)
 //   - UNIX (or file://) URLs can't have a hostname (to prevent accidents like unix://var/run/ondevice/ondevice.sock)
-type PathValidator struct {
+type PathParser struct {
 	// AllowMultiple -- if true, attempt to json.Unmarshal into a string slice before validating the whole thing
 	AllowMultiple bool
 
@@ -37,16 +37,16 @@ type PathValidator struct {
 }
 
 // Validate -- checks if the given value meets our criteria
-func (v PathValidator) Validate(value string) error {
+func (v PathParser) Validate(value string) error {
 	return v.Value(value).Error()
 }
 
 // validatePath -- checks an individual path
-func (v PathValidator) validatePath(value string) error {
+func (v PathParser) validatePath(value string) error {
 	if v.ValidSchemes != nil {
 		var u, err = url.Parse(value)
 		if err != nil {
-			logrus.WithError(err).WithField("url", value).Error("PathValidator: invalid URL")
+			logrus.WithError(err).WithField("url", value).Error("PathParser: invalid URL")
 			return err
 		}
 
@@ -70,14 +70,14 @@ func (v PathValidator) validatePath(value string) error {
 			if u.Path != "" || u.RawPath != "" || u.Opaque != "" {
 				if u.Path != "/" {
 					logrus.WithField("url", value).Errorf("%s URLs should only have a hostPort, but no path", strings.ToUpper(scheme))
-					return errors.New("PathValidator: got path in HTTP(s) URL")
+					return errors.New("PathParser: got path in HTTP(s) URL")
 				}
 			}
 		case "", "file", "unix":
 			if u.Host != "" {
 				logrus.WithField("url", value).Error("file paths can't have a hostname portion")
 				logrus.Info("  you may have used something like file://etc/motd instead of file:/etc/motd (or file:///etc/motd)")
-				return errors.New("PathValidator: got host in file URL")
+				return errors.New("PathParser: got host in file URL")
 			}
 		}
 
@@ -89,7 +89,7 @@ func (v PathValidator) validatePath(value string) error {
 }
 
 // Value -- puts the parsed data into a Value
-func (v PathValidator) Value(raw string) ValueImpl {
+func (v PathParser) Value(raw string) ValueImpl {
 	if len(raw) == 0 {
 		return ValueImpl{} // empty value
 	}

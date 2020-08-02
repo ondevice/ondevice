@@ -130,12 +130,13 @@ func (c Config) GetString(key Key) string {
 }
 
 // GetValue -- Fetch a config value wrapped in a config.Value
-func (c Config) GetValue(key Key) internal.Value {
+func (c Config) GetValue(key Key) Value {
 	var str = c.GetString(key)
 	if str == "" {
 		str = key.defaultValue
 	}
-	return key.validator.Value(str)
+	var rc = key.validator.Value(str)
+	return &rc
 }
 
 // hasKey -- returns true iff the given value has been defined (defaults don't count)

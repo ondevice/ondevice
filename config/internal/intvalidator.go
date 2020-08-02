@@ -31,7 +31,7 @@ func (v IntValidator) Validate(val string) error {
 }
 
 // Value -- returns a Value object for the given string
-func (v IntValidator) Value(raw string) (rc Value) {
+func (v IntValidator) Value(raw string) (rc ValueImpl) {
 	var i int64
 	if i, rc.err = strconv.ParseInt(raw, 0, 32); rc.err != nil {
 		return

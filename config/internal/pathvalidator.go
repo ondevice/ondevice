@@ -89,17 +89,17 @@ func (v PathValidator) validatePath(value string) error {
 }
 
 // Value -- puts the parsed data into a Value
-func (v PathValidator) Value(raw string) Value {
+func (v PathValidator) Value(raw string) ValueImpl {
 	if len(raw) == 0 {
-		return Value{} // empty value
+		return ValueImpl{} // empty value
 	}
 
 	if v.AllowMultiple && strings.HasPrefix(raw, "[") {
 		// parse as JSON
-		var rc Value
+		var rc ValueImpl
 
 		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {
-			return Value{err: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
+			return ValueImpl{err: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
 		}
 
 		// valid JSON list -> check each individual item
@@ -112,7 +112,7 @@ func (v PathValidator) Value(raw string) Value {
 	}
 
 	// default behaviour: put it into the first slice
-	return Value{
+	return ValueImpl{
 		values: []string{raw},
 		err:    v.validatePath(raw),
 	}

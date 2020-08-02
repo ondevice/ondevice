@@ -36,11 +36,6 @@ type PathParser struct {
 	ValidSchemes map[string]bool
 }
 
-// Validate -- checks if the given value meets our criteria
-func (v PathParser) Validate(value string) error {
-	return v.Value(value).Error()
-}
-
 // validatePath -- checks an individual path
 func (v PathParser) validatePath(value string) error {
 	if v.ValidSchemes != nil {

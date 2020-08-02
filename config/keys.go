@@ -102,7 +102,7 @@ func (k Key) Validate(val string) error {
 	if k.parser == nil {
 		return nil
 	}
-	return k.parser.Validate(val)
+	return k.parser.Value(val).Error()
 }
 
 func regKey(key Key) Key {

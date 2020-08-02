@@ -25,11 +25,6 @@ func (v IntParser) WithMin(min int) IntParser {
 	return v
 }
 
-// Validate -- returns nil if val is valid
-func (v IntParser) Validate(val string) error {
-	return v.Value(val).Error()
-}
-
 // Value -- returns a Value object for the given string
 func (v IntParser) Value(raw string) (rc ValueImpl) {
 	var i int64

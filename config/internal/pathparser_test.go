@@ -12,7 +12,6 @@ func TestParseSinglePathWithoutURLs(t *testing.T) {
 	var assert = assert.New(t)
 	var parser = PathParser{}
 
-	assert.NoError(parser.Validate(""))
 	var value = parser.Value("")
 	assert.NoError(value.Error())
 	assert.Empty(value.values)
@@ -21,7 +20,6 @@ func TestParseSinglePathWithoutURLs(t *testing.T) {
 
 	// JSON won't be parsed
 	var str = "[\"auth.json\", \"file:/etc/motd\"]"
-	assert.NoError(parser.Validate(str))
 	value = parser.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
@@ -30,7 +28,6 @@ func TestParseSinglePathWithoutURLs(t *testing.T) {
 
 	// URLs will be treated as simple path names - resulting in file system error messages downstream
 	str = "https://ondevice.io/index.html"
-	assert.NoError(parser.Validate(str))
 	value = parser.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
@@ -85,7 +82,6 @@ func TestParseSinglePathWithURLs(t *testing.T) {
 
 	// for unix sockets, the hostname must be empty
 	str = "unix://var/run/foo.sock"
-	assert.Error(parser.Validate(str))
 	value = parser.Value(str)
 	assert.Error(value.Error())
 	assert.Len(value.values, 1)

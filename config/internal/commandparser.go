@@ -21,11 +21,6 @@ import (
 // to use a command starting with '[', wrap it inside a JSON array: `["["]`
 type CommandParser struct{}
 
-// Validate -- returns any errors found while parsing this Command Value
-func (v CommandParser) Validate(value string) error {
-	return v.Value(value).Error()
-}
-
 // Value -- parses the command config string into a config.Value
 //
 // if the string you pass to .Value() starts with '[', it will be parsed as JSON.

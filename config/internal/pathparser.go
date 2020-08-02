@@ -37,8 +37,8 @@ type PathParser struct {
 }
 
 // validatePath -- checks an individual path
-func (v PathParser) validatePath(value string) error {
-	if v.ValidSchemes != nil {
+func (p PathParser) validatePath(value string) error {
+	if p.ValidSchemes != nil {
 		var u, err = url.Parse(value)
 		if err != nil {
 			logrus.WithError(err).WithField("url", value).Error("PathParser: invalid URL")
@@ -55,7 +55,7 @@ func (v PathParser) validatePath(value string) error {
 		}
 
 		var scheme = strings.ToLower(u.Scheme)
-		if !v.ValidSchemes[scheme] {
+		if !p.ValidSchemes[scheme] {
 			logrus.WithField("url", value).Error("URL scheme not supported")
 			return errors.New("unsupported URL scheme: " + u.Scheme)
 		}
@@ -84,14 +84,14 @@ func (v PathParser) validatePath(value string) error {
 }
 
 // Value -- puts the parsed data into a Value
-func (v PathParser) Value(raw string) ValueImpl {
+func (p PathParser) Value(raw string) ValueImpl {
 	if len(raw) == 0 {
-		return ValueImpl{} // empty value
+		return ValueImpl{parser: p} // empty value
 	}
 
-	if v.AllowMultiple && strings.HasPrefix(raw, "[") {
+	if p.AllowMultiple && strings.HasPrefix(raw, "[") {
 		// parse as JSON
-		var rc ValueImpl
+		var rc = ValueImpl{parser: p}
 
 		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {
 			return ValueImpl{err: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
@@ -99,7 +99,7 @@ func (v PathParser) Value(raw string) ValueImpl {
 
 		// valid JSON list -> check each individual item
 		for _, value := range rc.values {
-			if rc.err = v.validatePath(value); rc.err != nil {
+			if rc.err = p.validatePath(value); rc.err != nil {
 				break
 			}
 		}
@@ -109,6 +109,7 @@ func (v PathParser) Value(raw string) ValueImpl {
 	// default behaviour: put it into the first slice
 	return ValueImpl{
 		values: []string{raw},
-		err:    v.validatePath(raw),
+		err:    p.validatePath(raw),
+		parser: p,
 	}
 }

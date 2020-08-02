@@ -11,6 +11,7 @@ package internal
 type ValueImpl struct {
 	values []string
 	err    error
+	parser Parser
 }
 
 // Error -- returns validation errors

@@ -26,12 +26,13 @@ type CommandParser struct{}
 // if the string you pass to .Value() starts with '[', it will be parsed as JSON.
 //
 // Otherwise the whole string will be put inside the first (and only) array element
-func (v CommandParser) Value(raw string) ValueImpl {
+func (p CommandParser) Value(raw string) ValueImpl {
+	var rc = ValueImpl{parser: p}
+
 	if len(raw) == 0 {
-		return ValueImpl{} // empty value -> use default
+		return rc // empty value -> use default
 	}
 
-	var rc ValueImpl
 	if strings.HasPrefix(raw, "[") {
 		// the value starts with '[', assume it is JSON
 		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {

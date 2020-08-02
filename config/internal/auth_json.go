@@ -93,6 +93,7 @@ func (j AuthJSON) GetDeviceKey() string {
 	return j.Device.DeviceKey
 }
 
+// IsChanged -- returns true if the AuthJSON has been changed (i.e. one of the setters have been called)
 func (j AuthJSON) IsChanged() bool { return j.isChanged }
 
 // ListClientUsers -- returns the names of users we have client auth for

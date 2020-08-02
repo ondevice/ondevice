@@ -11,8 +11,11 @@ package internal
 // - Next() returns a new Value with the first item removed
 type Value struct {
 	values []string
-	Error  error
+	err    error
 }
+
+// Error -- returns validation errors
+func (v Value) Error() error { return v.err }
 
 // HasNext -- returns true if there are more than one values remaining
 func (v Value) HasNext() bool { return len(v.values) > 1 }

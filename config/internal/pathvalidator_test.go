@@ -14,7 +14,7 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 
 	assert.NoError(validator.Validate(""))
 	var value = validator.Value("")
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Empty(value.values)
 	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
@@ -23,7 +23,7 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 	var str = "[\"auth.json\", \"file:/etc/motd\"]"
 	assert.NoError(validator.Validate(str))
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -32,7 +32,7 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 	str = "https://ondevice.io/index.html"
 	assert.NoError(validator.Validate(str))
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -46,7 +46,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	}
 
 	var value = validator.Value("")
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Empty(value.values)
 	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
@@ -54,7 +54,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	// single valid URL
 	var str = "http://localhost:8080/"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -62,7 +62,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	// single URL with invalid schema (.Value will still return the stored value even if it's technically invalid)
 	str = "https://ondevice.io/index.html"
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -70,7 +70,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	// JSON values will cause URL validation errors
 	str = "[\"https://ondevice.io/index.html\"]"
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -78,7 +78,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	// for http sockets, the path must be empty
 	str = "http://localhost/index.html"
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -87,7 +87,7 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	str = "unix://var/run/foo.sock"
 	assert.Error(validator.Validate(str))
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Len(value.values, 1)
 	assert.Equal(str, value.String("--defaultValue--"))
 }
@@ -100,7 +100,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	}
 
 	var value = validator.Value("")
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Empty(value.values)
 	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
@@ -108,7 +108,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// single valid path
 	var str = "/var/run/ondevice.pid"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -116,7 +116,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// single URL -> no error but won't be able to read/write the files
 	str = "http://localhost:8080/"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -124,7 +124,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// valid JSON string array (since we don't do URL parsing, this won't cause errors)
 	str = "[\"~/.config/ondevice/ondevice.sock\", \"/var/run/ondevice.sock\", \"http://localhost:8080\"]"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 3)
 	assert.True(value.HasNext())
 	assert.Equal("~/.config/ondevice/ondevice.sock", value.String("--defaultValue--"))
@@ -138,7 +138,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// valid single-item JSON array
 	str = "[\"https://ondevice.io/index.html\"]"
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal("https://ondevice.io/index.html", value.String("--defaultValue--"))
@@ -146,14 +146,14 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// invalid json -> error
 	str = "[\"https://ondevice.io/index.html\""
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Empty(value.values)
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
 
 	// valid JSON, but not a list -> should be interpreted as-is
 	str = "\"https://ondevice.io/index.html\""
 	value = validator.Value(str)
-	assert.NoError(value.Error)
+	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
 	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
@@ -161,7 +161,7 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	// valid JSON list, but not of strings -> error
 	str = "[\"https://ondevice.io/index.html\", 1,2,3]"
 	value = validator.Value(str)
-	assert.Error(value.Error)
+	assert.Error(value.Error())
 	assert.Empty(value.values)
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
 }

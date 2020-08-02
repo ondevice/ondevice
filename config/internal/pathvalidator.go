@@ -38,7 +38,7 @@ type PathValidator struct {
 
 // Validate -- checks if the given value meets our criteria
 func (v PathValidator) Validate(value string) error {
-	return v.Value(value).Error
+	return v.Value(value).Error()
 }
 
 // validatePath -- checks an individual path
@@ -99,12 +99,12 @@ func (v PathValidator) Value(raw string) Value {
 		var rc Value
 
 		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {
-			return Value{Error: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
+			return Value{err: fmt.Errorf("failed to parse JSON path: %s", err.Error())}
 		}
 
 		// valid JSON list -> check each individual item
 		for _, value := range rc.values {
-			if rc.Error = v.validatePath(value); rc.Error != nil {
+			if rc.err = v.validatePath(value); rc.err != nil {
 				break
 			}
 		}
@@ -114,6 +114,6 @@ func (v PathValidator) Value(raw string) Value {
 	// default behaviour: put it into the first slice
 	return Value{
 		values: []string{raw},
-		Error:  v.validatePath(raw),
+		err:    v.validatePath(raw),
 	}
 }

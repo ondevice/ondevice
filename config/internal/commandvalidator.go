@@ -23,7 +23,7 @@ type CommandValidator struct{}
 
 // Validate -- returns any errors found while parsing this Command Value
 func (v CommandValidator) Validate(value string) error {
-	return v.Value(value).Error
+	return v.Value(value).Error()
 }
 
 // Value -- parses the command config string into a config.Value
@@ -40,7 +40,7 @@ func (v CommandValidator) Value(raw string) Value {
 	if strings.HasPrefix(raw, "[") {
 		// the value starts with '[', assume it is JSON
 		if err := json.Unmarshal([]byte(raw), &rc.values); err != nil {
-			rc.Error = fmt.Errorf("failed to parse JSON command: %s", err.Error())
+			rc.err = fmt.Errorf("failed to parse JSON command: %s", err.Error())
 		}
 	} else {
 		// default behaviour: put it into the first slice

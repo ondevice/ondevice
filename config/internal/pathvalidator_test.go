@@ -16,8 +16,8 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 	var value = validator.Value("")
 	assert.NoError(value.Error())
 	assert.Empty(value.values)
-	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// JSON won't be parsed
 	var str = "[\"auth.json\", \"file:/etc/motd\"]"
@@ -25,8 +25,8 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// URLs will be treated as simple path names - resulting in file system error messages downstream
 	str = "https://ondevice.io/index.html"
@@ -34,8 +34,8 @@ func TestValidateSinglePathWithoutURLs(t *testing.T) {
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 }
 
 // TestValidateSinglePathWithURLs -- single paths or URLs
@@ -48,40 +48,40 @@ func TestValidateSinglePathWithURLs(t *testing.T) {
 	var value = validator.Value("")
 	assert.NoError(value.Error())
 	assert.Empty(value.values)
-	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// single valid URL
 	var str = "http://localhost:8080/"
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// single URL with invalid schema (.Value will still return the stored value even if it's technically invalid)
 	str = "https://ondevice.io/index.html"
 	value = validator.Value(str)
 	assert.Error(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// JSON values will cause URL validation errors
 	str = "[\"https://ondevice.io/index.html\"]"
 	value = validator.Value(str)
 	assert.Error(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// for http sockets, the path must be empty
 	str = "http://localhost/index.html"
 	value = validator.Value(str)
 	assert.Error(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// for unix sockets, the hostname must be empty
 	str = "unix://var/run/foo.sock"
@@ -102,46 +102,46 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	var value = validator.Value("")
 	assert.NoError(value.Error())
 	assert.Empty(value.values)
-	assert.False(value.HasNext())
 	assert.Equal("--defaultValue--", value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// single valid path
 	var str = "/var/run/ondevice.pid"
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// single URL -> no error but won't be able to read/write the files
 	str = "http://localhost:8080/"
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// valid JSON string array (since we don't do URL parsing, this won't cause errors)
 	str = "[\"~/.config/ondevice/ondevice.sock\", \"/var/run/ondevice.sock\", \"http://localhost:8080\"]"
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 3)
-	assert.True(value.HasNext())
 	assert.Equal("~/.config/ondevice/ondevice.sock", value.String("--defaultValue--"))
-	value = value.Next()
-	assert.True(value.HasNext())
+
+	assert.True(value.Next())
 	assert.Equal("/var/run/ondevice.sock", value.String("--defaultValue--"))
-	value = value.Next()
-	assert.False(value.HasNext())
+
+	assert.True(value.Next())
 	assert.Equal("http://localhost:8080", value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// valid single-item JSON array
 	str = "[\"https://ondevice.io/index.html\"]"
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal("https://ondevice.io/index.html", value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// invalid json -> error
 	str = "[\"https://ondevice.io/index.html\""
@@ -155,8 +155,8 @@ func TestValidateMultiPathWithoutURLs(t *testing.T) {
 	value = validator.Value(str)
 	assert.NoError(value.Error())
 	assert.Len(value.values, 1)
-	assert.False(value.HasNext())
 	assert.Equal(str, value.String("--defaultValue--"))
+	assert.False(value.Next())
 
 	// valid JSON list, but not of strings -> error
 	str = "[\"https://ondevice.io/index.html\", 1,2,3]"

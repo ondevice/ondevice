@@ -258,11 +258,15 @@ func GetVersion() string {
 //
 // uses [path].auth_json as reference
 func (c Config) LoadAuth() AuthConfig {
-	var path = c.GetFilePath(PathAuthJSON)
-	var rc = internal.LoadAuth(path)
+	var path = c.GetPath(PathAuthJSON)
+	if path.Error() != nil {
+		logrus.WithError(path.Error()).Fatal("failed to load auth.json path")
+	}
+
+	var rc = internal.LoadAuth(path.GetAbsolutePath())
 	if rc.Error() != nil && os.IsNotExist(rc.Error()) {
 		var err error
-		if rc, err = c.migrateAuth(path); err != nil {
+		if rc, err = c.migrateAuth(path.GetAbsolutePath()); err != nil {
 			logrus.WithError(err).Fatal("failed to migrate credentials to auth.json")
 		}
 	}

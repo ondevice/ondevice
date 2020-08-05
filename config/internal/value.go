@@ -42,3 +42,10 @@ func (v ValueImpl) String(defaultValue string) string {
 func (v ValueImpl) Strings() []string {
 	return v.values
 }
+
+// NewErrorValue -- returns a ValueImpl element with Error() set to the specified value
+func NewErrorValue(err error) ValueImpl {
+	return ValueImpl{
+		err: err,
+	}
+}

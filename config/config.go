@@ -119,6 +119,27 @@ func (c Config) GetInt(key Key) int {
 	return int(rc)
 }
 
+// GetPath -- returns a PathValue for the given key
+func (c Config) GetPath(key Key) PathValue {
+	var str = c.GetString(key)
+	if str == "" {
+		str = key.defaultValue
+	}
+
+	var parser, ok = key.parser.(internal.PathParser)
+	if !ok {
+		logrus.Errorf("Config.GetPath(): not a path value: %v", key)
+		return PathValue{
+			ValueImpl: internal.NewErrorValue(fmt.Errorf("not a path value (key='%v')", key)),
+		}
+	}
+	return PathValue{
+		ValueImpl:  parser.Value(str),
+		configPath: c.path,
+		AllowURLs:  len(parser.ValidSchemes) > 0,
+	}
+}
+
 // GetString -- Fetch a configuration value (will return key.defaultValue if not defined)
 func (c Config) GetString(key Key) string {
 	if s, err := c.cfg.GetSection(key.section); err == nil {
@@ -217,6 +238,7 @@ func (c Config) Write() error {
 }
 
 // GetFilePath -- returns the path of the file in question, relative to ondevice.conf
+// DEPRECATED, use .GetPath() instead
 func (c Config) GetFilePath(key Key) string {
 	// unlike python's path.join() go's version will always concat the two!?!
 	var rc = c.GetString(key)

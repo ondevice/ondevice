@@ -85,7 +85,8 @@ func (r request) PostForm(form url.Values) response {
 	return r.Do("POST")
 }
 
-func getSocketURLs() []url.URL {
+func getSocketURLs() []*url.URL {
+	// deprecated - this will probably be removed (marked at 2020/08/05)
 	if env := os.Getenv("ONDEVICE_HOST"); env != "" {
 		// e.g.:
 		// - unix:///var/run/ondevice/ondevice.sock
@@ -97,11 +98,23 @@ func getSocketURLs() []url.URL {
 			logrus.WithError(err).Fatal("failed to parse ONDEVICE_HOST")
 		}
 
-		return []url.URL{*u}
+		return []*url.URL{u}
 	}
 
-	return []url.URL{
-		{Scheme: "unix", Path: config.MustLoad().GetFilePath(config.PathOndeviceSock)},
-		{Scheme: "unix", Path: "/var/run/ondevice/ondevice.sock"},
+	var socketURL = config.MustLoad().GetPath(config.PathOndeviceSock)
+	if socketURL.Error() != nil {
+		logrus.WithError(socketURL.Error()).Fatal("failed to fetch daemon socket URL")
 	}
+
+	var rc []*url.URL
+	for {
+		if u := socketURL.GetAbsoluteURL(); u != nil {
+			rc = append(rc, u)
+		}
+		if !socketURL.Next() {
+			break
+		}
+	}
+
+	return rc
 }

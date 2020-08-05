@@ -21,9 +21,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"path/filepath"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/ondevice/ondevice/config"
 	"github.com/ondevice/ondevice/control"
 	"github.com/ondevice/ondevice/daemon"
@@ -68,19 +66,9 @@ socket parameter.
 }
 
 func init() {
-	// TODO use different defaultSocketURL on Windows
-	// TODO find a way to use relative URL path (and use shell expansion, e.g. ~/.config/...)
-	var homeDir string
-	var err error
-
-	if homeDir, err = homedir.Dir(); err != nil {
-		logrus.WithError(err).Fatal("failed to fetch home directory")
-	}
-	var defaultSocketURL = url.URL{Scheme: "unix", Path: filepath.Join(homeDir, ".config/ondevice/ondevice.pid")}
-
 	rootCmd.AddCommand(daemonCmd)
-	daemonCmd.Flags().String("pidfile", "~/.config/ondevice/ondevice.pid", "path to the ondevice.pid file")
-	daemonCmd.Flags().String("sock", defaultSocketURL.String(), "path to the ondevice.sock file")
+	daemonCmd.Flags().String("pidfile", "", "if set, overrides the config value set in path.ondevice_pid")
+	daemonCmd.Flags().String("sock", "", "if set, overrides the config vlaue set in path.ondevice_sock")
 }
 
 func daemonRun(cmd *cobra.Command, args []string) {
@@ -108,23 +96,40 @@ func daemonRun(cmd *cobra.Command, args []string) {
 
 // Parses the commandline arguments, returns the ControlSocket URL
 func daemonParseArgs(cmd *cobra.Command, args []string, d *daemon.Daemon) (*url.URL, error) {
-	var rc *url.URL
 	var err error
 
 	if len(args) > 0 {
 		return nil, fmt.Errorf("Too many arguments: %s", args)
 	}
 
-	if pidFile := cmd.Flag("pidfile").Value.String(); pidFile != "" {
-		if d.PIDFile, err = homedir.Expand(pidFile); err != nil {
+	var cfg = config.MustLoad()
+
+	// override config values if flag is set
+	if pidFlag := cmd.Flag("pidfile").Value.String(); pidFlag != "" {
+		if err = cfg.SetValue(config.PathOndevicePID, pidFlag); err != nil {
+			logrus.WithError(err).Error("failed to override daemon PID file")
 			return nil, err
 		}
-	} else {
-		d.PIDFile = config.MustLoad().GetFilePath(config.PathOndevicePID)
+	}
+	if sockURL := cmd.Flag("sock").Value.String(); sockURL != "" {
+		if err = cfg.SetValue(config.PathOndeviceSock, sockURL); err != nil {
+			logrus.WithError(err).Error("failed to override daemon socket")
+			return nil, err
+		}
 	}
 
-	if rc, err = url.Parse(cmd.Flag("sock").Value.String()); err != nil {
-		logrus.WithError(err).Fatal("couldn't parse socket URL")
+	var pidFile = cfg.GetPath(config.PathOndevicePID)
+	if pidFile.Error() != nil {
+		logrus.WithError(err).Error("failed to get daemon PID file")
+		return nil, err
 	}
-	return rc, nil
+	d.PIDFile = pidFile.GetAbsolutePath()
+
+	var sockURL = cfg.GetPath(config.PathOndeviceSock)
+	if sockURL.Error() != nil {
+		logrus.WithError(err).Error("failed to get daemon socket URL")
+		return nil, err
+	}
+
+	return sockURL.GetAbsoluteURL(), nil
 }

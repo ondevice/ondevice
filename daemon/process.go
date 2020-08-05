@@ -35,18 +35,20 @@ func IsRunning(p *os.Process) error {
 }
 
 func getDaemonPID() (int, error) {
-	var paths = []string{
-		config.MustLoad().GetFilePath(config.PathOndevicePID),
-		"/var/run/ondevice/ondevice.pid",
-	}
+	var path = config.MustLoad().GetPath(config.PathOndevicePID)
 	var file *os.File
 
-	for _, path := range paths {
-		if f, err := os.Open(path); err == nil {
+	for {
+		//logrus.WithField("pidFile", path.GetPath()).Info("checking ondevice.pid")
+		if f, err := os.Open(path.GetAbsolutePath()); err == nil {
 			file = f
 			break
 		}
+		if !path.Next() {
+			break
+		}
 	}
+
 	if file == nil {
 		return -1, errors.New("Couldn't open PID file")
 	}

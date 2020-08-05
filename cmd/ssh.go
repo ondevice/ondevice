@@ -81,8 +81,8 @@ func (c *sshCmd) run(cmd *cobra.Command, args []string) {
 	sshCommand = append(sshCommand, fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
 
 	// use our own known_hosts file
-	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {
-		sshCommand = append(sshCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsFile))
+	if knownHostsPath := config.MustLoad().GetPath(config.PathKnownHosts); knownHostsPath.Error() == nil && knownHostsPath.GetPath() != "" {
+		sshCommand = append(sshCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsPath.GetAbsolutePath()))
 	}
 
 	sshCommand = append(sshCommand, args...)

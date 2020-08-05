@@ -58,8 +58,8 @@ func scpRun(cmd *cobra.Command, args []string) {
 	var scpCommand = config.MustLoad().GetValue(config.CommandSCP).Strings()
 
 	scpCommand = append(scpCommand, "-3", fmt.Sprintf("-oProxyCommand='%s' pipe %%h ssh", os.Args[0]))
-	if knownHostsFile := config.MustLoad().GetFilePath(config.PathKnownHosts); knownHostsFile != "" {
-		scpCommand = append(scpCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsFile))
+	if knownHostsPath := config.MustLoad().GetPath(config.PathKnownHosts); knownHostsPath.Error() == nil && knownHostsPath.GetPath() != "" {
+		scpCommand = append(scpCommand, fmt.Sprintf("-oUserKnownHostsFile=%s", knownHostsPath.GetAbsolutePath()))
 	}
 	scpCommand = append(scpCommand, args...)
 

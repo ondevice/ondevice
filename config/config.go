@@ -237,18 +237,6 @@ func (c Config) Write() error {
 	return internal.WriteFile(buff.Bytes(), c.path, 0o644)
 }
 
-// GetFilePath -- returns the path of the file in question, relative to ondevice.conf
-// DEPRECATED, use .GetPath() instead
-func (c Config) GetFilePath(key Key) string {
-	// unlike python's path.join() go's version will always concat the two!?!
-	var rc = c.GetString(key)
-	if !filepath.IsAbs(rc) {
-		var dir = filepath.Dir(c.path)
-		rc = filepath.Join(dir, c.GetString(key))
-	}
-	return rc
-}
-
 // GetVersion -- Returns the app version
 func GetVersion() string {
 	return version

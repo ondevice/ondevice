@@ -19,11 +19,16 @@ func TestPathOverride(t *testing.T) {
 	assert.Equal(t, _configPath, cfg.path)
 
 	// even though ondevice.conf wasn't found, we expect 'auth.json' to be in the same directory
-	assert.Equal(t, "/tmp/notfound/auth.json", cfg.GetFilePath(PathAuthJSON), "config path override failed")
+	var authJSON = cfg.GetPath(PathAuthJSON)
+	assert.NoError(t, authJSON.Error())
+	assert.Equal(t, "auth.json", authJSON.GetPath(), "config path override failed")
+	assert.Equal(t, "/tmp/notfound/auth.json", authJSON.GetAbsolutePath(), "config path override failed")
 
-	// update path to auth.json
+	// update path to auth.json (absolute path)
 	cfg.SetValue(PathAuthJSON, "/etc/ondevice/auth.json")
-	assert.Equal(t, "/etc/ondevice/auth.json", cfg.GetFilePath(PathAuthJSON), "config path override failed")
+	authJSON = cfg.GetPath(PathAuthJSON)
+	assert.Equal(t, "/etc/ondevice/auth.json", authJSON.GetPath(), "config path override failed")
+	assert.Equal(t, "/etc/ondevice/auth.json", authJSON.GetAbsolutePath(), "config path override failed")
 
 	// make sure MustLoad() doesn't fail on FileNotExists
 	MustLoad()

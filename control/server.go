@@ -114,8 +114,13 @@ func (c *ControlSocket) getStateHandler(w http.ResponseWriter, r *http.Request) 
 
 // postLoginHandler -- implements POST /login
 func (c *ControlSocket) postLoginHandler(w http.ResponseWriter, r *http.Request) {
-	var auth = config.NewAuth(r.FormValue("user"), r.FormValue("auth"))
+	if err := r.ParseForm(); err != nil {
+		logrus.WithError(err).Warning("ondevice.sock: failed to parse login data sent by client")
+		return
+	}
+	var auth = config.NewAuth(r.PostFormValue("user"), r.PostFormValue("auth"))
 	if auth.User() == "" || auth.Key() == "" {
+		logrus.Warn("received invalid auth request from client ", r.RemoteAddr)
 		_sendError(w, http.StatusBadRequest, "expected valid user/auth")
 		return
 	}

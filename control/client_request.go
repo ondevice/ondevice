@@ -15,6 +15,7 @@ import (
 
 // request -- control socket request
 type request struct {
+	Header   http.Header
 	endpoint string
 
 	body io.Reader
@@ -64,13 +65,20 @@ func (r request) Do(method string) response {
 		return response{err: err}
 	}
 
+	if r.Header != nil {
+		req.Header = r.Header
+	}
+
 	var resp *http.Response
 	if resp, err = client.Do(req); err != nil {
-		return response{err: err}
+		return response{resp: resp, err: err}
 	}
 
 	if resp.StatusCode != 200 {
-		return response{err: fmt.Errorf("Unexpected device request response code: %s", resp.Status)}
+		return response{
+			resp: resp,
+			err:  fmt.Errorf("Unexpected device request response code: %s", resp.Status),
+		}
 	}
 
 	return response{resp: resp}
@@ -82,6 +90,10 @@ func (r request) Get() response {
 
 func (r request) PostForm(form url.Values) response {
 	r.body = strings.NewReader(form.Encode())
+	if r.Header == nil {
+		r.Header = http.Header{}
+	}
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return r.Do("POST")
 }
 

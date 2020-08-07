@@ -3,6 +3,7 @@ package control
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -34,4 +35,18 @@ func (r response) ReadJSON(tgt interface{}) error {
 
 	var decoder = json.NewDecoder(r.resp.Body)
 	return decoder.Decode(&tgt)
+}
+
+// Read -- reads the response data
+func (r response) Read(buffer []byte) (int, error) {
+	return r.resp.Body.Read(buffer)
+}
+
+// ReadString
+func (r response) ReadString() (string, error) {
+	var data, err = ioutil.ReadAll(r.resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

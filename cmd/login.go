@@ -25,6 +25,7 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/ondevice/ondevice/api"
 	"github.com/ondevice/ondevice/config"
+	"github.com/ondevice/ondevice/control"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -118,16 +119,24 @@ func loginRun(cmd *cobra.Command, args []string) {
 	var a = config.LoadAuth()
 	if keyInfo.IsType("client") {
 		logrus.Info("updating client auth")
-		a.SetClientAuth(user, string(authKey))
+		a.SetClientAuth(user, authKey)
 	}
 	if keyInfo.IsType("device") {
 		logrus.Info("updating device auth")
-		a.SetDeviceAuth(user, string(authKey))
+		a.SetDeviceAuth(user, authKey)
 	}
 	if a.IsChanged() {
 		if err := a.Write(); err != nil {
 			logrus.WithError(err).Fatal("failed to write auth.json")
 		}
+	}
 
+	// if ondevice daemon is running, contact it and update its credentials as well
+	if keyInfo.IsType("device") {
+		// note that ondevice daemon may be using the same auth.json file as we are
+		//  -> only do this AFTER we've called auth.Write()
+		if err = control.Login(config.NewAuth(user, string(authKey))); err != nil {
+			logrus.WithError(err).Warn("failed to update ondevice daemon credentials")
+		}
 	}
 }

@@ -23,9 +23,10 @@ func Login(auth config.Auth) error {
 	var form = make(url.Values)
 
 	form.Set("user", auth.User())
-	form.Set("key", auth.Key())
+	form.Set("auth", auth.Key())
 
 	var resp = request{endpoint: "/login"}.PostForm(form)
+	defer resp.Close()
 	if err := resp.Error(); err != nil {
 		logrus.WithError(err).Error("failed to send login credentials to daemon")
 	}

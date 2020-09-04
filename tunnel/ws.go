@@ -17,7 +17,6 @@ import (
 const stateInitial = "initial"
 const stateConnecting = "connecting"
 const stateOpen = "open"
-const stateError = "error"
 const stateClosed = "closed"
 
 const evConnect = "connect"
@@ -54,8 +53,8 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	c.stateMachine = fsm.NewFSM(stateInitial, fsm.Events{
 		{Name: "connect", Src: []string{stateInitial}, Dst: stateConnecting},
 		{Name: evConnected, Src: []string{stateConnecting}, Dst: stateOpen},
-		{Name: evError, Src: []string{stateInitial, stateConnecting, stateOpen}, Dst: stateError},
-		{Name: evClose, Src: []string{stateInitial, stateConnecting, stateOpen, stateError}, Dst: stateClosed},
+		{Name: evError, Src: []string{stateInitial, stateConnecting, stateOpen}, Dst: stateClosed},
+		{Name: evClose, Src: []string{stateInitial, stateConnecting, stateOpen, stateClosed}, Dst: stateClosed},
 	}, fsm.Callbacks{
 		"after_" + evError:     c._onError,
 		"enter_" + stateClosed: c._onClose,
@@ -200,8 +199,6 @@ func (c *Connection) _onError(ev *fsm.Event) {
 	for _, cb := range c.ErrorListeners {
 		cb(err)
 	}
-
-	c.Close()
 }
 
 func (c *Connection) _onStateChange(ev *fsm.Event) {

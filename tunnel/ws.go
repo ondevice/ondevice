@@ -14,6 +14,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const stateInitial = "initial"
+const stateConnecting = "connecting"
+const stateOpen = "open"
+const stateError = "error"
+const stateClosed = "closed"
+
+const evConnect = "connect"
+const evConnected = "connected"
+const evError = "error"
+const evClose = "close"
+
 // Connection -- WebSocket connection
 //
 // internal state machine:
@@ -23,8 +34,8 @@ import (
 // - error: event: "error", from: initial, connecting, open
 // - closed: event: "close", from: initial, connecting, open, error, timeout
 type Connection struct {
-	ws    *websocket.Conn
-	state *fsm.FSM
+	ws           *websocket.Conn
+	stateMachine *fsm.FSM
 
 	CloseListeners    []func()
 	ErrorListeners    []func(err util.APIError)
@@ -36,18 +47,19 @@ type Connection struct {
 
 // OpenWebsocket -- Open a websocket connection
 func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onMessage func(int, []byte), auths ...config.Auth) util.APIError {
-	if c.state != nil {
+	if c.stateMachine != nil {
+		// TODO this is not thread safe
 		panic("OpenWebsocket() called twice on a single Connection!")
 	}
-	c.state = fsm.NewFSM("initial", fsm.Events{
-		{Name: "connect", Src: []string{"initial"}, Dst: "connecting"},
-		{Name: "connected", Src: []string{"connecting"}, Dst: "open"},
-		{Name: "error", Src: []string{"initial", "connecting", "open"}, Dst: "error"},
-		{Name: "close", Src: []string{"initial", "connecting", "open", "error"}, Dst: "closed"},
+	c.stateMachine = fsm.NewFSM(stateInitial, fsm.Events{
+		{Name: "connect", Src: []string{stateInitial}, Dst: stateConnecting},
+		{Name: evConnected, Src: []string{stateConnecting}, Dst: stateOpen},
+		{Name: evError, Src: []string{stateInitial, stateConnecting, stateOpen}, Dst: stateError},
+		{Name: evClose, Src: []string{stateInitial, stateConnecting, stateOpen, stateError}, Dst: stateClosed},
 	}, fsm.Callbacks{
-		"after_error":  c._onError,
-		"enter_closed": c._onClose,
-		"enter_state":  c._onStateChange,
+		"after_" + evError:     c._onError,
+		"enter_" + stateClosed: c._onClose,
+		"enter_state":          c._onStateChange,
 	})
 	c.done = make(chan struct{})
 
@@ -69,7 +81,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	url := auth.GetURL(endpoint+"/websocket", params, "wss")
 	logrus.Debugf("opening websocket connection to '%s' (auth: '%s')", url, auth.GetAuthHeader())
 
-	c.state.Event("connect")
+	c.stateMachine.Event(evConnect)
 	websocket.DefaultDialer.HandshakeTimeout = 60 * time.Second
 	ws, resp, err := websocket.DefaultDialer.Dial(url, hdr)
 	if err != nil {
@@ -92,14 +104,17 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 
 // Close -- Close the underlying WebSocket connection
 func (c *Connection) Close() {
-	if err := c.state.Event("close"); err != nil {
+	if err := c.stateMachine.Event(evClose); err != nil {
 		// TODO do error handling (and ignore 'already in closed state' error)
 	}
 }
 
 // IsClosed -- Returns true for closed connections (either being closed normally or due to an error/timeout)
 func (c *Connection) IsClosed() bool {
-	return c.state != nil && c.state.Is("closed")
+	if s := c.stateMachine; s != nil {
+		return s.Is(stateClosed)
+	}
+	return false
 }
 
 func (c *Connection) receive() {
@@ -161,7 +176,7 @@ func (c *Connection) Wait() {
 
 // _error -- Puts the connection into the 'error' state and closes it
 func (c *Connection) _error(err util.APIError) {
-	c.state.Event("error", err)
+	c.stateMachine.Event(evError, err)
 }
 
 func (c *Connection) _onClose(ev *fsm.Event) {

@@ -118,7 +118,7 @@ func (t *Tunnel) onMessage(_type int, msg []byte) {
 			t.lastPing = time.Now()
 		} else if metaType == "connected" {
 			logrus.Debug("connected")
-			if err := t.state.Event("connected"); err != nil {
+			if err := t.stateMachine.Event(evConnected); err != nil {
 				logrus.WithError(err).Error("state change failed (ev: 'connected')")
 			}
 			t.connected <- nil

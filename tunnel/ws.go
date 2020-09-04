@@ -30,8 +30,9 @@ const evClose = "close"
 // - initial (OpenWebsocket() sets the state to 'connecting' pretty soon after creating the state machine, so this state isn't all too relevant)
 // - connecting: event: "connect", from: initial
 // - open: event: "connected", from: connecting
-// - error: event: "error", from: initial, connecting, open
-// - closed: event: "close", from: initial, connecting, open, error, timeout
+// - closed:
+//	events: "close", "error"
+//	from: initial, connecting, open
 type Connection struct {
 	ws           *websocket.Conn
 	stateMachine *fsm.FSM
@@ -54,7 +55,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 		{Name: "connect", Src: []string{stateInitial}, Dst: stateConnecting},
 		{Name: evConnected, Src: []string{stateConnecting}, Dst: stateOpen},
 		{Name: evError, Src: []string{stateInitial, stateConnecting, stateOpen}, Dst: stateClosed},
-		{Name: evClose, Src: []string{stateInitial, stateConnecting, stateOpen, stateClosed}, Dst: stateClosed},
+		{Name: evClose, Src: []string{stateInitial, stateConnecting, stateOpen}, Dst: stateClosed},
 	}, fsm.Callbacks{
 		"after_" + evError:     c._onError,
 		"enter_" + stateClosed: c._onClose,
@@ -104,7 +105,11 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 // Close -- Close the underlying WebSocket connection
 func (c *Connection) Close() {
 	if err := c.stateMachine.Event(evClose); err != nil {
-		// TODO do error handling (and ignore 'already in closed state' error)
+		if _, ok := err.(fsm.NoTransitionError); ok {
+			// already in closed state
+		} else {
+			logrus.WithError(err).Error("failed to close connection")
+		}
 	}
 }
 

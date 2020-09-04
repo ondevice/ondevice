@@ -37,9 +37,9 @@ type Connection struct {
 	ws           *websocket.Conn
 	stateMachine *fsm.FSM
 
-	CloseListeners    []func()
-	ErrorListeners    []func(err util.APIError)
-	MessageListerners []func(int, []byte)
+	CloseListeners   []func()
+	ErrorListeners   []func(err util.APIError)
+	MessageListeners []func(int, []byte)
 
 	writeLock sync.Mutex
 	done      chan struct{}
@@ -95,7 +95,7 @@ func OpenWebsocket(c *Connection, endpoint string, params map[string]string, onM
 	}
 
 	c.ws = ws
-	c.MessageListerners = append(c.MessageListerners, onMessage)
+	c.MessageListeners = append(c.MessageListeners, onMessage)
 
 	go c.receive()
 
@@ -143,7 +143,7 @@ func (c *Connection) receive() {
 			}
 			return
 		}
-		for _, cb := range c.MessageListerners {
+		for _, cb := range c.MessageListeners {
 			cb(msgType, msg)
 		}
 	}
